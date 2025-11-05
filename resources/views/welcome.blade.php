@@ -13,9 +13,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
     <style>
-        /* small helper for image aspect ratio boxes */
-        .ratio-4-3 { padding-top: 75%; position: relative; }
-        .ratio-4-3 > image { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+    /* small helper for image aspect ratio boxes */
+    .ratio-4-3 { padding-top: 75%; position: relative; }
+    .ratio-3-2 { padding-top: 66.6667%; position: relative; }
+    /* target actual img elements inside ratio wrappers */
+    .ratio-4-3 > img, .ratio-3-2 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
         
         /* Dropdown menu styles */
         .dropdown { position: relative; }
@@ -37,12 +39,12 @@
 <body class="antialiased text-gray-800 bg-gray-50">
 
     <!-- Navbar - Authenticated User -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Left: Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('homepage') }}" class="flex items-center gap-3">
+                    <a href="{{ url('/') }}" class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-md bg-red-600 flex items-center justify-center text-white font-bold">
                             U
                         </div>
@@ -54,11 +56,17 @@
                 <div class="flex-1 hidden md:flex justify-center px-4 max-w-2xl">
                     <form action="#" method="GET" class="w-full">
                         <div class="relative">
+                            <!-- search icon -->
+                            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                                </svg>
+                            </div>
                             <input
                                 name="q"
                                 type="search"
-                                placeholder="Cari ulos, jenis, atau fungsi..."
-                                class="w-full border border-gray-200 rounded-full py-2.5 px-4 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                placeholder="Cari ulos tradisional ..."
+                                class="w-full border border-gray-200 rounded-full py-2.5 pl-10 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
                                 aria-label="Cari ulos"
                             />
                             <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 text-white px-4 py-1.5 rounded-full hover:bg-red-700 transition">
@@ -70,89 +78,77 @@
 
                 <!-- Right: User Actions -->
                 <div class="flex items-center gap-4">
-                    <!-- Cart Icon -->
-                    <a href="#" class="relative p-2 rounded-full hover:bg-gray-100 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
-                        </svg>
-                        <!-- Cart badge -->
-                        <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">3</span>
-                    </a>
-
-                    <!-- Notification Icon -->
-                    <a href="#" class="relative p-2 rounded-full hover:bg-gray-100 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A6.5 6.5 0 0117 10V8a5 5 0 00-10 0v2c0 2-.8 3.9-2.4 5.4L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        <!-- Notification badge -->
-                        <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">5</span>
-                    </a>
-
-                    <!-- User Profile Dropdown -->
-                    <div class="dropdown">
-                        <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
-                            <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=b81a1a&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    @auth
+                        <!-- Cart Icon -->
+                        <a href="#" class="relative p-2 rounded-full hover:bg-gray-100 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                             </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div class="dropdown-menu">
-                            <div class="py-2">
-                                <div class="px-4 py-2 border-b border-gray-100">
-                                    <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'User' }}</p>
-                                    <p class="text-xs text-gray-500">{{ Auth::user()->email ?? 'user@example.com' }}</p>
-                                </div>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        Profil Saya
-                                    </span>
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Pesanan Saya
-                                    </span>
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                        Wishlist
-                                    </span>
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        Pengaturan
-                                    </span>
-                                </a>
-                                <div class="border-t border-gray-100 mt-2 pt-2">
-                                    <form action="{{ route('logout') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                                            <span class="flex items-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                                </svg>
-                                                Keluar
-                                            </span>
-                                        </button>
-                                    </form>
+                            <!-- Cart badge -->
+                            <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">3</span>
+                        </a>
+
+                        <!-- Notification Icon -->
+                        <a href="#" class="relative p-2 rounded-full hover:bg-gray-100 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A6.5 6.5 0 0117 10V8a5 5 0 00-10 0v2c0 2-.8 3.9-2.4 5.4L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <!-- Notification badge -->
+                            <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">5</span>
+                        </a>
+
+                        <!-- User Profile Dropdown -->
+                        <div class="dropdown">
+                            <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
+                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=b81a1a&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div class="dropdown-menu">
+                                <div class="py-2">
+                                    <div class="px-4 py-2 border-b border-gray-100">
+                                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'User' }}</p>
+                                        <p class="text-xs text-gray-500">{{ Auth::user()->email ?? 'user@example.com' }}</p>
+                                    </div>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Profil Saya</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Pesanan Saya</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Wishlist</a>
+                                    <div class="border-t border-gray-100 mt-2 pt-2">
+                                        <form action="{{ route('logout') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">Keluar</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endauth
+
+                    @guest
+                        <!-- Guest actions: show Home, Masuk & Daftar like design -->
+                        <div class="hidden sm:flex items-center gap-3">
+                            <a href="{{ url('/') }}" class="text-gray-700 px-3 py-1 rounded-full hover:bg-gray-100 transition flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5L12 4l9 5.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
+                                </svg>
+                                <span class="text-sm">Home</span>
+                            </a>
+                            <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
+                            <a href="{{ route('register') }}" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">Daftar</a>
+                        </div>
+
+                        <!-- For very small screens show icon-only buttons -->
+                        <div class="sm:hidden flex items-center gap-2">
+                            <a href="{{ route('masuk') }}" class="p-2 rounded-md hover:bg-gray-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </a>
+                        </div>
+                    @endguest
 
                     <!-- Mobile Menu Button -->
                     <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
@@ -177,33 +173,51 @@
     <!-- Hero -->
     <main>
         <section class="relative">
-            <div class="h-[56vh] md:h-[72vh] bg-gray-800">
-                <img
-                    src="{{ asset('image/Background.png') }}"
-                    alt="Ulos tradisional"
-                    class="w-full h-full object-cover opacity-90"
-                />
-                <div class="absolute inset-0 bg-black/35"></div>
+            <div class="bg-white">
+                <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+                    <!-- constrained hero banner to align with product grid -->
+                    <div class="py-6">
+                        <div class="bg-white rounded-lg overflow-hidden shadow-sm">
+                            <div class="w-[1364px] h-[548px] max-w-full mx-auto relative">
+                                <img
+                                    src="{{ asset('image/Background.png') }}"
+                                    alt="Ulos tradisional"
+                                    width="1364"
+                                    height="548"
+                                    class="w-full h-full object-cover object-center"
+                                />
 
-                <div class="absolute inset-0 flex items-center">
-                    <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full">
-                        <div class="max-w-2xl text-white" data-aos="fade-up">
-                            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
-                                Jual Beli Ulos dengan Mudah
-                            </h1>
-                            <p class="mt-4 text-lg sm:text-xl text-white/90">
-                                Temukan ulos tradisional Batak berkualitas dari pengrajin lokal. Mudah, aman, dan terpercaya.
-                            </p>
+                                <!-- subtle gradient overlay -->
+                                <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40"></div>
 
-                            <div class="mt-6 flex flex-wrap gap-3">
-                                <a href="#products" class="inline-flex items-center bg-red-600 text-white px-5 py-3 rounded-lg shadow hover:scale-105 transform transition">Belanja Sekarang</a>
-                                <a href="#categories" class="inline-flex items-center border border-white/40 text-white px-5 py-3 rounded-lg hover:bg-white/10 transition">Pelajari Lebih Lanjut</a>
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="pl-6 md:pl-10 lg:pl-12 max-w-2xl text-white text-left" data-aos="fade-up">
+                                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
+                                            Jual Beli Ulos dengan Mudah
+                                        </h1>
+                                        <p class="mt-3 text-sm sm:text-base text-white/90">
+                                            Temukan koleksi Ulos asli Batak terbaik untuk berbagai kebutuhan tradisi dan upacara adat
+                                        </p>
+
+                                        <div class="mt-4 flex flex-wrap gap-3">
+                                            <a href="#products" class="inline-flex items-center bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:scale-105 transform transition">Belanja Sekarang</a>
+                                            <a href="#categories" class="inline-flex items-center border border-white/40 text-white px-4 py-2 rounded-lg hover:bg-white/10 transition">Pelajari Lebih Lanjut</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- small centered category pill to match design -->
+        <div class="mt-6">
+            <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
+                <span class="inline-block bg-amber-100 text-amber-1000 px-4 py-1 rounded-full text-sm">Kategori Pilihan</span>
+            </div>
+        </div>
 
         <!-- Categories -->
         <section id="categories" class="py-16">
@@ -267,14 +281,10 @@
         <!-- Products -->
         <section id="products" class="py-16 bg-white">
             <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col items-center text-center">
                     <div>
                         <h2 class="text-2xl font-bold" data-aos="fade-up">Koleksi Ulos Terbaik</h2>
                         <p class="text-gray-500 mt-1" data-aos="fade-up" data-aos-delay="60">Pilihan ulos terpopuler dari pengrajin lokal.</p>
-                    </div>
-                    
-                    <div>
-                        <a href="#" class="text-sm text-red-600">Lihat Semua Koleksi</a>
                     </div>
                 </div>
                
@@ -299,7 +309,7 @@
                     @endphp
 
                     @foreach($products as $index => $p)
-                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
+                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
                             <div class="relative">
                                 <div class="ratio-3-2">
                                     <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover" />
@@ -318,7 +328,7 @@
                                 </button>
                             </div>
 
-                            <div class="p-4">
+                            <div class="p-4 flex-1 flex flex-col">
                                 <!-- Tag -->
                                 <div class="mb-2">
                                     <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
@@ -338,24 +348,31 @@
                                 <hr class="my-4 border-gray-200">
 
                                 <!-- Add to cart button (full width) -->
-                                <div>
-                                    <button
+                                <div class="mt-auto">
+                                    <a
+                                        href="{{ route('tambah.ke.keranjang') }}"
                                         data-name="{{ $p['name'] }}"
                                         data-price="{{ $p['price'] }}"
+                                        role="button"
                                         class="btn-add-to-cart w-full inline-flex items-center justify-center gap-3 px-4 py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition shadow"
                                     >
-                                         <!-- cart icon -->
+                                        <!-- cart icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
                                             <circle cx="10" cy="20" r="1" />
                                             <circle cx="18" cy="20" r="1" />
                                         </svg>
                                         Tambah ke Keranjang
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </article>
                     @endforeach
+                </div>
+
+                <!-- Link: lihat semua koleksi (centered below products) -->
+                <div class="mt-8 text-center">
+                    <a href="#" class="inline-block text-sm text-red-600">Lihat Semua Koleksi</a>
                 </div>
             </div>
         </section>
@@ -413,9 +430,18 @@
         // AOS init
         AOS.init({ duration: 700, once: true });
 
-        // Add-to-cart (authenticated user can add to cart)
+        // Add-to-cart handler: only intercept for authenticated users.
+        // Guests should follow the link (which redirects them to login) without any popup.
+        const isAuthenticated = @json(Auth::check());
         document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                if (!isAuthenticated) {
+                    // Let the anchor navigate to the login route. Do not show any popup.
+                    return;
+                }
+
+                // For authenticated users, prevent navigation and show the added-to-cart feedback.
+                e.preventDefault();
                 const name = btn.getAttribute('data-name') || 'Produk';
                 const price = btn.getAttribute('data-price') || '';
                 // Animation
