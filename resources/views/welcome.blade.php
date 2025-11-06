@@ -16,8 +16,10 @@
     /* small helper for image aspect ratio boxes */
     .ratio-4-3 { padding-top: 75%; position: relative; }
     .ratio-3-2 { padding-top: 66.6667%; position: relative; }
+    /* 578x497 (~1.163:1) ratio for category thumbnails */
+    .ratio-578-497 { padding-top: 85.99%; position: relative; }
     /* target actual img elements inside ratio wrappers */
-    .ratio-4-3 > img, .ratio-3-2 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+    .ratio-4-3 > img, .ratio-3-2 > img, .ratio-578-497 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
         
         /* Dropdown menu styles */
         .dropdown { position: relative; }
@@ -34,6 +36,27 @@
             z-index: 50;
         }
         .dropdown:hover .dropdown-menu { display: block; }
+        
+        /* Brand red overrides: map Tailwind "red-" utility classes used in this view to the provided hex */
+        :root { --brand-red: #AE0808; }
+
+        /* Backgrounds */
+        .bg-red-600 { background-color: var(--brand-red) !important; }
+        .bg-red-700 { background-color: var(--brand-red) !important; }
+        .bg-red-800 { background-color: var(--brand-red) !important; }
+        /* very light bg (used on small hover states) — map to same brand for consistency */
+        .bg-red-50 { background-color: var(--brand-red) !important; }
+
+        /* Text */
+        .text-red-600 { color: var(--brand-red) !important; }
+
+        /* Hover variants (class names contain colon, escape for CSS) */
+        .hover\:bg-red-700:hover { background-color: var(--brand-red) !important; }
+        .hover\:bg-red-800:hover { background-color: var(--brand-red) !important; }
+        .hover\:bg-red-50:hover { background-color: var(--brand-red) !important; }
+
+        /* Focus ring (approximate) */
+        .focus\:ring-red-300:focus { --tw-ring-color: var(--brand-red) !important; box-shadow: 0 0 0 4px rgba(174,8,8,0.12) !important; }
     </style>
 </head>
 <body class="antialiased text-gray-800 bg-gray-50">
@@ -100,7 +123,7 @@
                         <!-- User Profile Dropdown -->
                         <div class="dropdown">
                             <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
-                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=b81a1a&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
+                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=AE0808&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -227,50 +250,58 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Card: Jenis Ulos Adat -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition group" data-aos="fade-right">
-                        <div class="flex items-start gap-4">
-                            <div>
-                                <h3 class="text-lg font-semibold">Jenis Ulos Adat</h3>
-                                <p class="text-sm text-gray-500 mt-1">Beberapa ulos khas yang sering dicari.</p>
-
-                                <ul class="mt-3 space-y-2 text-sm">
-                                    <li class="flex items-center gap-2">
-                                        <span class="inline-block w-2 h-2 rounded-full bg-red-600"></span>
-                                        Ulos Ragidup
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span>
-                                        Ulos Ragi Hotang
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
-                                        Ulos Sibolang
-                                    </li>
-                                </ul>
-
-                                <div class="mt-4">
-                                    <a href="#" class="text-red-600 font-medium group-hover:underline">Lihat semua jenis</a>
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-right">
+                        <div class="relative">
+                            <!-- Thumbnail image -->
+                            <div class="mb-4 rounded-lg overflow-hidden">
+                                <div class="ratio-578-497">
+                                    <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat" width="578" height="497" />
                                 </div>
+                            </div>
+                            <h3 class="text-lg font-semibold">Jenis Ulos Adat</h3>
+                            <p class="text-sm text-gray-500 mt-1">Beberapa ulos khas yang sering dicari.</p>
+
+                            <ul class="mt-3 space-y-2 text-sm">
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-red-600"></span>
+                                    Ulos Ragidup
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span>
+                                    Ulos Ragi Hotang
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    Ulos Sibolang
+                                </li>
+                            </ul>
+
+                            <div class="mt-4">
+                                <a href="#" class="text-red-600 font-medium group-hover:underline">Lihat semua jenis</a>
                             </div>
                         </div>
                     </div>
 
                     <!-- Card: Fungsi Ulos -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition group" data-aos="fade-left">
-                        <div class="flex items-start gap-4">
-                            <div>
-                                <h3 class="text-lg font-semibold">Fungsi Ulos</h3>
-                                <p class="text-sm text-gray-500 mt-1">Ulos yang biasa dipakai pada berbagai acara adat.</p>
-
-                                <ul class="mt-3 space-y-2 text-sm">
-                                    <li>Pernikahan</li>
-                                    <li>Kelahiran</li>
-                                    <li>Kematian</li>
-                                </ul>
-
-                                <div class="mt-4">
-                                    <a href="#" class="text-red-600 font-medium group-hover:underline">Jelajahi fungsi ulos</a>
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
+                        <div class="relative">
+                            <!-- Thumbnail image -->
+                            <div class="mb-4 rounded-lg overflow-hidden">
+                                <div class="ratio-578-497">
+                                    <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" width="578" height="497" />
                                 </div>
+                            </div>
+                            <h3 class="text-lg font-semibold">Fungsi Ulos</h3>
+                            <p class="text-sm text-gray-500 mt-1">Ulos yang biasa dipakai pada berbagai acara adat.</p>
+
+                            <ul class="mt-3 space-y-2 text-sm">
+                                <li>Pernikahan</li>
+                                <li>Kelahiran</li>
+                                <li>Kematian</li>
+                            </ul>
+
+                            <div class="mt-4">
+                                <a href="#" class="text-red-600 font-medium group-hover:underline">Jelajahi fungsi ulos</a>
                             </div>
                         </div>
                     </div>
