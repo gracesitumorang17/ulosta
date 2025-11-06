@@ -6,7 +6,7 @@
     <title>Masuk - UlosTa</title>
     <style>
         :root{
-            --red:#b81a1a;
+            --red:#AE0808;
             --muted:#f3f3f3;
             --border:#e2e2e2;
             --text:#2b2b2b;
@@ -102,7 +102,7 @@
             </div>
 
             @if($errors->has('email') || $errors->has('password') || session('error'))
-                <div style="margin-top:10px;padding:10px;border-radius:8px;background:#fff3f3;border:1px solid #ffd6d6;color:#8b1c1c;font-size:13px">
+                <div style="margin-top:10px;padding:10px;border-radius:8px;background:#fff3f3;border:1px solid #ffd6d6;color:#AE0808;font-size:13px">
                     @foreach($errors->all() as $err)
                         <div>{{ $err }}</div>
                     @endforeach

@@ -4,12 +4,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+// Homepage route - redirect authenticated users to /home, guests see welcome
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
     return view('welcome');
-});
+})->name('homepage');
 
-// show login form
+// show login form (redirect authenticated users to /home)
 Route::get('/masuk', function () {
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
     return view('masuk');
 })->name('masuk');
 
@@ -22,7 +29,8 @@ Route::post('/masuk', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        return redirect()->route('homepage');
+        // redirect to authenticated homepage
+        return redirect()->route('home');
     }
 
     return back()->withErrors([
@@ -35,8 +43,11 @@ Route::get('/lupa-password', function () {
     return view('auth.forgot-password');
 })->name('password.request');
 
-// show register form
+// show register form (redirect authenticated users to /home)
 Route::get('/daftar', function () {
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
     return view('daftar');
 })->name('register');
 
@@ -71,13 +82,14 @@ Route::post('/daftar', function (Request $request) {
     Auth::login($user);
     $request->session()->regenerate();
 
-    return redirect()->route('homepage')->with('success', 'Akun berhasil dibuat! Selamat datang di UlosTa.');
+    // redirect to authenticated homepage after successful registration
+    return redirect()->route('home')->with('success', 'Akun berhasil dibuat! Selamat datang di UlosTa.');
 })->name('register.submit');
 
-// Homepage (after login)
-Route::get('/homepage', function () {
-    return view('homepage');
-})->middleware('auth')->name('homepage');
+// Homepage for authenticated users
+Route::get('/home', function () {
+    return view('welcomelogin');
+})->middleware('auth')->name('home');
 
 // Add-to-cart route: guests are redirected to the login page; authenticated users go to the homepage (or cart)
 Route::get('/tambah-ke-keranjang', function () {
@@ -96,7 +108,4 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-// Legacy home route (redirect to homepage)
-Route::get('/home', function () {
-    return redirect()->route('homepage');
-})->middleware('auth')->name('home');
+// (removed duplicate) /home route already defined above
