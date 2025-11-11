@@ -108,4 +108,30 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-// (removed duplicate) /home route already defined above
+// Admin routes - dapat diakses tanpa login
+Route::group(['prefix' => 'admin'], function () {
+    // Admin dashboard
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('admin.dashboard');
+
+    // Admin verifikasi penjual
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('admin.verifikasi-penjual');
+
+    // Admin semua penjual
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('admin.semua-penjual');
+
+    // Admin penjual tidak aktif
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('admin.penjual-tidak-aktif');
+
+    // Admin laporan
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('admin.laporan');
+});
