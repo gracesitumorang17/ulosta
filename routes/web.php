@@ -3,10 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\CartController;
 
+// Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
-    return view('welcome');
-});
+    return Auth::check() ? redirect()->route('homepage') : view('welcome');
+})->name('welcome');
 
 // show login form
 Route::get('/masuk', function () {
@@ -76,14 +78,15 @@ Route::post('/daftar', function (Request $request) {
 
 // Homepage (after login)
 Route::get('/homepage', function () {
-    return view('homepage');
+    // Use existing welcomelogin view as homepage
+    return view('welcomelogin');
 })->middleware('auth')->name('homepage');
 
 // Add-to-cart route: guests are redirected to the login page; authenticated users go to the homepage (or cart)
 Route::get('/tambah-ke-keranjang', function () {
     if (Auth::check()) {
-        // TODO: change to actual cart route when implemented
-        return redirect()->route('homepage');
+        // When authenticated, send user to cart page
+        return redirect()->route('keranjang');
     }
     return redirect()->route('masuk');
 })->name('tambah.ke.keranjang');
@@ -96,7 +99,7 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-// Legacy home route (redirect to homepage)
+// Legacy home route alias -> redirect to homepage
 Route::get('/home', function () {
     return redirect()->route('homepage');
 })->middleware('auth')->name('home');
@@ -134,3 +137,10 @@ Route::get('/produk/{slug}', function ($slug) {
 
     return view('produk.detail', compact('product','recommendations'));
 })->name('produk.detail');
+// Cart routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
+    Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
+    Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
+    Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
+});

@@ -6,7 +6,7 @@
     <title>Daftar - UlosTa</title>
     <style>
         :root{
-            --red:#b81a1a;
+            --red:#AE0808;
             --muted:#f3f3f3;
             --border:#e2e2e2;
             --text:#2b2b2b;
@@ -96,7 +96,7 @@
             font-size:15px;
         }
         .btn:hover{
-            background:#a01616;
+            background:#AE0808;
         }
         .sep{display:flex;align-items:center;gap:10px;margin:18px 0;color:#bdbdbd;font-size:13px}
         .sep:before,.sep:after{content:"";flex:1;height:1px;background:#eee}
@@ -120,7 +120,7 @@
             border-radius:8px;
             background:#fff3f3;
             border:1px solid #ffd6d6;
-            color:#8b1c1c;
+            color:#AE0808;
             font-size:13px;
         }
         @media(max-width:420px){ 
