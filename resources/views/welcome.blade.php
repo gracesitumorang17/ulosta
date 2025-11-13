@@ -16,8 +16,10 @@
     /* small helper for image aspect ratio boxes */
     .ratio-4-3 { padding-top: 75%; position: relative; }
     .ratio-3-2 { padding-top: 66.6667%; position: relative; }
+    /* 578x497 (~1.163:1) ratio for category thumbnails */
+    .ratio-578-497 { padding-top: 85.99%; position: relative; }
     /* target actual img elements inside ratio wrappers */
-    .ratio-4-3 > img, .ratio-3-2 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+    .ratio-4-3 > img, .ratio-3-2 > img, .ratio-578-497 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
         
         :root {
             --brand-red-50:#FDEAEA; --brand-red-600:#AE0808; --brand-red-700:#8F0606; --brand-red-800:#6F0404;
@@ -93,7 +95,7 @@
                         <!-- User Profile Dropdown -->
                         <div class="dropdown">
                             <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
-                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=b81a1a&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
+                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=AE0808&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
