@@ -111,6 +111,22 @@
             --tw-ring-color: var(--brand-red) !important;
             box-shadow: 0 0 0 4px rgba(174, 8, 8, 0.12) !important;
         }
+    /* small helper for image aspect ratio boxes */
+    .ratio-4-3 { padding-top: 75%; position: relative; }
+    .ratio-3-2 { padding-top: 66.6667%; position: relative; }
+    /* 578x497 (~1.163:1) ratio for category thumbnails */
+    .ratio-578-497 { padding-top: 85.99%; position: relative; }
+    /* target actual img elements inside ratio wrappers */
+    .ratio-4-3 > img, .ratio-3-2 > img, .ratio-578-497 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+        
+        :root {
+            --brand-red-50:#FDEAEA; --brand-red-600:#AE0808; --brand-red-700:#8F0606; --brand-red-800:#6F0404;
+        }
+        .bg-red-600{background-color:var(--brand-red-600)!important;} .bg-red-700{background-color:var(--brand-red-700)!important;} .bg-red-800{background-color:var(--brand-red-800)!important;}
+        .text-red-600{color:var(--brand-red-600)!important;}
+        /* Dropdown (kept minimal) */
+        .dropdown{position:relative;} .dropdown-menu{display:none;position:absolute;right:0;top:100%;margin-top:.5rem;background:#fff;border-radius:.75rem;box-shadow:0 8px 24px -4px rgba(0,0,0,.15);min-width:220px;z-index:50;}
+        .dropdown:focus-within .dropdown-menu,.dropdown:hover .dropdown-menu{display:block;}
     </style>
 
     <!--
@@ -320,6 +336,8 @@
                                             <a href="#categories"
                                                 class="inline-flex items-center border border-white/40 text-white px-4 py-2 rounded-lg hover:bg-white/10 transition">Pelajari
                                                 Lebih Lanjut</a>
+                                            <a href="#products" class="inline-flex items-center bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 transition">Belanja Sekarang</a>
+                                            <a href="#categories" class="inline-flex items-center border border-white/50 text-white px-5 py-2 rounded-full hover:bg-white/10 transition">Pelajari Lebih Lanjut</a>
                                         </div>
                                     </div>
                                 </div>
@@ -337,8 +355,9 @@
                     Pilihan</span>
             </div>
         </div>
+ 
 
-        <!-- Categories -->
+        <!-- Categories Section -->
         <section id="categories" class="py-16">
             <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                 <h2 class="text-center text-2xl sm:text-3xl font-semibold" data-aos="fade-up">Temukan Ulos Anda</h2>
@@ -355,12 +374,31 @@
                                 <div class="ratio-578-497">
                                     <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat"
                                         width="578" height="497" />
+                <!-- Section Header -->
+                <div class="text-center mb-12">
+                    <div class="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                        Kategori Pilihan
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900" data-aos="fade-up">Temukan Ulos Anda</h2>
+                    <p class="text-center text-gray-500 mt-2" data-aos="fade-up" data-aos-delay="80">Jelajahi kategori ulos berdasarkan jenis dan fungsi populer.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card: Jenis Ulos Adat -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-right">
+                        <div class="relative">
+                            <!-- Thumbnail image with title overlay -->
+                            <div class="mb-4 rounded-xl overflow-hidden relative">
+                                <div class="ratio-3-2">
+                                    <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat" class="absolute inset-0 w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                                    <div class="absolute left-4 bottom-4">
+                                        <h3 class="text-white text-xl font-semibold drop-shadow">Jenis Ulos Adat</h3>
+                                    </div>
                                 </div>
                             </div>
-                            <h3 class="text-lg font-semibold">Jenis Ulos Adat</h3>
-                            <p class="text-sm text-gray-500 mt-1">Beberapa ulos khas yang sering dicari.</p>
 
-                            <ul class="mt-3 space-y-2 text-sm">
+                            <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-red-600"></span>
                                     Ulos Ragidup
@@ -379,6 +417,12 @@
                                 <a href="#" class="text-red-600 font-medium group-hover:underline">Lihat semua
                                     jenis</a>
                             </div>
+                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
+                                Lihat semua jenis
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
 
@@ -391,21 +435,44 @@
                                 <div class="ratio-578-497">
                                     <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" width="578"
                                         height="497" />
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
+                        <div class="relative">
+                            <!-- Thumbnail image with title overlay -->
+                            <div class="mb-4 rounded-xl overflow-hidden relative">
+                                <div class="ratio-3-2">
+                                    <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" class="absolute inset-0 w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                                    <div class="absolute left-4 bottom-4">
+                                        <h3 class="text-white text-xl font-semibold drop-shadow">Fungsi Ulos</h3>
+                                    </div>
                                 </div>
                             </div>
-                            <h3 class="text-lg font-semibold">Fungsi Ulos</h3>
-                            <p class="text-sm text-gray-500 mt-1">Ulos yang biasa dipakai pada berbagai acara adat.</p>
 
-                            <ul class="mt-3 space-y-2 text-sm">
-                                <li>Pernikahan</li>
-                                <li>Kelahiran</li>
-                                <li>Kematian</li>
+                            <ul class="space-y-3 text-sm mb-6">
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-pink-500"></span>
+                                    Pernikahan
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                                    Kelahiran
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
+                                    Kematian
+                                </li>
                             </ul>
 
                             <div class="mt-4">
                                 <a href="#" class="text-red-600 font-medium group-hover:underline">Jelajahi
                                     fungsi ulos</a>
                             </div>
+                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
+                                Jelajahi fungsi ulos
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -486,6 +553,11 @@
                                 <div class="ratio-3-2">
                                     <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}"
                                         class="w-full h-full object-cover" />
+                    @foreach($products as $index => $p)
+                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
+                            <div class="relative">
+                                <div class="ratio-3-2">
+                                    <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover" loading="lazy" />
                                 </div>
 
                                 <!-- Top-left badge "Terlaris" -->
@@ -511,6 +583,7 @@
                                 <div class="mb-2">
                                     <span
                                         class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
+                                    <span class="inline-block bg-amber-100 text-amber-800 text-[11px] font-medium px-3 py-1 rounded-full tracking-wide">{{ $p['tag'] }}</span>
                                 </div>
                                 <!-- Title & desc -->
                                 <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
@@ -523,9 +596,12 @@
                                         <div class="text-sm text-gray-400 line-through mt-0.5">{{ $p['original'] }}
                                         </div>
                                     </div>
+                                <div class="mt-3">
+                                    <div class="text-red-600 font-semibold text-base">{{ $p['price'] }}</div>
+                                    <div class="text-xs text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
                                 </div>
 
-                                <hr class="my-4 border-gray-200">
+                                <div class="my-3 border-t border-dashed border-gray-200"></div>
 
                                 <!-- Add to cart button (full width) -->
                                 <div class="mt-auto">
@@ -542,6 +618,19 @@
                                         </svg>
                                         Tambah ke Keranjang
                                     </a>
+                                    <form method="GET" action="{{ route('tambah.ke.keranjang') }}">
+                                        <button type="submit"
+                                            data-name="{{ $p['name'] }}"
+                                            data-price="{{ $p['price'] }}"
+                                            class="btn-add-to-cart w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition text-sm font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+                                                <circle cx="10" cy="20" r="1" />
+                                                <circle cx="18" cy="20" r="1" />
+                                            </svg>
+                                            Keranjang
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </article>
@@ -624,7 +713,7 @@
                 // For authenticated users, prevent navigation and show the added-to-cart feedback.
                 e.preventDefault();
                 const name = btn.getAttribute('data-name') || 'Produk';
-                const price = btn.getAttribute('data-price') || '';
+                const price = btn.getAttribute('data-price') || ''; 
                 // Animation
                 btn.classList.add('transform', 'scale-95');
                 setTimeout(() => btn.classList.remove('scale-95'), 150);

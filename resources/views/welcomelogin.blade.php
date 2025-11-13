@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Homepage - UlosTa</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Tailwind CDN (for prototyping) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -90,6 +91,32 @@
             --tw-ring-color: var(--brand-red) !important;
             box-shadow: 0 0 0 4px rgba(174, 8, 8, 0.12) !important;
         }
+        
+        /* Brand color system (kept lightweight, no Tailwind config) */
+        :root {
+            --brand-red-50:  #FDEAEA;  /* very light tint for hovers */
+            --brand-red-300: #EFA3A3;  /* ring color */
+            --brand-red-600: #AE0808;  /* primary */
+            --brand-red-700: #8F0606;  /* hover */
+            --brand-red-800: #6F0404;  /* active */
+        }
+
+        /* Map only the shades used in this page for consistent branding */
+        .bg-red-600 { background-color: var(--brand-red-600) !important; }
+        .bg-red-700 { background-color: var(--brand-red-700) !important; }
+        .bg-red-800 { background-color: var(--brand-red-800) !important; }
+        .bg-red-50  { background-color: var(--brand-red-50) !important; }
+
+        .text-red-600 { color: var(--brand-red-600) !important; }
+        .border-red-700 { border-color: var(--brand-red-700) !important; }
+        .text-red-700 { color: var(--brand-red-700) !important; }
+
+        .hover\:bg-red-700:hover { background-color: var(--brand-red-700) !important; }
+        .hover\:bg-red-800:hover { background-color: var(--brand-red-800) !important; }
+        .hover\:bg-red-50:hover  { background-color: var(--brand-red-50) !important; }
+
+        /* Focus ring */
+        .focus\:ring-red-300:focus { --tw-ring-color: var(--brand-red-300) !important; box-shadow: 0 0 0 4px rgba(239,163,163,0.6) !important; }
     </style>
 
     <!--
@@ -171,6 +198,9 @@
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                    <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-800 hover:text-red-600 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                         </svg>
                         <span class="text-sm font-medium">Keranjang</span>
                     </a>
@@ -282,6 +312,9 @@
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
+                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-100" aria-expanded="false" aria-controls="mobile-menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                 </div>
@@ -295,6 +328,39 @@
                             class="w-full border border-gray-200 rounded-full py-2.5 px-4 shadow-sm focus:outline-none" />
                     </div>
                 </form>
+            </div>
+
+            <!-- Mobile Menu Panel -->
+            <div id="mobile-menu" class="md:hidden hidden pb-4">
+                <nav class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="text-sm font-medium">Home</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="text-sm font-medium">Wishlist</span>
+                    </a>
+                    <a href="{{ route('keranjang') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                        </svg>
+                        <span class="text-sm font-medium">Keranjang</span>
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0v-1m6-10V5a3 3 0 10-6 0v1" />
+                            </svg>
+                            <span class="text-sm">Keluar</span>
+                        </button>
+                    </form>
+                </nav>
             </div>
         </div>
     </header>
@@ -380,6 +446,16 @@
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900">Jenis Ulos Adat</h3>
                                     <p class="text-sm text-gray-500">Beberapa ulos khas yang sering dicari</p>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-right">
+                        <div class="relative">
+                            <!-- Thumbnail image with title overlay -->
+                            <div class="mb-4 rounded-xl overflow-hidden relative">
+                                <div class="ratio-3-2">
+                                    <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat" class="absolute inset-0 w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                                    <div class="absolute left-4 bottom-4">
+                                        <h3 class="text-white text-xl font-semibold drop-shadow">Jenis Ulos Adat</h3>
+                                    </div>
                                 </div>
                             </div>
 
@@ -434,6 +510,16 @@
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900">Fungsi Ulos</h3>
                                     <p class="text-sm text-gray-500">Ulos untuk berbagai acara adat</p>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
+                        <div class="relative">
+                            <!-- Thumbnail image with title overlay -->
+                            <div class="mb-4 rounded-xl overflow-hidden relative">
+                                <div class="ratio-3-2">
+                                    <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" class="absolute inset-0 w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                                    <div class="absolute left-4 bottom-4">
+                                        <h3 class="text-white text-xl font-semibold drop-shadow">Fungsi Ulos</h3>
+                                    </div>
                                 </div>
                             </div>
 
@@ -622,6 +708,16 @@
                                             stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+                                    <button
+                                        data-name="{{ $p['name'] }}"
+                                        data-price="{{ $p['price'] }}"
+                                        data-original="{{ $p['original'] }}"
+                                        data-tag="{{ $p['tag'] }}"
+                                        data-image="{{ $p['image'] }}"
+                                        class="btn-add-to-cart inline-flex items-center justify-center gap-2 px-4 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-shadow shadow-sm text-sm font-medium h-11"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
                                             <circle cx="10" cy="20" r="1" />
                                             <circle cx="18" cy="20" r="1" />
                                         </svg>
@@ -716,7 +812,41 @@
             once: true
         });
 
-        // Add-to-cart handler for authenticated users
+        // Toast element factory
+        function ensureToast() {
+            let toast = document.getElementById('toast-add-cart');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-add-cart';
+                toast.className = 'fixed top-5 right-5 z-50 hidden';
+                toast.innerHTML = `
+                    <div class="bg-white/95 backdrop-blur border border-gray-200 shadow-xl rounded-lg px-4 py-3 flex items-start gap-3 min-w-[280px]">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700">
+                            <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                                <path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 111.414-1.414L8.414 12.172l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' />
+                            </svg>
+                        </div>
+                        <div class="text-sm">
+                            <div class="font-semibold text-gray-800">Berhasil ditambahkan</div>
+                            <div class="text-gray-600" id="toast-text">Produk masuk ke keranjang.</div>
+                        </div>
+                        <button class="ml-2 text-gray-400 hover:text-gray-600" aria-label="Tutup" onclick="document.getElementById('toast-add-cart').classList.add('hidden')">×</button>
+                    </div>`;
+                document.body.appendChild(toast);
+            }
+            return toast;
+        }
+
+        function showToast(message) {
+            const toast = ensureToast();
+            toast.querySelector('#toast-text').textContent = message;
+            toast.classList.remove('hidden');
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        // Add-to-cart handler (persist via AJAX + toast)
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const name = btn.getAttribute('data-name') || 'Produk';
@@ -728,6 +858,29 @@
 
                 // Show success feedback
                 alert(`${name} (${price}) berhasil ditambahkan ke keranjang!`);
+            btn.addEventListener('click', async () => {
+                const name = btn.dataset.name;
+                const price = btn.dataset.price;
+                const original = btn.dataset.original;
+                const tag = btn.dataset.tag;
+                const image = btn.dataset.image;
+                btn.classList.add('transform','scale-95');
+                setTimeout(()=>btn.classList.remove('scale-95'),120);
+                try {
+                    const res = await fetch('{{ route('cart.add') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                        body: JSON.stringify({ name, price, original, tag, image })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast(`${name} berhasil ditambahkan ke keranjang!`);
+                    } else {
+                        showToast('Gagal menambahkan ke keranjang');
+                    }
+                } catch (e) {
+                    showToast('Terjadi kesalahan');
+                }
             });
         });
 
@@ -767,6 +920,35 @@
         if (yearEl) {
             yearEl.textContent = new Date().getFullYear();
         }
+        if (yearEl) { yearEl.textContent = new Date().getFullYear(); }
+        
+        // Mobile menu toggle
+        (function(){
+            const btn = document.getElementById('mobile-menu-btn');
+            const panel = document.getElementById('mobile-menu');
+            if (!btn || !panel) return;
+            const toggle = () => {
+                const isHidden = panel.classList.contains('hidden');
+                panel.classList.toggle('hidden');
+                btn.setAttribute('aria-expanded', String(isHidden));
+            };
+            btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); });
+            document.addEventListener('click', (e)=>{
+                if (!panel.classList.contains('hidden')) {
+                    // close if clicking outside panel & button
+                    if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('hidden');
+                        btn.setAttribute('aria-expanded','false');
+                    }
+                }
+            });
+            document.addEventListener('keydown', (e)=>{
+                if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+                    panel.classList.add('hidden');
+                    btn.setAttribute('aria-expanded','false');
+                }
+            });
+        })();
     </script>
 </body>
 

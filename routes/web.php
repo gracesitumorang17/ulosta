@@ -6,20 +6,15 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 
-// Homepage route - redirect authenticated users to /home, guests see welcome
+// Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('home');
-    }
-    return view('welcome');
-})->name('homepage');
+    return Auth::check() ? redirect()->route('homepage') : view('welcome');
+})->name('welcome');
 
-// show login form (redirect authenticated users to /home)
+// show login form
 Route::get('/masuk', function () {
-    if (Auth::check()) {
-        return redirect()->route('home');
-    }
     return view('masuk');
 })->name('masuk');
 
@@ -32,8 +27,7 @@ Route::post('/masuk', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        // redirect to authenticated homepage
-        return redirect()->route('home');
+        return redirect()->route('homepage');
     }
 
     return back()->withErrors([
@@ -46,11 +40,8 @@ Route::get('/lupa-password', function () {
     return view('auth.forgot-password');
 })->name('password.request');
 
-// show register form (redirect authenticated users to /home)
+// show register form
 Route::get('/daftar', function () {
-    if (Auth::check()) {
-        return redirect()->route('home');
-    }
     return view('daftar');
 })->name('register');
 
@@ -85,20 +76,20 @@ Route::post('/daftar', function (Request $request) {
     Auth::login($user);
     $request->session()->regenerate();
 
-    // redirect to authenticated homepage after successful registration
-    return redirect()->route('home')->with('success', 'Akun berhasil dibuat! Selamat datang di UlosTa.');
+    return redirect()->route('homepage')->with('success', 'Akun berhasil dibuat! Selamat datang di UlosTa.');
 })->name('register.submit');
 
-// Homepage for authenticated users
-Route::get('/home', function () {
+// Homepage (after login)
+Route::get('/homepage', function () {
+    // Use existing welcomelogin view as homepage
     return view('welcomelogin');
-})->middleware('auth')->name('home');
+})->middleware('auth')->name('homepage');
 
 // Add-to-cart route: guests are redirected to the login page; authenticated users go to the homepage (or cart)
 Route::get('/tambah-ke-keranjang', function () {
     if (Auth::check()) {
-        // TODO: change to actual cart route when implemented
-        return redirect()->route('homepage');
+        // When authenticated, send user to cart page
+        return redirect()->route('keranjang');
     }
     return redirect()->route('masuk');
 })->name('tambah.ke.keranjang');
@@ -186,4 +177,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
     // ...existing admin routes...
+// Legacy home route alias -> redirect to homepage
+Route::get('/home', function () {
+    return redirect()->route('homepage');
+})->middleware('auth')->name('home');
+
+// Cart routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
+    Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
+    Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
+    Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
 });
