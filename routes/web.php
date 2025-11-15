@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 
 // Root: if authenticated go to /homepage, else public welcome landing
@@ -99,6 +102,81 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
+// Set role after login (seller or buyer) and redirect accordingly — persist to user.role
+Route::post('/set-role', [RoleController::class, 'setRole'])
+    ->name('set.role')
+    ->middleware('auth');
+
+// Seller dashboard route (sudah memakai middleware EnsureUserIsSeller)
+Route::get('/seller/dashboard', function () {
+    return view('seller.dashboard');
+})->name('seller.dashboard')->middleware(['auth', \App\Http\Middleware\EnsureUserIsSeller::class]);
+
+// Public pages
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+Route::get('/daftar', [RegisterController::class, 'show'])->name('register');
+Route::post('/daftar', [RegisterController::class, 'register'])->name('register.submit');
+
+// simple login/logout routes (sesuaikan dengan auth scaffolding Anda)
+Route::get('/masuk', fn() => view('masuk'))->name('masuk');
+Route::post('/masuk', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('masuk.submit');
+Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+
+// role change (upgrade ke seller)
+Route::post('/set-role', [RoleController::class, 'setRole'])->middleware('auth')->name('set.role');
+
+// seller-only routes
+Route::middleware(['auth', 'role:seller'])->group(function () {
+    Route::get('/seller/dashboard', fn() => view('seller.dashboard'))->name('seller.dashboard');
+    // ... seller routes ...
+});
+
+// admin-only
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', fn() => view('admin.index'))->name('admin.home');
+    // ... admin routes ...
+});
+
+// Example: routes accessible to seller OR admin
+Route::middleware(['auth', 'role:admin,seller'])->group(function () {
+    // ... shared routes ...
+});
+
+// Auth routes
+Route::get('/masuk', function () {
+    return view('masuk');
+})->name('masuk');
+Route::post('/masuk', [AuthController::class, 'login'])->name('masuk.submit');
+
+Route::get('/register', function () {
+    return view('daftar');
+})->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Dashboards
+Route::middleware(['auth', 'role:seller'])->group(function () {
+    Route::get('/seller/dashboard', function () {
+        return view('seller.dashboard');
+    })->name('seller.dashboard');
+    // ...existing seller routes...
+});
+
+Route::middleware(['auth', 'role:buyer'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('buyer.dashboard');
+    })->name('buyer.dashboard');
+    // ...existing buyer routes...
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    // ...existing admin routes...
 // Legacy home route alias -> redirect to homepage
 Route::get('/home', function () {
     return redirect()->route('homepage');
