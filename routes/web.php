@@ -144,3 +144,53 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
     Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
 });
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
+});
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
+});
