@@ -104,6 +104,39 @@ Route::get('/home', function () {
     return redirect()->route('homepage');
 })->middleware('auth')->name('home');
 
+// Product detail (temporary demo route)
+Route::get('/produk/{slug}', function ($slug) {
+    $product = [
+        'slug' => $slug,
+        'title' => 'Ulos Ragihotang Premium',
+        'price' => 1250000,
+        'original_price' => 1500000,
+        'reviews' => 28,
+        'tags' => ['Ragi Hotang','Pernikahan'],
+        'stock' => 15,
+        'jenis' => 'Ragi Hotang',
+        'fungsi' => 'Pernikahan',
+        'ukuran' => '200 x 150 cm',
+        'berat' => '800 gr',
+        'material' => 'Katun Premium',
+        'asal' => 'Sumatera Utara',
+        'images' => [
+            asset('image/Ulos Ragi Hotang.jpg'),
+            asset('image/ulos1.jpeg'),
+            asset('image/ulos2.jpg'),
+            asset('image/ulos3.jpg'),
+        ],
+        'description' => 'Ulos Ragi Hotang Premium adalah kain tenun tradisional Batak dengan motif yang melambangkan keharmonisan dan kekuatan. Cocok untuk upacara pernikahan adat, ditenun dari benang premium dengan pewarnaan alami yang tahan lama.',
+    ];
+
+    $recommendations = [
+        ['title'=>'Ulos Bintang Maratur','price'=>750000,'old'=>900000,'img'=>asset('image/Ulos Bintang Maratur.jpg'),'tag'=>'Kelahiran'],
+        ['title'=>'Ulos Mangiring','price'=>860000,'old'=>990000,'img'=>asset('image/Ulos Mangiring.jpg'),'tag'=>'Pernikahan'],
+        ['title'=>'Ulos Sibolang Rasta Pamontari','price'=>750000,'old'=>1000000,'img'=>asset('image/Ulos Sibolang Rasta Pamontari.jpg'),'tag'=>'Kelahiran'],
+    ];
+
+    return view('produk.detail', compact('product','recommendations'));
+})->name('produk.detail');
 // Cart routes (authenticated)
 Route::middleware('auth')->group(function () {
     Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
@@ -125,4 +158,54 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+});
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
+});
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
 });
