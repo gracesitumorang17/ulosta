@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CheckoutController;
 
 // Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
@@ -77,10 +80,7 @@ Route::post('/daftar', function (Request $request) {
 })->name('register.submit');
 
 // Homepage (after login)
-Route::get('/homepage', function () {
-    // Use existing welcomelogin view as homepage
-    return view('welcomelogin');
-})->middleware('auth')->name('homepage');
+Route::get('/homepage', [HomeController::class, 'index'])->middleware('auth')->name('homepage');
 
 // Add-to-cart route: guests are redirected to the login page; authenticated users go to the homepage (or cart)
 Route::get('/tambah-ke-keranjang', function () {
@@ -143,6 +143,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
     Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
     Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+});
+
+// Wishlist routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/add', [WishlistController::class, 'store'])->name('wishlist.add');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.delete');
+    Route::get('/wishlist/count', [WishlistController::class, 'getCount'])->name('wishlist.count');
+});
+
+// Checkout routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
 });
 
 // Admin routes
