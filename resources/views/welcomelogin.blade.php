@@ -198,7 +198,7 @@
                                 <p class="text-xs text-gray-500">Pembeli</p>
                             </div>
                             <nav class="py-2">
-                                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
@@ -377,9 +377,8 @@
                     <!-- Card: Jenis Ulos Adat -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-right">
                         <div class="relative">
-                            <!-- Thumbnail image with title overlay -->
                             <div class="mb-4 rounded-xl overflow-hidden relative">
-                                <div class="aspect-[3/2] relative">
+                                <div class="ratio-3-2">
                                     <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat" class="absolute inset-0 w-full h-full object-cover" />
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
                                     <div class="absolute left-4 bottom-4">
@@ -387,7 +386,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-red-600"></span>
@@ -401,23 +399,21 @@
                                     <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
                                     Ulos Sibolang
                                 </li>
-                            </ul>
-
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Lihat semua jenis
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                                                    </ul>
+                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
+                                                        Lihat semua jenis
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
                         </div>
                     </div>
 
                     <!-- Card: Fungsi Ulos -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
                         <div class="relative">
-                            <!-- Thumbnail image with title overlay -->
                             <div class="mb-4 rounded-xl overflow-hidden relative">
-                                <div class="aspect-[3/2] relative">
+                                <div class="ratio-3-2">
                                     <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" class="absolute inset-0 w-full h-full object-cover" />
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
                                     <div class="absolute left-4 bottom-4">
@@ -425,28 +421,26 @@
                                     </div>
                                 </div>
                             </div>
-
                             <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-pink-500"></span>
                                     Pernikahan
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                                       <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
                                     Kelahiran
                                 </li>
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                                     Kematian
                                 </li>
-                            </ul>
-
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Jelajahi fungsi ulos
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                                                    </ul>
+                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
+                                                        Jelajahi fungsi ulos
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
                         </div>
                     </div>
                 </div>
@@ -456,29 +450,90 @@
         <!-- Products -->
         <section id="products" class="py-16 bg-white">
             <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-
-
-                <div class="flex flex-col items-center text-center">
-                    <div>
-                        <h2 class="text-2xl font-bold" data-aos="fade-up">Koleksi Ulos Terbaik</h2>
-                        <p class="text-gray-500 mt-1" data-aos="fade-up" data-aos-delay="60">
-                            @if($search ?? false)
-                                Hasil pencarian untuk: <span class="font-semibold text-red-600">"{{ $search }}"</span>
-                                @if(count($products) > 0)
-                                    ({{ count($products) }} produk ditemukan)
-                                @endif
-                            @else
-                                Pilihan ulos terpopuler dari pengrajin lokal.
-                            @endif
-                        </p>
+                <!-- Section Header with Filters -->
+                <div class="text-center mb-8">
+                    <div class="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                        Kategori Pilihan
                     </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900" data-aos="fade-up">Temukan Ulos Anda</h2>
+                    <p class="text-gray-500 mt-2" data-aos="fade-up" data-aos-delay="60">
+                        @if($search ?? false)
+                            Hasil pencarian untuk: <span class="font-semibold text-red-600">"{{ $search }}"</span>
+                            @if(count($products) > 0)
+                                ({{ count($products) }} produk ditemukan)
+                            @endif
+                        @else
+                            Jelajahi koleksi Ulos berdasarkan jenis dan fungsi tradisi
+                        @endif
+                    </p>
                 </div>
+
+                <!-- Filter Section -->
+                <form id="filter-form" method="GET" action="{{ route('homepage') }}" class="flex flex-wrap items-center justify-center gap-6 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Hidden search input to preserve search query -->
+                    @if($search ?? false)
+                    <input type="hidden" name="q" value="{{ $search }}">
+                    @endif
+
+                    <!-- Jenis Filter -->
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700">Jenis :</label>
+                        <div class="relative">
+                            <select name="jenis" id="jenis-filter" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-600 cursor-pointer">
+                                <option value="">Semua Jenis</option>
+                                <option value="Ragidup" {{ ($jenisFilter ?? '') == 'Ragidup' ? 'selected' : '' }}>Ulos Ragidup</option>
+                                <option value="Ragi Hotang" {{ ($jenisFilter ?? '') == 'Ragi Hotang' ? 'selected' : '' }}>Ulos Ragi Hotang</option>
+                                <option value="Sibolang" {{ ($jenisFilter ?? '') == 'Sibolang' ? 'selected' : '' }}>Ulos Sibolang</option>
+                                <option value="Bintang Maratur" {{ ($jenisFilter ?? '') == 'Bintang Maratur' ? 'selected' : '' }}>Ulos Bintang Maratur</option>
+                                <option value="Sadum" {{ ($jenisFilter ?? '') == 'Sadum' ? 'selected' : '' }}>Ulos Sadum</option>
+                                <option value="Mangiring" {{ ($jenisFilter ?? '') == 'Mangiring' ? 'selected' : '' }}>Ulos Mangiring</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fungsi Filter -->
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700">Fungsi :</label>
+                        <div class="relative">
+                            <select name="fungsi" id="fungsi-filter" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-600 cursor-pointer">
+                                <option value="">Semua Fungsi</option>
+                                <option value="Pernikahan" {{ ($fungsiFilter ?? '') == 'Pernikahan' ? 'selected' : '' }}>Pernikahan</option>
+                                <option value="Kelahiran" {{ ($fungsiFilter ?? '') == 'Kelahiran' ? 'selected' : '' }}>Kelahiran</option>
+                                <option value="Kematian" {{ ($fungsiFilter ?? '') == 'Kematian' ? 'selected' : '' }}>Kematian</option>
+                                <option value="Upacara Adat" {{ ($fungsiFilter ?? '') == 'Upacara Adat' ? 'selected' : '' }}>Upacara Adat</option>
+                                <option value="Pesta Tradisional" {{ ($fungsiFilter ?? '') == 'Pesta Tradisional' ? 'selected' : '' }}>Pesta Tradisional</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Button -->
+                    @if(($jenisFilter ?? false) || ($fungsiFilter ?? false))
+                    <a href="{{ route('homepage') }}{{ ($search ?? false) ? '?q=' . $search : '' }}" class="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Reset Filter
+                    </a>
+                    @endif
+                </form>
                
                 @if(count($products) > 0)
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
+                <div id="product-grid" class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
 
                     @foreach($products as $index => $p)
-                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
+                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" 
+                                 data-aos="fade-up" 
+                                 data-aos-delay="{{ 40 * ($index + 1) }}">
                             <div class="relative">
                                 <div class="aspect-[4/3] relative">
                                     <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="absolute inset-0 w-full h-full object-cover" />
