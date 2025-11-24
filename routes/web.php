@@ -7,11 +7,29 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
+use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 
 // Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
-    return Auth::check() ? redirect()->route('homepage') : view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('homepage');
+    }
+
+    // Fetch a few active, in-stock products for the public landing page
+    $products = Product::active()->inStock()->latest()->take(9)->get()->map(function ($p) {
+        return [
+            'id' => $p->id,
+            'name' => $p->name,
+            'description' => $p->description,
+            'image' => $p->image,
+            'tag' => $p->tag,
+            'formatted_price' => $p->formatted_price,
+            'formatted_original_price' => $p->formatted_original_price,
+        ];
+    });
+
+    return view('welcome', compact('products'));
 })->name('welcome');
 
 // show login form
@@ -105,38 +123,31 @@ Route::get('/home', function () {
     return redirect()->route('homepage');
 })->middleware('auth')->name('home');
 
-// Product detail (temporary demo route)
-Route::get('/produk/{slug}', function ($slug) {
-    $product = [
-        'slug' => $slug,
-        'title' => 'Ulos Ragihotang Premium',
-        'price' => 1250000,
-        'original_price' => 1500000,
-        'reviews' => 28,
-        'tags' => ['Ragi Hotang','Pernikahan'],
-        'stock' => 15,
-        'jenis' => 'Ragi Hotang',
-        'fungsi' => 'Pernikahan',
-        'ukuran' => '200 x 150 cm',
-        'berat' => '800 gr',
-        'material' => 'Katun Premium',
-        'asal' => 'Sumatera Utara',
-        'images' => [
-            asset('image/Ulos Ragi Hotang.jpg'),
-            asset('image/ulos1.jpeg'),
-            asset('image/ulos2.jpg'),
-            asset('image/ulos3.jpg'),
-        ],
-        'description' => 'Ulos Ragi Hotang Premium adalah kain tenun tradisional Batak dengan motif yang melambangkan keharmonisan dan kekuatan. Cocok untuk upacara pernikahan adat, ditenun dari benang premium dengan pewarnaan alami yang tahan lama.',
+// Product detail route
+Route::get('/produk/{id}', function ($id) {
+    $product = Product::findOrFail($id);
+    
+    // Convert to array format expected by the view
+    $productData = [
+        'id' => $product->id,
+        'name' => $product->name,
+        'description' => $product->description,
+        'price' => $product->formatted_price,
+        'original_price' => $product->formatted_original_price,
+        'image' => $product->image,
+        'tag' => $product->tag,
+        'stock' => $product->stock,
+        'category' => $product->tag,
+        'function' => $product->tag,
+        'type' => $product->tag,
+        'size' => '200 x 150 cm',
+        'weight' => '800 gram',
+        'material' => 'Katun Premium', 
+        'origin' => 'Sumatera Utara',
+        'reviews' => '64 reviews'
     ];
 
-    $recommendations = [
-        ['title'=>'Ulos Bintang Maratur','price'=>750000,'old'=>900000,'img'=>asset('image/Ulos Bintang Maratur.jpg'),'tag'=>'Kelahiran'],
-        ['title'=>'Ulos Mangiring','price'=>860000,'old'=>990000,'img'=>asset('image/Ulos Mangiring.jpg'),'tag'=>'Pernikahan'],
-        ['title'=>'Ulos Sibolang Rasta Pamontari','price'=>750000,'old'=>1000000,'img'=>asset('image/Ulos Sibolang Rasta Pamontari.jpg'),'tag'=>'Kelahiran'],
-    ];
-
-    return view('produk.detail', compact('product','recommendations'));
+    return view('detail-produk', ['product' => $productData]);
 })->name('produk.detail');
 // Cart routes (authenticated)
 Route::middleware('auth')->group(function () {

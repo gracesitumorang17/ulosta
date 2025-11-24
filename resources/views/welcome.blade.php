@@ -313,30 +313,13 @@
                
                 <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
 
-                    @php
-                        $products = [
-                            [
-                                'name' => 'Ulos Ragi Hotang',
-                                'tag' => 'Pernikahan',
-                                'price' => 'Rp.800.000',
-                                'original' => 'Rp.1.000.000',
-                                'image' => 'Ulos Ragi Hotang.jpg',
-                                'desc' => 'Ulos tradisional dengan motif ulos Ragi Hotang yang indah'
-                            ],
-                            ['name' => 'Ulos Sibolang', 'tag' => 'Kematian', 'price' => 'Rp.450.000', 'original' => 'Rp.600.000', 'image' => 'Ulos Sibolang Rasta Pamontari.jpg', 'desc' => 'Ulos tradisional dengan motif khas'],
-                            ['name' => 'Ulos Mangiring', 'tag' => 'Syukuran', 'price' => 'Rp.380.000', 'original' => 'Rp.500.000', 'image' => 'Ulos Mangiring.jpg', 'desc' => 'Ulos tradisional dengan motif halus'],
-                            ['name' => 'Ulos Sadum', 'tag' => 'Pernikahan', 'price' => 'Rp.600.000', 'original' => 'Rp.750.000', 'image' => 'Ulos Sadum.jpeg', 'desc' => 'Tenunan berkualitas tinggi'],
-                            ['name' => 'Ulos Bintang Maratur', 'tag' => 'Pernikahan', 'price' => 'Rp.490.000', 'original' => 'Rp.650.000', 'image' => 'Ulos Bintang Maratur.jpg', 'desc' => 'Motif tradisional khas Batak'],
-                            ['name' => 'Ulos Ragi Hidup', 'tag' => 'Pernikahan', 'price' => 'Rp.350.000', 'original' => 'Rp.450.000', 'image' => 'Ulos Ragi Hotang.jpg', 'desc' => 'Kerajinan dari pengrajin lokal'],
-                        ];
-                    @endphp
-
-                    @foreach($products as $index => $p)
+                    @forelse($products as $index => $product)
                         <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
-                            <div class="relative">
-                                <div class="ratio-3-2">
-                                    <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover" loading="lazy" />
-                                </div>
+                            <a href="{{ route('produk.detail', $product['id']) }}" class="block">
+                                <div class="relative">
+                                    <div class="ratio-3-2">
+                                        <img src="{{ $product['image'] ? asset('image/' . $product['image']) : asset('image/default-product.jpg') }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover" loading="lazy" />
+                                    </div>
 
                                 <!-- Top-left badge "Terlaris" -->
                                 <div class="absolute left-3 top-3">
@@ -354,28 +337,31 @@
                             <div class="p-4 flex-1 flex flex-col">
                                 <!-- Tag -->
                                 <div class="mb-2">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-[11px] font-medium px-3 py-1 rounded-full tracking-wide">{{ $p['tag'] }}</span>
+                                    <span class="inline-block bg-amber-100 text-amber-800 text-[11px] font-medium px-3 py-1 rounded-full tracking-wide">{{ $product['tag'] ?? 'Produk' }}</span>
                                 </div>
                                 <!-- Title & desc -->
-                                <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
-                                <p class="text-sm text-gray-500 mt-1">{{ $p['desc'] }}</p>
+                                <h3 class="font-semibold text-gray-800 text-base">{{ $product['name'] }}</h3>
+                                <p class="text-sm text-gray-500 mt-1">{{ Str::limit($product['description'], 60) }}</p>
+                            </a>
 
                                 <!-- Price -->
                                 <div class="mt-3">
-                                    <div class="text-red-600 font-semibold text-base">{{ $p['price'] }}</div>
-                                    <div class="text-xs text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
+                                    <div class="text-red-600 font-semibold text-base">{{ $product['formatted_price'] }}</div>
+                                    @if($product['formatted_original_price'])
+                                        <div class="text-xs text-gray-400 line-through mt-0.5">{{ $product['formatted_original_price'] }}</div>
+                                    @endif
                                 </div>
 
                                 <div class="my-3 border-t border-dashed border-gray-200"></div>
 
-                                <!-- Add to cart button (full width) -->
-                                <div class="mt-auto">
-                                    <form method="GET" action="{{ route('tambah.ke.keranjang') }}">
+                                <!-- CTA buttons -->
+                                <div class="mt-auto grid grid-cols-2 gap-3">
+                                    <form method="GET" action="{{ route('tambah.ke.keranjang') }}" class="flex">
                                         <button type="submit"
-                                            data-name="{{ $p['name'] }}"
-                                            data-price="{{ $p['price'] }}"
-                                            class="btn-add-to-cart w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition text-sm font-medium">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            data-name="{{ $product['name'] }}"
+                                            data-price="{{ $product['formatted_price'] }}"
+                                            class="btn-add-to-cart flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition text-sm font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
                                                 <circle cx="10" cy="20" r="1" />
                                                 <circle cx="18" cy="20" r="1" />
@@ -383,16 +369,35 @@
                                             Keranjang
                                         </button>
                                     </form>
+                                    <a href="{{ route('produk.detail', $product['id']) }}" class="inline-flex items-center justify-center px-3 py-2 border border-red-700 text-red-700 rounded-md hover:bg-red-50 transition text-sm font-medium">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Detail
+                                    </a>
                                 </div>
                             </div>
                         </article>
-                    @endforeach
+                    @empty
+                        <div class="col-span-full text-center py-12">
+                            <div class="text-gray-400 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Produk</h3>
+                            <p class="text-gray-500">Produk sedang dalam proses penambahan. Silakan kembali lagi nanti.</p>
+                        </div>
+                    @endforelse
                 </div>
 
                 <!-- Link: lihat semua koleksi (centered below products) -->
+                @if($products->count() > 0)
                 <div class="mt-8 text-center">
                     <a href="#" class="inline-block text-sm text-red-600">Lihat Semua Koleksi</a>
                 </div>
+                @endif
             </div>
         </section>
     </main>
