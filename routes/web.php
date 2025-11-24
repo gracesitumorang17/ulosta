@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Models\Product;
+use App\Http\Controllers\ProfileController;
 
 // Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
@@ -169,6 +170,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+});
+
+// Profile routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [ProfileController::class, 'index'])->name('profil');
+    Route::put('/profil/update', [ProfileController::class, 'update'])->name('profil.update');
+    Route::post('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Admin routes
