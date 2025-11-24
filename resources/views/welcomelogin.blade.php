@@ -480,9 +480,11 @@
                     @foreach($products as $index => $p)
                         <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
                             <div class="relative">
-                                <div class="aspect-[4/3] relative">
-                                    <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="absolute inset-0 w-full h-full object-cover" />
-                                </div>
+                                <a href="{{ route('produk.detail', $p['id']) }}" class="block">
+                                    <div class="aspect-[4/3] relative">
+                                        <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="absolute inset-0 w-full h-full object-cover" />
+                                    </div>
+                                </a>
 
                                 <!-- Top-left badge "Populer" -->
                                 <div class="absolute left-3 top-3">
@@ -510,7 +512,9 @@
                                     <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
                                 </div>
                                 <!-- Title & desc -->
-                                <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
+                                <a href="{{ route('produk.detail', $p['id']) }}" class="hover:text-red-600 transition-colors">
+                                    <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
+                                </a>
                                 <p class="text-sm text-gray-500 mt-1">{{ $p['desc'] }}</p>
 
                                 <!-- Price -->
@@ -539,7 +543,13 @@
                                         </svg>
                                         <span>Keranjang</span>
                                     </button>
-                                    <a href="#" class="inline-flex items-center justify-center px-4 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 h-11 text-sm font-medium">Detail</a>
+                                    <a href="{{ route('produk.detail', $p['id']) }}" class="inline-flex items-center justify-center gap-1 px-4 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 h-11 text-sm font-medium">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Detail
+                                    </a>
                                 </div>
                             </div>
                         </article>
