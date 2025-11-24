@@ -19,8 +19,10 @@ class HomeController extends Controller
             $wishlistCount = Auth::user()->wishlists()->count();
         }
 
-        // Get search query
+        // Get search query and filters
         $search = $request->input('q');
+        $jenisFilter = $request->input('jenis');
+        $fungsiFilter = $request->input('fungsi');
 
         // Get products from database
         $query = Product::active();
@@ -28,6 +30,16 @@ class HomeController extends Controller
         // Apply search filter if search query exists
         if ($search) {
             $query->search($search);
+        }
+
+        // Filter berdasarkan jenis ulos (kolom 'tag')
+        if ($jenisFilter) {
+            $query->where('tag', $jenisFilter);
+        }
+
+        // Filter berdasarkan fungsi ulos (kolom 'category')
+        if ($fungsiFilter) {
+            $query->where('category', $fungsiFilter);
         }
 
         $productsData = $query->orderBy('created_at', 'desc')->get();
@@ -42,9 +54,11 @@ class HomeController extends Controller
                 'original' => $product->formatted_original_price ?? $product->formatted_price,
                 'image' => $product->image,
                 'desc' => $product->description,
+                'category' => $product->category ?? '',
+                'function' => $product->function ?? '',
             ];
         })->toArray();
 
-        return view('welcomelogin', compact('cartCount', 'wishlistCount', 'products', 'search'));
+        return view('welcomelogin', compact('cartCount', 'wishlistCount', 'products', 'search', 'jenisFilter', 'fungsiFilter'));
     }
 }
