@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
     ];
 
     /**
@@ -44,5 +46,64 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Relationships
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function billingAddresses()
+    {
+        return $this->hasMany(Address::class)->billing();
+    }
+
+    public function shippingAddresses()
+    {
+        return $this->hasMany(Address::class)->shipping();
+    }
+
+    public function defaultBillingAddress()
+    {
+        return $this->hasOne(Address::class)->billing()->default();
+    }
+
+    public function defaultShippingAddress()
+    {
+        return $this->hasOne(Address::class)->shipping()->default();
+    }
+
+    // Accessors
+    public function getCartTotalAttribute()
+    {
+        return $this->cartItems->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+    }
+
+    public function getCartCountAttribute()
+    {
+        return $this->cartItems->sum('quantity');
+    }
+
+    public function getFormattedCartTotalAttribute()
+    {
+        return 'Rp ' . number_format($this->cart_total, 0, ',', '.');
     }
 }

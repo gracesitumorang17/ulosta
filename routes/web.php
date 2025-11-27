@@ -5,10 +5,32 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CheckoutController;
+use App\Models\Product;
+use App\Http\Controllers\ProfileController;
 
 // Root: if authenticated go to /homepage, else public welcome landing
 Route::get('/', function () {
-    return Auth::check() ? redirect()->route('homepage') : view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('homepage');
+    }
+
+    // Fetch a few active, in-stock products for the public landing page
+    $products = Product::active()->inStock()->latest()->take(9)->get()->map(function ($p) {
+        return [
+            'id' => $p->id,
+            'name' => $p->name,
+            'description' => $p->description,
+            'image' => $p->image,
+            'tag' => $p->tag,
+            'formatted_price' => $p->formatted_price,
+            'formatted_original_price' => $p->formatted_original_price,
+        ];
+    });
+
+    return view('welcome', compact('products'));
 })->name('welcome');
 
 // show login form
@@ -78,10 +100,7 @@ Route::post('/daftar', function (Request $request) {
 })->name('register.submit');
 
 // Homepage (after login)
-Route::get('/homepage', function () {
-    // Use existing welcomelogin view as homepage
-    return view('welcomelogin');
-})->middleware('auth')->name('homepage');
+Route::get('/homepage', [HomeController::class, 'index'])->middleware('auth')->name('homepage');
 
 // Add-to-cart route: guests are redirected to the login page; authenticated users go to the homepage (or cart)
 Route::get('/tambah-ke-keranjang', function () {
@@ -144,6 +163,78 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
     Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
     Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+});
+
+// Wishlist routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/add', [WishlistController::class, 'store'])->name('wishlist.add');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.delete');
+    Route::get('/wishlist/count', [WishlistController::class, 'getCount'])->name('wishlist.count');
+});
+
+// Checkout routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+});
+
+// Profile routes (authenticated)
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [ProfileController::class, 'index'])->name('profil');
+    Route::put('/profil/update', [ProfileController::class, 'update'])->name('profil.update');
+    Route::post('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+});
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
+});
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.admindashboard');
+    })->name('dashboard');
+    
+    Route::get('/verifikasi-penjual', function () {
+        return view('admin.verifikasi-penjual');
+    })->name('verifikasi-penjual');
+    
+    Route::get('/semua-penjual', function () {
+        return view('admin.semua-penjual');
+    })->name('semua-penjual');
+    
+    Route::get('/penjual-tidak-aktif', function () {
+        return view('admin.penjual-tidak-aktif');
+    })->name('penjual-tidak-aktif');
+    
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    })->name('laporan');
 });
 
 // ========== Seller area (basic auth-protected routes) ==========

@@ -8,6 +8,17 @@
 
     <!-- Tailwind CDN (for prototyping) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand': '#dc2626'
+                    }
+                }
+            }
+        }
+    </script>
 
     <!-- AOS (Animate On Scroll) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
@@ -21,8 +32,6 @@
     .ratio-578-497 { padding-top: 85.99%; position: relative; }
     /* target actual img elements inside ratio wrappers */
     .ratio-4-3 > img, .ratio-3-2 > img, .ratio-578-497 > img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
-        
-        /* (removed) old hover dropdown styles no longer used */
         
         /* Brand color system (kept lightweight, no Tailwind config) */
         :root {
@@ -49,6 +58,31 @@
 
         /* Focus ring */
         .focus\:ring-red-300:focus { --tw-ring-color: var(--brand-red-300) !important; box-shadow: 0 0 0 4px rgba(239,163,163,0.6) !important; }
+        
+        /* Wishlist heart animation */
+        .wishlist-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .wishlist-btn.active svg {
+            fill: #dc2626;
+            stroke: #dc2626;
+        }
+        
+        .wishlist-btn.active {
+            animation: heartBeat 0.3s ease-in-out;
+        }
+        
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.2); }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800 bg-gray-50">
@@ -69,7 +103,7 @@
 
                 <!-- Center: Search -->
                 <div class="flex-1 hidden md:flex justify-center px-4 max-w-2xl">
-                    <form action="#" method="GET" class="w-full">
+                    <form action="{{ route('homepage') }}" method="GET" class="w-full">
                         <div class="relative">
                             <!-- search icon -->
                             <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -80,10 +114,18 @@
                             <input
                                 name="q"
                                 type="search"
+                                value="{{ $search ?? '' }}"
                                 placeholder="Cari ulos tradisional ..."
-                                class="w-full bg-gray-100 border border-gray-200 rounded-full py-2.5 pl-10 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                class="w-full bg-gray-100 border border-gray-200 rounded-full py-2.5 pl-10 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
                                 aria-label="Cari ulos"
                             />
+                            @if($search ?? false)
+                            <a href="{{ route('homepage') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="Hapus pencarian">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -98,19 +140,42 @@
                         <span class="text-sm font-medium">Home</span>
                     </a>
 
-                    <!-- Wishlist -->
-                    <a href="#" class="flex items-center gap-2 text-gray-800 hover:text-red-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
+                    <!-- Wishlist/Suka -->
+                    <a href="{{ route('wishlist.index') }}" class="relative flex items-center gap-2 text-gray-800 hover:text-red-600 transition">
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            @if($wishlistCount > 0)
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                            </span>
+                            @else
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                            @endif
+                        </div>
                         <span class="text-sm font-medium">Wishlist</span>
                     </a>
 
                     <!-- Keranjang -->
-                    <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-800 hover:text-red-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
-                        </svg>
+                    <a href="{{ route('keranjang') }}" class="relative flex items-center gap-2 text-gray-800 hover:text-red-600 transition" id="cart-link">
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                            </svg>
+                            <!-- Cart Badge -->
+                            @if($cartCount > 0)
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
+                            @else
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                            @endif
+                        </div>
                         <span class="text-sm font-medium">Keranjang</span>
                     </a>
 
@@ -133,23 +198,23 @@
                                 <p class="text-xs text-gray-500">Pembeli</p>
                             </div>
                             <nav class="py-2">
-                                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     <span class="text-sm">Profil saya</span>
+                                </a>
+                                <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span class="text-sm">Wishlist Saya</span>
                                 </a>
                                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                     </svg>
                                     <span class="text-sm">Pesanan Saya</span>
-                                </a>
-                                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                    <span class="text-sm">Wishlist</span>
                                 </a>
                                 <div class="my-2 border-t border-gray-100"></div>
                                 <form action="{{ route('logout') }}" method="POST">
@@ -176,9 +241,22 @@
 
             <!-- Mobile Search -->
             <div id="mobile-search" class="md:hidden pb-3">
-                <form action="#" method="GET">
+                <form action="{{ route('homepage') }}" method="GET">
                     <div class="relative">
-                        <input name="q" type="search" placeholder="Cari ulos..." class="w-full border border-gray-200 rounded-full py-2.5 px-4 shadow-sm focus:outline-none" />
+                        <input 
+                            name="q" 
+                            type="search" 
+                            value="{{ $search ?? '' }}"
+                            placeholder="Cari ulos..." 
+                            class="w-full border border-gray-200 rounded-full py-2.5 px-4 pr-10 shadow-sm focus:outline-none" 
+                        />
+                        @if($search ?? false)
+                        <a href="{{ route('homepage') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="Hapus pencarian">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -192,16 +270,39 @@
                         </svg>
                         <span class="text-sm font-medium">Home</span>
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
+                    <a href="{{ route('wishlist.index') }}" class="relative flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            @if($wishlistCount > 0)
+                            <span id="mobile-wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                            </span>
+                            @else
+                            <span id="mobile-wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                            @endif
+                        </div>
                         <span class="text-sm font-medium">Wishlist</span>
                     </a>
-                    <a href="{{ route('keranjang') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
-                        </svg>
+                    <a href="{{ route('keranjang') }}" class="relative flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50" id="mobile-cart-link">
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                            </svg>
+                            <!-- Mobile Cart Badge -->
+                            @if($cartCount > 0)
+                            <span id="mobile-cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
+                            @else
+                            <span id="mobile-cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                            @endif
+                        </div>
                         <span class="text-sm font-medium">Keranjang</span>
                     </a>
                     <form action="{{ route('logout') }}" method="POST">
@@ -276,7 +377,6 @@
                     <!-- Card: Jenis Ulos Adat -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-right">
                         <div class="relative">
-                            <!-- Thumbnail image with title overlay -->
                             <div class="mb-4 rounded-xl overflow-hidden relative">
                                 <div class="ratio-3-2">
                                     <img src="{{ asset('image/jenis ulos.jpg') }}" alt="Jenis Ulos Adat" class="absolute inset-0 w-full h-full object-cover" />
@@ -286,7 +386,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-red-600"></span>
@@ -300,21 +399,19 @@
                                     <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
                                     Ulos Sibolang
                                 </li>
-                            </ul>
-
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Lihat semua jenis
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                                                    </ul>
+                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
+                                                        Lihat semua jenis
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
                         </div>
                     </div>
 
                     <!-- Card: Fungsi Ulos -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
                         <div class="relative">
-                            <!-- Thumbnail image with title overlay -->
                             <div class="mb-4 rounded-xl overflow-hidden relative">
                                 <div class="ratio-3-2">
                                     <img src="{{ asset('image/fungsiulos.jpg') }}" alt="Fungsi Ulos" class="absolute inset-0 w-full h-full object-cover" />
@@ -324,28 +421,26 @@
                                     </div>
                                 </div>
                             </div>
-
                             <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-pink-500"></span>
                                     Pernikahan
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                                       <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
                                     Kelahiran
                                 </li>
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                                     Kematian
                                 </li>
-                            </ul>
-
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Jelajahi fungsi ulos
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                                                    </ul>
+                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
+                                                        Jelajahi fungsi ulos
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
                         </div>
                     </div>
                 </div>
@@ -355,54 +450,116 @@
         <!-- Products -->
         <section id="products" class="py-16 bg-white">
             <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-
-
-                <div class="flex flex-col items-center text-center">
-                    <div>
-                        <h2 class="text-2xl font-bold" data-aos="fade-up">Koleksi Ulos Terbaik</h2>
-                        <p class="text-gray-500 mt-1" data-aos="fade-up" data-aos-delay="60">Pilihan ulos terpopuler dari pengrajin lokal.</p>
+                <!-- Section Header with Filters -->
+                <div class="text-center mb-8">
+                    <div class="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                        Kategori Pilihan
                     </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900" data-aos="fade-up">Temukan Ulos Anda</h2>
+                    <p class="text-gray-500 mt-2" data-aos="fade-up" data-aos-delay="60">
+                        @if($search ?? false)
+                            Hasil pencarian untuk: <span class="font-semibold text-red-600">"{{ $search }}"</span>
+                            @if(count($products) > 0)
+                                ({{ count($products) }} produk ditemukan)
+                            @endif
+                        @else
+                            Jelajahi koleksi Ulos berdasarkan jenis dan fungsi tradisi
+                        @endif
+                    </p>
                 </div>
-               
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
 
-                    @php
-                        $products = [
-                            [
-                                'name' => 'Ulos Ragi Hotang',
-                                'tag' => 'Pernikahan',
-                                'price' => 'Rp.800.000',
-                                'original' => 'Rp.1.000.000',
-                                'image' => 'Ulos Ragi Hotang.jpg',
-                                'desc' => 'Ulos tradisional dengan motif ulos Ragi Hotang yang indah'
-                            ],
-                            ['name' => 'Ulos Sibolang', 'tag' => 'Kematian', 'price' => 'Rp.450.000', 'original' => 'Rp.600.000', 'image' => 'Ulos Sibolang Rasta Pamontari.jpg', 'desc' => 'Ulos tradisional dengan motif khas'],
-                            ['name' => 'Ulos Mangiring', 'tag' => 'Syukuran', 'price' => 'Rp.380.000', 'original' => 'Rp.500.000', 'image' => 'Ulos Mangiring.jpg', 'desc' => 'Ulos tradisional dengan motif halus'],
-                            ['name' => 'Ulos Sadum', 'tag' => 'Pernikahan', 'price' => 'Rp.600.000', 'original' => 'Rp.750.000', 'image' => 'Ulos Sadum.jpeg', 'desc' => 'Tenunan berkualitas tinggi'],
-                            ['name' => 'Ulos Bintang Maratur', 'tag' => 'Pernikahan', 'price' => 'Rp.490.000', 'original' => 'Rp.650.000', 'image' => 'Ulos Bintang Maratur.jpg', 'desc' => 'Motif tradisional khas Batak'],
-                            ['name' => 'Ulos Ragi Hidup', 'tag' => 'Pernikahan', 'price' => 'Rp.350.000', 'original' => 'Rp.450.000', 'image' => 'Ulos Ragi Hotang.jpg', 'desc' => 'Kerajinan dari pengrajin lokal'],
-                        ];
-                    @endphp
+                <!-- Filter Section -->
+                <form id="filter-form" method="GET" action="{{ route('homepage') }}" class="flex flex-wrap items-center justify-center gap-6 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Hidden search input to preserve search query -->
+                    @if($search ?? false)
+                    <input type="hidden" name="q" value="{{ $search }}">
+                    @endif
+
+                    <!-- Jenis Filter -->
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700">Jenis :</label>
+                        <div class="relative">
+                            <select name="jenis" id="jenis-filter" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-600 cursor-pointer">
+                                <option value="">Semua Jenis</option>
+                                <option value="Ragidup" {{ ($jenisFilter ?? '') == 'Ragidup' ? 'selected' : '' }}>Ulos Ragidup</option>
+                                <option value="Ragi Hotang" {{ ($jenisFilter ?? '') == 'Ragi Hotang' ? 'selected' : '' }}>Ulos Ragi Hotang</option>
+                                <option value="Sibolang" {{ ($jenisFilter ?? '') == 'Sibolang' ? 'selected' : '' }}>Ulos Sibolang</option>
+                                <option value="Bintang Maratur" {{ ($jenisFilter ?? '') == 'Bintang Maratur' ? 'selected' : '' }}>Ulos Bintang Maratur</option>
+                                <option value="Sadum" {{ ($jenisFilter ?? '') == 'Sadum' ? 'selected' : '' }}>Ulos Sadum</option>
+                                <option value="Mangiring" {{ ($jenisFilter ?? '') == 'Mangiring' ? 'selected' : '' }}>Ulos Mangiring</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fungsi Filter -->
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700">Fungsi :</label>
+                        <div class="relative">
+                            <select name="fungsi" id="fungsi-filter" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-600 cursor-pointer">
+                                <option value="">Semua Fungsi</option>
+                                <option value="Pernikahan" {{ ($fungsiFilter ?? '') == 'Pernikahan' ? 'selected' : '' }}>Pernikahan</option>
+                                <option value="Kelahiran" {{ ($fungsiFilter ?? '') == 'Kelahiran' ? 'selected' : '' }}>Kelahiran</option>
+                                <option value="Kematian" {{ ($fungsiFilter ?? '') == 'Kematian' ? 'selected' : '' }}>Kematian</option>
+                                <option value="Upacara Adat" {{ ($fungsiFilter ?? '') == 'Upacara Adat' ? 'selected' : '' }}>Upacara Adat</option>
+                                <option value="Pesta Tradisional" {{ ($fungsiFilter ?? '') == 'Pesta Tradisional' ? 'selected' : '' }}>Pesta Tradisional</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Button -->
+                    @if(($jenisFilter ?? false) || ($fungsiFilter ?? false))
+                    <a href="{{ route('homepage') }}{{ ($search ?? false) ? '?q=' . $search : '' }}" class="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Reset Filter
+                    </a>
+                    @endif
+                </form>
+               
+                @if(count($products) > 0)
+                <div id="product-grid" class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
 
                     @foreach($products as $index => $p)
-                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
+                        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transform hover:scale-[1.02] transition group h-full flex flex-col" 
+                                 data-aos="fade-up" 
+                                 data-aos-delay="{{ 40 * ($index + 1) }}">
                             <div class="relative">
-                                <div class="ratio-3-2">
-                                    <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover" />
-                                </div>
+                                <a href="{{ route('produk.detail', $p['id']) }}" class="block">
+                                    <div class="aspect-[4/3] relative">
+                                        <img src="{{ asset('image/' . $p['image']) }}" alt="{{ $p['name'] }}" class="absolute inset-0 w-full h-full object-cover" />
+                                    </div>
+                                </a>
 
                                 <!-- Top-left badge "Populer" -->
                                 <div class="absolute left-3 top-3">
                                     <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">Populer</span>
                                 </div>
-
-                                <!-- Favorite heart (top-right) -->
-                                <button class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition" aria-label="Simpan favorit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
-                                    </svg>
-                                </button>
+                                
+                                <!-- Top-right Wishlist button -->
+                                <div class="absolute right-3 top-3">
+                                    <button 
+                                        class="wishlist-btn w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white"
+                                        data-product-id="{{ $index }}"
+                                        aria-label="Tambah ke wishlist"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
+                        
 
                             <div class="p-4 flex-1 flex flex-col">
                                 <!-- Tag -->
@@ -410,7 +567,9 @@
                                     <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
                                 </div>
                                 <!-- Title & desc -->
-                                <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
+                                <a href="{{ route('produk.detail', $p['id']) }}" class="hover:text-red-600 transition-colors">
+                                    <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
+                                </a>
                                 <p class="text-sm text-gray-500 mt-1">{{ $p['desc'] }}</p>
 
                                 <!-- Price -->
@@ -439,76 +598,91 @@
                                         </svg>
                                         <span>Keranjang</span>
                                     </button>
-                                    <a href="#" class="inline-flex items-center justify-center px-4 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 h-11 text-sm font-medium">Detail</a>
+                                    <a href="{{ route('produk.detail', $p['id']) }}" class="inline-flex items-center justify-center gap-1 px-4 border border-red-700 text-red-700 rounded-lg hover:bg-red-50 h-11 text-sm font-medium">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Detail
+                                    </a>
                                 </div>
                             </div>
                         </article>
                     @endforeach
                 </div>
 
+                @if(!($search ?? false))
                 <!-- Link: lihat semua koleksi (centered below products) -->
                 <div class="mt-8 text-center">
                     <a href="#" class="inline-block text-sm text-red-600">Lihat Semua Koleksi</a>
                 </div>
+                @endif
+
+                @else
+                <!-- Empty State - No Products Found -->
+                <div class="mt-12 text-center py-16">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-100 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Produk Tidak Ditemukan</h3>
+                    <p class="text-gray-500 mb-6">Maaf, tidak ada produk yang cocok dengan pencarian "{{ $search }}"</p>
+                    <a href="{{ route('homepage') }}" class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Lihat Semua Produk</span>
+                    </a>
+                </div>
+                @endif
             </div>
         </section>
     </main>
 
-    <!-- Footer (dark, multi-column) -->
-    <footer class="bg-neutral-900 text-neutral-300 mt-16">
+      <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-200">
         <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
-                <!-- Brand -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-red-600 rounded-md flex items-center justify-center font-bold text-white text-sm">U</div>
-                        <div class="text-white font-semibold text-lg">UlosTa</div>
-                    </div>
-                    <p class="mt-4 text-sm text-neutral-400">Platform jual-beli ulos asli Batak dari pengrajin lokal dengan aman dan mudah.</p>
-                    <div class="mt-4 flex items-center gap-3 text-neutral-400">
-                        <a href="#" aria-label="Instagram" class="hover:text-white">IG</a>
-                        <a href="#" aria-label="Facebook" class="hover:text-white">FB</a>
-                        <a href="#" aria-label="Twitter" class="hover:text-white">X</a>
-                        <a href="#" aria-label="YouTube" class="hover:text-white">YT</a>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-red-600 rounded-md flex items-center justify-center font-bold">U</div>
+                        <div>
+                            <h4 class="font-semibold">UlosTa</h4>
+                            <p class="text-sm text-gray-400">Platform Jual Beli Ulos Terpercaya</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tentang -->
-                <div>
-                    <h4 class="text-white font-semibold">Tentang Kami</h4>
-                    <ul class="mt-4 space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-white">Profil Perusahaan</a></li>
-                        <li><a href="#" class="hover:text-white">Karir</a></li>
-                        <li><a href="#" class="hover:text-white">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-white">Syarat & Ketentuan</a></li>
-                    </ul>
-                </div>
+                <div class="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    <div>
+                        <h5 class="text-gray-300 font-semibold">Tautan Cepat</h5>
+                        <ul class="mt-3 space-y-2 text-sm text-gray-400">
+                            <li><a href="#" class="hover:underline">Tentang Kami</a></li>
+                            <li><a href="#" class="hover:underline">Kontak</a></li>
+                            <li><a href="#" class="hover:underline">Bantuan</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Kategori -->
-                <div>
-                    <h4 class="text-white font-semibold">Kategori</h4>
-                    <ul class="mt-4 space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-white">Ulos Pernikahan</a></li>
-                        <li><a href="#" class="hover:text-white">Ulos Kelahiran</a></li>
-                        <li><a href="#" class="hover:text-white">Ulos Kematian</a></li>
-                        <li><a href="#" class="hover:text-white">Ulos Lainnya</a></li>
-                    </ul>
-                </div>
+                    <div>
+                        <h5 class="text-gray-300 font-semibold">Bantuan</h5>
+                        <ul class="mt-3 space-y-2 text-sm text-gray-400">
+                            <li><a href="#" class="hover:underline">Pengiriman</a></li>
+                            <li><a href="#" class="hover:underline">Pengembalian</a></li>
+                            <li><a href="#" class="hover:underline">FAQ</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Kontak -->
-                <div>
-                    <h4 class="text-white font-semibold">Hubungi Kami</h4>
-                    <ul class="mt-4 space-y-2 text-sm">
-                        <li>Email: support@ulosta.id</li>
-                        <li>Telepon: +62 812-3456-7890</li>
-                        <li>Alamat: Medan, Sumatera Utara</li>
-                    </ul>
+                    <div>
+                        <h5 class="text-gray-300 font-semibold">Kontak</h5>
+                        <p class="mt-3 text-sm text-gray-400">ppwproject@gmail.com</p>
+                        <p class="mt-1 text-sm text-gray-400">+62 812 3456 7890</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-10 border-t border-neutral-800 pt-6 text-sm text-neutral-400 flex flex-col sm:flex-row items-center justify-between">
-                <p>© <span id="year"></span> UlosTa. All rights reserved.</p>
-                <div class="mt-2 sm:mt-0">Indonesia</div>
+            <div class="border-t border-gray-800 py-4 text-center text-sm text-gray-500 mt-8">
+                © {{ date('Y') }} UlosTa. Semua hak dilindungi.
             </div>
         </div>
     </footer>
@@ -551,6 +725,65 @@
             window.__toastTimer = setTimeout(() => toast.classList.add('hidden'), 2000);
         }
 
+        // Wishlist functionality - using database instead of localStorage
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get product data from closest article
+                const article = this.closest('article');
+                const productName = article.querySelector('.btn-add-to-cart').dataset.name;
+                const productPrice = article.querySelector('.btn-add-to-cart').dataset.price;
+                const productOriginal = article.querySelector('.btn-add-to-cart').dataset.original;
+                const productTag = article.querySelector('.btn-add-to-cart').dataset.tag;
+                const productImage = article.querySelector('.btn-add-to-cart').dataset.image;
+                
+                // Add visual feedback
+                this.classList.add('transform', 'scale-95');
+                setTimeout(() => this.classList.remove('scale-95'), 120);
+                
+                try {
+                    const res = await fetch('{{ route('wishlist.add') }}', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRF-TOKEN': csrf, 
+                            'Accept': 'application/json' 
+                        },
+                        body: JSON.stringify({ 
+                            name: productName,
+                            price: productPrice,
+                            original: productOriginal,
+                            tag: productTag,
+                            image: productImage
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        // Toggle active state based on action
+                        if (data.action === 'added') {
+                            this.classList.add('active');
+                            showToast(data.message || 'Ditambahkan ke wishlist');
+                        } else {
+                            this.classList.remove('active');
+                            showToast(data.message || 'Dihapus dari wishlist');
+                        }
+                        
+                        // Update wishlist badge
+                        updateWishlistBadge(data.count);
+                    } else {
+                        showToast('Gagal memperbarui wishlist');
+                    }
+                } catch (e) {
+                    console.error('Error updating wishlist:', e);
+                    showToast('Terjadi kesalahan');
+                }
+            });
+        });
+
         // Add-to-cart handler (persist via AJAX + toast)
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
@@ -571,6 +804,9 @@
                     const data = await res.json();
                     if (data.success) {
                         showToast(`${name} berhasil ditambahkan ke keranjang!`);
+                        
+                        // Update cart badges
+                        updateCartBadge(data.count);
                     } else {
                         showToast('Gagal menambahkan ke keranjang');
                     }
@@ -580,7 +816,6 @@
             });
         });
 
-        // (removed) profile dropdown script — navbar uses simple profile link to match design
         // Profile dropdown: toggle on click, close on outside click or Esc
         (function(){
             const btn = document.getElementById('profile-btn');
@@ -641,6 +876,60 @@
                 }
             });
         })();
+
+        // Update cart badge function
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cart-badge');
+            const mobileBadge = document.getElementById('mobile-cart-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (badge) {
+                    badge.textContent = displayCount;
+                    badge.classList.remove('hidden');
+                }
+                
+                if (mobileBadge) {
+                    mobileBadge.textContent = displayCount;
+                    mobileBadge.classList.remove('hidden');
+                }
+            } else {
+                if (badge) {
+                    badge.classList.add('hidden');
+                }
+                if (mobileBadge) {
+                    mobileBadge.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update wishlist badge function
+        function updateWishlistBadge(count) {
+            const badge = document.getElementById('wishlist-badge');
+            const mobileBadge = document.getElementById('mobile-wishlist-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (badge) {
+                    badge.textContent = displayCount;
+                    badge.classList.remove('hidden');
+                }
+                
+                if (mobileBadge) {
+                    mobileBadge.textContent = displayCount;
+                    mobileBadge.classList.remove('hidden');
+                }
+            } else {
+                if (badge) {
+                    badge.classList.add('hidden');
+                }
+                if (mobileBadge) {
+                    mobileBadge.classList.add('hidden');
+                }
+            }
+        }
     </script>
 </body>
 </html>

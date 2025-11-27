@@ -64,13 +64,19 @@ class CartController extends Controller
         $data = $request->validate(['qty' => 'required|integer|min:1']);
         $item->quantity = $data['qty'];
         $item->save();
-        return back();
+        return back()->with('success', 'Quantity berhasil diperbarui');
     }
 
     public function destroy(CartItem $item)
     {
         abort_unless($item->user_id === Auth::id(), 403);
         $item->delete();
-        return back();
+        return back()->with('success', 'Produk dihapus dari keranjang');
+    }
+
+    public function clear()
+    {
+        CartItem::where('user_id', Auth::id())->delete();
+        return back()->with('success', 'Keranjang berhasil dikosongkan');
     }
 }
