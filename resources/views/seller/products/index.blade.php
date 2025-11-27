@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kelola Produk - UlosTa Seller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --brand-red-50: #FDEAEA;
+            --brand-red-300: #EFA3A3;
+            --brand-red-600: #AE0808;
+            --brand-red-700: #8F0606;
+            --gold-500: #f5b400;
+            --gold-600: #d89d00;
+            --gold-700: #b48300;
+        }
+
+        /* Utility badge base (replaces @apply for CDN usage) */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            /* py-0.5 px-2 */
+            border-radius: 9999px;
+            /* rounded-full */
+            font-size: 11px;
+            /* text-[11px] */
+            font-weight: 500;
+            /* font-medium */
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .badge-cat {
+            background: #eef0f3;
+            color: #555;
+        }
+
+        .badge-status-active {
+            background: var(--gold-500);
+            color: #222;
+        }
+
+        .badge-status-inactive {
+            background: #ececec;
+            color: #555;
+        }
+
+        .btn-add {
+            background: var(--brand-red-600);
+            color: #fff;
+        }
+
+        .btn-add:hover {
+            background: var(--brand-red-700);
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-wrap th {
+            text-align: left;
+            font-size: .68rem;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: .75rem .9rem;
+            color: #6b7280;
+        }
+
+        .table-wrap td {
+            padding: .7rem .9rem;
+            font-size: .75rem;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        .table-wrap tbody tr:hover td {
+            background: #f9fafb;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: .6rem;
+            padding: .65rem .9rem;
+            font-size: .75rem;
+        }
+
+        .search-input:focus {
+            outline: 2px solid var(--brand-red-300);
+            outline-offset: 2px;
+        }
+
+        .action-icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .price-red {
+            color: var(--brand-red-600);
+            font-weight: 600;
+        }
+
+        /* Sinkronisasi warna merah dengan dashboard (override Tailwind default) */
+        .bg-red-600 {
+            background-color: var(--brand-red-600) !important;
+        }
+
+        .bg-red-700 {
+            background-color: var(--brand-red-700) !important;
+        }
+
+        .text-red-600 {
+            color: var(--brand-red-600) !important;
+        }
+
+        .hover\:bg-red-700:hover {
+            background-color: var(--brand-red-700) !important;
+        }
+
+        .focus\:ring-red-300:focus {
+            box-shadow: 0 0 0 4px rgba(239, 163, 163, .6) !important;
+        }
+    </style>
+    <style>
+        /* Page-specific override: hide profile popup to avoid covering action buttons on this page */
+        header .relative [x-cloak],
+        header .relative [x-show] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gray-50 text-gray-800">
+    <!-- Navbar -->
+    @include('seller.partials.navbar')
+
+    @php
+        if (!function_exists('format_rp_products')) {
+            function format_rp_products($v)
+            {
+                return 'Rp ' . number_format($v, 0, ',', '.');
+            }
+        }
+        $products = [
+            [
+                'title' => 'Ulos Ragihotang Premium',
+                'slug' => 'ulos-ragihotang-premium',
+                'category' => 'Pernikahan',
+                'price' => 1250000,
+                'stock' => 15,
+                'sold' => 45,
+                'status' => 'Aktif',
+                'img' => asset('image/' . rawurlencode('Ulos Ragi Hotang.jpg')),
+            ],
+            [
+                'title' => 'Ulos Bintang Maratur Klasik',
+                'slug' => 'ulos-bintang-maratur-klasik',
+                'category' => 'Penghormatan',
+                'price' => 950000,
+                'stock' => 8,
+                'sold' => 38,
+                'status' => 'Aktif',
+                'img' => asset('image/' . rawurlencode('Ulos Bintang Maratur.jpg')),
+            ],
+            [
+                'title' => 'Ulos Sibolong Tradisional',
+                'slug' => 'ulos-sibolong-tradisional',
+                'category' => 'Kematian',
+                'price' => 1100000,
+                'stock' => 12,
+                'sold' => 32,
+                'status' => 'Aktif',
+                // Perbaikan: file 'Ulos Sibolang.jpg' tidak ada, gunakan nama yang benar di folder public/image
+                'img' => asset('image/' . rawurlencode('Ulos Sibolang Rasta Pamontari.jpg')),
+            ],
+            [
+                'title' => 'Ulos Ragi Hidup Eksklusif',
+                'slug' => 'ulos-ragi-hidup-eksklusif',
+                'category' => 'Pernikahan',
+                'price' => 1350000,
+                'stock' => 0,
+                'sold' => 25,
+                'status' => 'Nonaktif',
+                'img' => asset('image/' . rawurlencode('ulos2.jpg')),
+            ],
+            [
+                'title' => 'Ulos Mangiring Premium',
+                'slug' => 'ulos-mangiring-premium',
+                'category' => 'Penghormatan',
+                'price' => 875000,
+                'stock' => 20,
+                'sold' => 18,
+                'status' => 'Aktif',
+                'img' => asset('image/' . rawurlencode('ulos3.jpg')),
+            ],
+        ];
+        // Filter produk yang sudah ditandai dihapus (demo) dari session
+        // Merge produk custom yang dibuat via form create
+        $custom = session('custom_products', []);
+        if (!empty($custom)) {
+            $products = array_merge($products, array_values($custom));
+        }
+        $deleted = session('deleted_products', []);
+        if (!empty($deleted)) {
+            $products = array_values(array_filter($products, fn($p) => !in_array($p['slug'], $deleted)));
+        }
+    @endphp
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        @if (session('success'))
+            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-md">
+                {{ session('success') }}
+            </div>
+        @endif
+        <script>
+            // Patch navbar "Laporan" link to point to reports route and set active style
+            (function() {
+                try {
+                    const laporanHref = @json(route('seller.reports.index'));
+                    const header = document.querySelector('header');
+                    if (!header) return;
+                    header.querySelectorAll('nav a').forEach(a => {
+                        const label = a.querySelector('span');
+                        if (label && label.textContent.trim() === 'Laporan') {
+                            a.setAttribute('href', laporanHref);
+                            const path = new URL(laporanHref, window.location.origin).pathname;
+                            if (window.location.pathname === path) {
+                                a.classList.remove('text-gray-700');
+                                a.classList.add('text-red-600');
+                            }
+                        }
+                    });
+                } catch (e) {}
+            })();
+        </script>
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold mb-1">Kelola Produk</h1>
+                <p class="text-sm text-gray-500">{{ count($products) }} produk ditemukan</p>
+            </div>
+            <div class="hidden md:flex">
+                <a href="{{ route('seller.products.create') }}"
+                    class="btn-add inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                    </svg>
+                    Tambah Produk
+                </a>
+            </div>
+        </div>
+
+        <!-- Tools Bar -->
+        <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11 19a8 8 0 1 1 5.293-14.293A8 8 0 0 1 11 19Zm8.5 1.5L16 15" />
+                    </svg>
+                    <input type="text" placeholder="Cari produk..." class="search-input pl-9" />
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button"
+                    class="inline-flex items-center gap-1 text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M5 9h14M9 14h6M11 19h2" />
+                    </svg>
+                    Status: Semua
+                </button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap border border-gray-200 rounded-xl overflow-hidden">
+            <table>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="w-64">Produk</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Terjual</th>
+                        <th>Status</th>
+                        <th class="text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($products as $p)
+                        <tr>
+                            <td class="flex items-center gap-3 min-w-0">
+                                <div class="w-12 h-12 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                                    <img src="{{ $p['img'] }}" alt="{{ $p['title'] }}"
+                                        class="w-full h-full object-cover" />
+                                </div>
+                                <div class="truncate">
+                                    <p class="text-sm font-medium truncate">{{ $p['title'] }}</p>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-cat">{{ $p['category'] }}</span></td>
+                            <td class="price-red">{{ format_rp_products($p['price']) }}</td>
+                            <td class="{{ $p['stock'] == 0 ? 'text-red-600 font-semibold' : '' }}">{{ $p['stock'] }}
+                                pcs</td>
+                            <td>{{ $p['sold'] }}</td>
+                            <td>
+                                @if ($p['status'] === 'Aktif')
+                                    <span class="badge badge-status-active">Aktif</span>
+                                @else
+                                    <span class="badge badge-status-inactive">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td class="text-right">
+                                <div class="flex justify-end items-center gap-3 text-gray-600">
+                                    <button type="button" class="hover:text-gray-900" title="Lihat">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="hover:text-gray-900" title="Edit">
+                                        <a href="{{ route('seller.products.edit', $p['slug']) }}" class="inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.862 3.487 20.5 7.125m-3.638-3.638-9.9 9.9a4.5 4.5 0 0 0-1.17 2.12L5.25 18.75l3.244-.543a4.5 4.5 0 0 0 2.12-1.17l9.9-9.9m-3.638-3.638 3.638 3.638M6.75 12.75l4.5 4.5" />
+                                            </svg>
+                                        </a>
+                                    </button>
+                                    <form method="POST" action="{{ route('seller.products.destroy', $p['slug']) }}"
+                                        class="inline-flex" onsubmit="return confirm('Hapus produk ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="hover:text-red-600" title="Hapus">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 7h12M9 7V4h6v3m1 0v13H8V7" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>
