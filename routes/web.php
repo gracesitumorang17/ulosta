@@ -85,16 +85,27 @@ Route::post('/daftar', function (Request $request) {
         'terms.required' => 'Anda harus menyetujui syarat & ketentuan.',
     ]);
 
-    // Create user
+    // Determine role from checkbox
+    $role = $request->boolean('seller') ? 'seller' : 'buyer';
+
+    // Create user with phone and role
     $user = \App\Models\User::create([
         'name' => $validated['name'],
         'email' => $validated['email'],
         'password' => bcrypt($validated['password']),
+        'phone' => $validated['phone'],
+        'role' => $role,
     ]);
 
     // Auto login after registration
     Auth::login($user);
     $request->session()->regenerate();
+
+    // If seller, send to onboarding flow; else homepage
+    if ($role === 'seller') {
+        return redirect()->route('seller.onboarding.info')
+            ->with('success', 'Akun dibuat sebagai penjual. Lengkapi informasi toko Anda.');
+    }
 
     return redirect()->route('homepage')->with('success', 'Akun berhasil dibuat! Selamat datang di UlosTa.');
 })->name('register.submit');
@@ -192,23 +203,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return view('admin.admindashboard');
     })->name('dashboard');
-    
+
     Route::get('/dashboard', function () {
         return view('admin.admindashboard');
     })->name('dashboard');
-    
+
     Route::get('/verifikasi-penjual', function () {
         return view('admin.verifikasi-penjual');
     })->name('verifikasi-penjual');
-    
+
     Route::get('/semua-penjual', function () {
         return view('admin.semua-penjual');
     })->name('semua-penjual');
-    
+
     Route::get('/penjual-tidak-aktif', function () {
         return view('admin.penjual-tidak-aktif');
     })->name('penjual-tidak-aktif');
-    
+
     Route::get('/laporan', function () {
         return view('admin.laporan');
     })->name('laporan');
@@ -219,25 +230,159 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.admindashboard');
     })->name('dashboard');
-    
+
     Route::get('/verifikasi-penjual', function () {
         return view('admin.verifikasi-penjual');
     })->name('verifikasi-penjual');
-    
+
     Route::get('/semua-penjual', function () {
         return view('admin.semua-penjual');
     })->name('semua-penjual');
-    
+
     Route::get('/penjual-tidak-aktif', function () {
         return view('admin.penjual-tidak-aktif');
     })->name('penjual-tidak-aktif');
-    
+
     Route::get('/laporan', function () {
         return view('admin.laporan');
     })->name('laporan');
 });
 
 // ========== Seller area (basic auth-protected routes) ==========
+// Seller onboarding: step 1 - store basic information
+Route::middleware('auth')->group(function () {
+    Route::get('/seller/onboarding/info', function () {
+        $defaults = [
+            'name' => Auth::user()->name ? (Auth::user()->name . ' Store') : 'Nama Toko',
+            'focus' => '',
+            'description' => '',
+        ];
+        $store = array_merge($defaults, session('seller_store', []));
+        return view('seller.onboarding.info', compact('store'));
+    })->name('seller.onboarding.info');
+
+    Route::post('/seller/onboarding/info', function (Request $request) {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'focus' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ], [
+            'name.required' => 'Nama toko wajib diisi.',
+        ]);
+
+        // Save into session so settings page stays in sync (no DB yet)
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
+        $existing = session('seller_store', []);
+        $store = array_merge([
+            'slug' => $existing['slug'] ?? $slug,
+            'logo' => $existing['logo'] ?? asset('image/ulos1.jpeg'),
+            'address' => $existing['address'] ?? '',
+            'phone' => $existing['phone'] ?? '',
+            'email' => $existing['email'] ?? (Auth::user()->email ?? ''),
+            'hours' => $existing['hours'] ?? '',
+        ], $data);
+        session(['seller_store' => $store]);
+
+        return redirect()->route('seller.onboarding.address')->with('success', 'Informasi toko tersimpan. Lanjut isi alamat.');
+    })->name('seller.onboarding.info.save');
+
+    // Seller onboarding: step 2 - store address information
+    Route::get('/seller/onboarding/address', function () {
+        $defaults = [
+            'province' => '',
+            'city' => '',
+            'district' => '',
+            'postal_code' => '',
+            'address' => '',
+        ];
+        $store = array_merge($defaults, session('seller_store', []));
+        return view('seller.onboarding.address', compact('store'));
+    })->name('seller.onboarding.address');
+
+    Route::post('/seller/onboarding/address', function (Request $request) {
+        $data = $request->validate([
+            'province' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+        ]);
+
+        $existing = session('seller_store', []);
+        $store = array_merge($existing, $data);
+        session(['seller_store' => $store]);
+
+        // Next step: bank information
+        return redirect()->route('seller.onboarding.bank')->with('success', 'Alamat toko tersimpan. Lanjut isi informasi rekening.');
+    })->name('seller.onboarding.address.save');
+
+    // Seller onboarding: step 3 - bank information
+    Route::get('/seller/onboarding/bank', function () {
+        $defaults = [
+            'bank_name' => '',
+            'bank_account' => '',
+            'bank_holder' => '',
+        ];
+        $store = array_merge($defaults, session('seller_store', []));
+        return view('seller.onboarding.bank', compact('store'));
+    })->name('seller.onboarding.bank');
+
+    Route::post('/seller/onboarding/bank', function (Request $request) {
+        $data = $request->validate([
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account' => 'nullable|string|max:50',
+            'bank_holder' => 'nullable|string|max:255',
+        ]);
+
+        $existing = session('seller_store', []);
+        $store = array_merge($existing, $data);
+        session(['seller_store' => $store]);
+
+        // Next step: go to verification
+        return redirect()->route('seller.onboarding.verify')->with('success', 'Informasi rekening tersimpan. Lanjut unggah dokumen verifikasi.');
+    })->name('seller.onboarding.bank.save');
+
+    // Seller onboarding: step 4 - verification documents
+    Route::get('/seller/onboarding/verify', function () {
+        $store = session('seller_store', []);
+        return view('seller.onboarding.verify', compact('store'));
+    })->name('seller.onboarding.verify');
+
+    Route::post('/seller/onboarding/verify', function (Request $request) {
+        $data = $request->validate([
+            'ktp_number' => ['required', 'regex:/^\d{16}$/'],
+            'ktp_photo' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'selfie_photo' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'store_photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ], [
+            'ktp_number.required' => 'Nomor KTP wajib diisi.',
+            'ktp_number.regex' => 'Nomor KTP harus 16 digit angka.',
+            'ktp_photo.required' => 'Foto KTP wajib diunggah.',
+            'selfie_photo.required' => 'Foto selfie dengan KTP wajib diunggah.',
+        ]);
+
+        $store = session('seller_store', []);
+
+        // Simpan file ke storage/app/private/seller_verifications/{userId}
+        $basePath = 'private/seller_verifications/' . \Illuminate\Support\Facades\Auth::id();
+        $saved = [];
+        if ($request->hasFile('ktp_photo')) {
+            $saved['ktp_photo'] = $request->file('ktp_photo')->store($basePath);
+        }
+        if ($request->hasFile('selfie_photo')) {
+            $saved['selfie_photo'] = $request->file('selfie_photo')->store($basePath);
+        }
+        if ($request->hasFile('store_photo')) {
+            $saved['store_photo'] = $request->file('store_photo')->store($basePath);
+        }
+
+        session(['seller_store' => array_merge($store, [
+            'ktp_number' => $data['ktp_number'],
+        ], $saved)]);
+
+        return redirect()->route('seller.settings')->with('success', 'Dokumen verifikasi berhasil diunggah.');
+    })->name('seller.onboarding.verify.save');
+});
 // Dashboard penjual
 Route::get('/seller/dashboard', function () {
     return view('seller.dashboard');
@@ -444,13 +589,41 @@ Route::get('/seller/laporan', function () {
 })->middleware('auth')->name('seller.reports.index');
 
 // Pengaturan toko (seller settings)
-Route::get('/seller/settings', function () {
-    // Data placeholder dapat digantikan dengan data toko nyata nanti
-    $store = [
-        'name' => Auth::user()->name ?? 'Nama Toko',
-        'slug' => 'toko-anda',
-        'description' => 'Deskripsi singkat toko ulos Anda.',
-        'logo' => asset('image/ulos1.jpeg'),
-    ];
-    return view('seller.settings', compact('store'));
-})->middleware('auth')->name('seller.settings');
+Route::middleware('auth')->group(function () {
+    Route::get('/seller/settings', function () {
+        $defaults = [
+            'name' => Auth::user()->name ? (Auth::user()->name . ' Store') : 'Nama Toko',
+            'slug' => 'toko-anda',
+            'description' => 'Deskripsi singkat toko ulos Anda.',
+            'logo' => asset('image/ulos1.jpeg'),
+            'address' => '',
+            'phone' => '',
+            'email' => Auth::user()->email ?? '',
+            'hours' => '',
+            'focus' => '',
+        ];
+        $store = array_merge($defaults, session('seller_store', []));
+        return view('seller.settings', compact('store'));
+    })->name('seller.settings');
+
+    Route::post('/seller/settings', function (Request $request) {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email',
+            'hours' => 'nullable|string|max:255',
+            'focus' => 'nullable|string|max:255',
+        ]);
+
+        $existing = session('seller_store', []);
+        $slug = $existing['slug'] ?? strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
+        $store = array_merge($existing, $data, [
+            'slug' => $slug,
+        ]);
+        session(['seller_store' => $store]);
+
+        return redirect()->route('seller.settings')->with('success', 'Pengaturan toko disimpan.');
+    })->name('seller.settings.save');
+});

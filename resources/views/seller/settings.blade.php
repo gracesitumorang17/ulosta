@@ -182,7 +182,13 @@
                 </div>
             </div>
 
-            <form method="POST" action="#" class="space-y-8">
+            @if (session('success'))
+                <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-md">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('seller.settings.save') }}" class="space-y-8">
                 @csrf
                 <!-- Informasi Dasar -->
                 <div class="form-card">
@@ -212,6 +218,11 @@
                                 <label class="form-label">Deskripsi</label>
                                 <textarea name="description" rows="4" class="input-soft resize-none">{{ $store['description'] ?? '' }}</textarea>
                                 <div class="field-helper">Gunakan deskripsi singkat yang informatif.</div>
+                            </div>
+                            <div>
+                                <label class="form-label">Fokus Toko</label>
+                                <input type="text" name="focus" value="{{ $store['focus'] ?? '' }}"
+                                    class="input-soft" />
                             </div>
                         </div>
                     </div>
