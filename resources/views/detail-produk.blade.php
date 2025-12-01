@@ -15,15 +15,19 @@
 
     <style>
         /* Brand red overrides */
-        :root { --brand-red: #AE0808; }
+        :root { 
+            --brand-red: #AE0808;
+            --brand-red-700: #8F0606;
+            --brand-red-800: #6F0404;
+        }
 
         .bg-red-600 { background-color: var(--brand-red) !important; }
-        .bg-red-700 { background-color: var(--brand-red) !important; }
-        .bg-red-800 { background-color: var(--brand-red) !important; }
+        .bg-red-700 { background-color: var(--brand-red-700) !important; }
+        .bg-red-800 { background-color: var(--brand-red-800) !important; }
         .bg-red-50 { background-color: rgba(174,8,8,0.05) !important; }
         .text-red-600 { color: var(--brand-red) !important; }
-        .hover\:bg-red-700:hover { background-color: var(--brand-red) !important; }
-        .hover\:bg-red-800:hover { background-color: var(--brand-red) !important; }
+        .hover\:bg-red-700:hover { background-color: var(--brand-red-800) !important; }
+        .hover\:bg-red-800:hover { background-color: #6F0404 !important; }
         .hover\:bg-red-50:hover { background-color: rgba(174,8,8,0.05) !important; }
         .focus\:ring-red-300:focus { --tw-ring-color: rgba(174,8,8,0.3) !important; }
         .border-red-600 { border-color: var(--brand-red) !important; }
@@ -122,7 +126,7 @@
                 <!-- Left: Logo -->
                 <div class="flex items-center">
                     <a href="{{ url('/') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-md bg-red-600 flex items-center justify-center text-white font-bold">
+                        <div class="w-10 h-10 rounded-md bg-red-700 flex items-center justify-center text-white font-bold">
                             U
                         </div>
                         <span class="text-lg font-semibold">UlosTa</span>
@@ -152,7 +156,7 @@
                 <div class="flex items-center gap-6">
                     @auth
                         <!-- Home -->
-                        <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
@@ -160,7 +164,7 @@
                         </a>
 
                         <!-- Wishlist -->
-                        <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
@@ -168,7 +172,7 @@
                         </a>
 
                         <!-- Keranjang -->
-                        <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                             </svg>
@@ -204,7 +208,7 @@
                         </div>
                     @else
                         <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
-                        <a href="{{ route('register') }}" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">Daftar</a>
+                        <a href="{{ route('register') }}" class="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition">Daftar</a>
                     @endauth
                 </div>
             </div>
@@ -354,7 +358,7 @@
                     <!-- Action Buttons -->
                     <div class="flex gap-3">
                         <button
-                            class="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition font-medium"
+                            class="flex-1 flex items-center justify-center gap-2 bg-red-700 text-white py-3 px-6 rounded-lg hover:bg-red-800 transition font-medium"
                             onclick="addToCart(this)"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
@@ -362,10 +366,10 @@
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                             </svg>
-                            Tambah ke Keranjang
+                            <span>Keranjang</span>
                         </button>
                         <button
                             class="flex-1 flex items-center justify-center bg-gray-900 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition font-medium"
@@ -402,34 +406,6 @@
                             </svg>
                             <span class="text-sm">Bagikan</span>
                         </button>
-                    </div>
-                </div>
-
-                <!-- Guarantees -->
-                <div class="grid grid-cols-3 gap-4 pt-6 border-t">
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">Garansi Uang Kembali</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">Gratis Ongkir</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">30 Hari Pengembalian</div>
                     </div>
                 </div>
             </div>
@@ -510,7 +486,7 @@
 
                             <div class="mt-4 pt-3 border-t border-gray-200">
                                 <button
-                                    class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm font-medium"
+                                    class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 transition text-sm font-medium"
                                     onclick="addToCart(this)"
                                     data-name="{{ $item['name'] }}"
                                     data-price="{{ $item['price'] }}"
@@ -614,7 +590,7 @@
                             <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
                                 <path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 111.414-1.414L8.414 12.172l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' />
                             </svg>
-        				</div>
+                        </div>
                         <div class="text-sm">
                             <div class="font-semibold text-gray-800">Berhasil ditambahkan</div>
                             <div class="text-gray-600" id="toast-text">Produk masuk ke keranjang.</div>
