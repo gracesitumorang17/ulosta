@@ -251,14 +251,7 @@
                                 </li>
                             </ul>
 
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Lihat semua jenis
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
+                           
 
                     <!-- Card: Fungsi Ulos -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition group relative overflow-hidden" data-aos="fade-left">
@@ -289,12 +282,7 @@
                                 </li>
                             </ul>
 
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Jelajahi fungsi ulos
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                        
                         </div>
                     </div>
                 </div>
@@ -355,27 +343,22 @@
                                 <div class="my-3 border-t border-dashed border-gray-200"></div>
 
                                 <!-- CTA buttons -->
-                                <div class="mt-auto grid grid-cols-2 gap-3">
-                                    <form method="GET" action="{{ route('tambah.ke.keranjang') }}" class="flex">
+                                <div class="mt-auto px-0 pb-2">
+                                    <form method="GET" action="{{ route('tambah.ke.keranjang') }}">
                                         <button type="submit"
                                             data-name="{{ $product['name'] }}"
                                             data-price="{{ $product['formatted_price'] }}"
-                                            class="btn-add-to-cart flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition text-sm font-medium">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
-                                                <circle cx="10" cy="20" r="1" />
-                                                <circle cx="18" cy="20" r="1" />
-                                            </svg>
-                                            Keranjang
+                                            class="btn-add-to-cart w-full flex items-center justify-center gap-2 px-0 py-3 bg-red-700 text-white rounded-b-xl hover:bg-red-800 transition text-base font-semibold shadow-sm">
+                                            <span class="flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+                                                    <circle cx="10" cy="20" r="1" />
+                                                    <circle cx="18" cy="20" r="1" />
+                                                </svg>
+                                                <span>Keranjang</span>
+                                            </span>
                                         </button>
                                     </form>
-                                    <a href="{{ route('produk.detail', $product['id']) }}" class="inline-flex items-center justify-center px-3 py-2 border border-red-700 text-red-700 rounded-md hover:bg-red-50 transition text-sm font-medium">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Detail
-                                    </a>
                                 </div>
                             </div>
                         </article>
