@@ -122,7 +122,7 @@ Route::get('/home', function () {
     return redirect()->route('homepage');
 })->middleware('auth')->name('home');
 
-// Product detail route (requires authentication)
+// Product detail route (no authentication required)
 Route::get('/produk/{id}', function ($id) {
     $product = Product::findOrFail($id);
     
@@ -147,7 +147,7 @@ Route::get('/produk/{id}', function ($id) {
     ];
 
     return view('detail-produk', ['product' => $productData]);
-})->middleware('auth')->name('produk.detail');
+})->name('produk.detail');
 // Cart routes (authenticated)
 Route::middleware('auth')->group(function () {
     Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
