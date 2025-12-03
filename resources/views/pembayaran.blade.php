@@ -68,9 +68,9 @@
 
         <form action="{{ route('checkout.process') }}" method="POST">
             @csrf
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <!-- Left Column - Form -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 order-2 lg:order-1">
                     <!-- Alamat Pengiriman -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex items-center gap-2 mb-6">
@@ -148,43 +148,6 @@
                         </div>
                     </div>
 
-                    <!-- Metode Pembayaran -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h2 class="text-lg font-semibold mb-4">Metode Pembayaran</h2>
-                        
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="mandiri" class="w-4 h-4 text-red-600" required />
-                                <span class="text-sm font-medium">Mandiri Virtual Account</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="bca" class="w-4 h-4 text-red-600" />
-                                <span class="text-sm font-medium">BCA Virtual Account</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="dana" class="w-4 h-4 text-red-600" />
-                                <span class="text-sm font-medium">Dana</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="gopay" class="w-4 h-4 text-red-600" />
-                                <span class="text-sm font-medium">GoPay</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="ovo" class="w-4 h-4 text-red-600" />
-                                <span class="text-sm font-medium">OVO</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                <input type="radio" name="metode_pembayaran" value="cod" class="w-4 h-4 text-red-600" />
-                                <span class="text-sm font-medium">Bayar di Tempat (COD)</span>
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Metode Pengiriman -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h2 class="text-lg font-semibold mb-4">Metode Pengiriman</h2>
@@ -200,10 +163,9 @@
                 </div>
 
                 <!-- Right Column - Order Summary -->
-                <div class="lg:col-span-1">
+                <div class="lg:col-span-1 order-1 lg:order-2">
                     <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
                         <h2 class="text-lg font-semibold mb-6">Ringkasan Pesanan</h2>
-
                         <!-- Product Items -->
                         <div class="space-y-4 mb-6 max-h-60 overflow-y-auto">
                             @foreach($items as $item)
@@ -219,14 +181,12 @@
                             </div>
                             @endforeach
                         </div>
-
                         <!-- Price Summary -->
                         <div class="border-t pt-4 space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Subtotal</span>
                                 <span class="font-medium">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
-
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Ongkir</span>
                                 <span class="font-medium">
@@ -237,13 +197,11 @@
                                     @endif
                                 </span>
                             </div>
-
                             <div class="border-t pt-3 flex justify-between text-base font-bold">
                                 <span>Total</span>
                                 <span class="text-red-600">Rp {{ number_format($total, 0, ',', '.') }}</span>
                             </div>
                         </div>
-
                         <!-- Buttons -->
                         <div class="mt-6 space-y-3">
                             <button 
@@ -252,7 +210,6 @@
                             >
                                 Buat Pesanan
                             </button>
-
                             <a 
                                 href="{{ route('keranjang') }}"
                                 class="block w-full text-center border border-red-600 text-red-600 py-3 rounded-lg hover:bg-red-50 transition font-medium"
@@ -262,6 +219,26 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Instruksi Pembayaran (rekening penjual) -->
+            <div class="max-w-4xl mx-auto mt-8">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold mb-4">Instruksi Pembayaran</h2>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-600 rounded">
+                        <h3 class="font-semibold text-red-700 mb-2">Transfer ke Rekening Penjual</h3>
+                        <p class="text-gray-700 text-sm mb-2">Silakan lakukan pembayaran ke nomor rekening berikut:</p>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold text-gray-800">Bank Mandiri</span>
+                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Rekening Penjual</span>
+                            </div>
+                            <div class="text-lg font-bold text-red-700 tracking-wider">1234 5678 9012</div>
+                            <div class="text-sm text-gray-600">a.n. Siti Manurung</div>
+                        </div>
+                        <p class="text-xs text-gray-500">Setelah melakukan pembayaran, pesanan Anda akan diproses oleh penjual.</p>
+                    </div>
+                </div>
+            </div>
             </div>
         </form>
     </main>
