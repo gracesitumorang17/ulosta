@@ -47,6 +47,14 @@ Route::post('/masuk', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
+        $role = Auth::user()->role;
+        // Redirect by role
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        if ($role === 'seller') {
+            return redirect()->route('seller.dashboard');
+        }
         return redirect()->route('homepage');
     }
 
@@ -199,7 +207,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', function () {
         return view('admin.admindashboard');
     })->name('dashboard');
@@ -225,28 +233,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     })->name('laporan');
 });
 
-// Admin routes
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.admindashboard');
-    })->name('dashboard');
-
-    Route::get('/verifikasi-penjual', function () {
-        return view('admin.verifikasi-penjual');
-    })->name('verifikasi-penjual');
-
-    Route::get('/semua-penjual', function () {
-        return view('admin.semua-penjual');
-    })->name('semua-penjual');
-
-    Route::get('/penjual-tidak-aktif', function () {
-        return view('admin.penjual-tidak-aktif');
-    })->name('penjual-tidak-aktif');
-
-    Route::get('/laporan', function () {
-        return view('admin.laporan');
-    })->name('laporan');
-});
+// (removed duplicate admin route group)
 
 // ========== Seller area (basic auth-protected routes) ==========
 // Seller onboarding: step 1 - store basic information
@@ -386,12 +373,12 @@ Route::middleware('auth')->group(function () {
 // Dashboard penjual
 Route::get('/seller/dashboard', function () {
     return view('seller.dashboard');
-})->middleware('auth')->name('seller.dashboard');
+})->middleware(['auth', 'role:seller'])->name('seller.dashboard');
 
 // Halaman daftar produk penjual
 Route::get('/seller/products', function () {
     return view('seller.products.index');
-})->middleware('auth')->name('seller.products.index');
+})->middleware(['auth', 'role:seller'])->name('seller.products.index');
 
 // Halaman tambah produk (form kosong mirip edit)
 Route::get('/seller/products/create', function () {
@@ -411,7 +398,7 @@ Route::get('/seller/products/create', function () {
     $slugValue = null; // belum ada slug sampai disimpan
     $uploaded = [];
     return view('seller.products.create', compact('product', 'slugValue', 'uploaded'));
-})->middleware('auth')->name('seller.products.create');
+})->middleware(['auth', 'role:seller'])->name('seller.products.create');
 
 // Simpan produk baru (demo: ke session + simpan gambar)
 Route::post('/seller/products', function (Request $request) {
@@ -452,7 +439,7 @@ Route::post('/seller/products', function (Request $request) {
     ];
     session()->put('custom_products', $custom);
     return redirect()->route('seller.products.edit', $slug)->with('success', 'Produk baru dibuat (demo).');
-})->middleware('auth')->name('seller.products.store');
+})->middleware(['auth', 'role:seller'])->name('seller.products.store');
 
 // Halaman edit produk (placeholder berdasarkan slug)
 Route::get('/seller/products/{slug}/edit', function ($slug) {
@@ -541,7 +528,7 @@ Route::get('/seller/products/{slug}/edit', function ($slug) {
     }
     $slugValue = $slug;
     return view('seller.products.edit', compact('product', 'slugValue', 'uploaded'));
-})->middleware('auth')->name('seller.products.edit');
+})->middleware(['auth', 'role:seller'])->name('seller.products.edit');
 
 // Upload gambar produk (multiple)
 Route::post('/seller/products/{slug}/images', function (Request $request, $slug) {
@@ -563,7 +550,7 @@ Route::post('/seller/products/{slug}/images', function (Request $request, $slug)
     }
 
     return redirect()->route('seller.products.edit', $slug)->with('success', 'Gambar berhasil diupload.');
-})->middleware('auth')->name('seller.products.images.upload');
+})->middleware(['auth', 'role:seller'])->name('seller.products.images.upload');
 
 // Hapus produk (demo: hanya menandai di session + hapus gambar yang diupload)
 Route::delete('/seller/products/{slug}', function ($slug) {
@@ -576,20 +563,20 @@ Route::delete('/seller/products/{slug}', function ($slug) {
     // Hapus direktori gambar jika ada
     Storage::deleteDirectory('public/products/' . $slug);
     return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus (demo).');
-})->middleware('auth')->name('seller.products.destroy');
+})->middleware(['auth', 'role:seller'])->name('seller.products.destroy');
 
 // Daftar pesanan
 Route::get('/seller/orders', function () {
     return view('seller.orders.index');
-})->middleware('auth')->name('seller.orders.index');
+})->middleware(['auth', 'role:seller'])->name('seller.orders.index');
 
 // Laporan penjualan (seller reports)
 Route::get('/seller/laporan', function () {
     return view('seller.reports.index');
-})->middleware('auth')->name('seller.reports.index');
+})->middleware(['auth', 'role:seller'])->name('seller.reports.index');
 
 // Pengaturan toko (seller settings)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/seller/settings', function () {
         $defaults = [
             'name' => Auth::user()->name ? (Auth::user()->name . ' Store') : 'Nama Toko',

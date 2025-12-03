@@ -10,13 +10,38 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // Get cart count for authenticated user
+        // If authenticated, show role-specific dashboards
+        if (Auth::check()) {
+            $role = Auth::user()->role ?? 'buyer';
+            if ($role === 'admin') {
+                return view('admin.admindashboard');
+            }
+            if ($role === 'seller') {
+                return view('seller.dashboard');
+            }
+        }
+
+        // Get cart/wishlist counts safely without assuming relations exist
         $cartCount = 0;
         $wishlistCount = 0;
-        
+
         if (Auth::check()) {
-            $cartCount = Auth::user()->cartItems()->sum('quantity');
-            $wishlistCount = Auth::user()->wishlists()->count();
+            $user = Auth::user();
+            // If relations exist, use them; otherwise keep defaults
+            if (method_exists($user, 'cartItems')) {
+                try {
+                    $cartCount = (int) $user->cartItems()->sum('quantity');
+                } catch (\Throwable $e) {
+                    $cartCount = 0;
+                }
+            }
+            if (method_exists($user, 'wishlists')) {
+                try {
+                    $wishlistCount = (int) $user->wishlists()->count();
+                } catch (\Throwable $e) {
+                    $wishlistCount = 0;
+                }
+            }
         }
 
         // Get search query and filters
@@ -45,7 +70,7 @@ class HomeController extends Controller
         $productsData = $query->orderBy('created_at', 'desc')->get();
 
         // Format products for view
-        $products = $productsData->map(function($product) {
+        $products = $productsData->map(function ($product) {
             return [
                 'id' => $product->id,
                 'name' => $product->name,
