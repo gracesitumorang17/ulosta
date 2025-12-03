@@ -400,12 +400,7 @@
                                     Ulos Sibolang
                                 </li>
                                                     </ul>
-                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
-                                                        Lihat semua jenis
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                        </svg>
-                                                    </a>
+                                                    
                         </div>
                     </div>
 
@@ -434,13 +429,7 @@
                                     <span class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                                     Kematian
                                 </li>
-                                                    </ul>
-                                                    <a href="#" class="inline-flex items-center text-red-600 font-semibold mt-2">
-                                                        Jelajahi fungsi ulos
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                        </svg>
-                                                    </a>
+                                                    
                         </div>
                     </div>
                 </div>
