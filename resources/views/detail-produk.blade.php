@@ -265,7 +265,6 @@
                 <!-- Category Tags -->
                 <div class="flex gap-2">
                     <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">{{ $product['category'] ?? 'Ragihotang' }}</span>
-                    <span class="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">{{ $product['function'] ?? 'Pernikahan' }}</span>
                 </div>
 
                 <!-- Product Title -->
@@ -630,6 +629,10 @@
 
         // Add to cart via AJAX then go to keranjang
         async function addToCart(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
             const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             let qty = 1;
             const qtyEl = document.getElementById('quantity');
@@ -673,6 +676,10 @@
 
         // Wishlist toggle via database
         async function toggleWishlist(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
             const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             const icon = btn.querySelector('svg');
             try {
@@ -712,6 +719,10 @@
 
         // Buy now - add to cart and redirect to checkout
         async function buyNow(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
             const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             let qty = 1;
             const qtyEl = document.getElementById('quantity');
