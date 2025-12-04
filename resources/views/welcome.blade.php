@@ -251,12 +251,7 @@
                                 </li>
                             </ul>
 
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Lihat semua jenis
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                            
                         </div>
                     </div>
 
@@ -289,12 +284,7 @@
                                 </li>
                             </ul>
 
-                            <a href="#" class="inline-flex items-center text-red-600 font-medium group-hover:underline">
-                                Jelajahi fungsi ulos
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                            
                         </div>
                     </div>
                 </div>
@@ -378,6 +368,7 @@
                                             Keranjang
                                         </button>
                                     </form>
+                                    @auth
                                     <a href="{{ route('produk.detail', $product['id']) }}" class="inline-flex items-center justify-center px-3 py-2 border border-red-700 text-red-700 rounded-md hover:bg-red-50 transition text-sm font-medium">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -385,6 +376,15 @@
                                         </svg>
                                         Detail
                                     </a>
+                                    @else
+                                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-3 py-2 border border-red-700 text-red-700 rounded-md hover:bg-red-50 transition text-sm font-medium">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Detail
+                                    </a>
+                                    @endauth
                                 </div>
                             </div>
                         </article>

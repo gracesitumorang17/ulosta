@@ -1,0 +1,88 @@
+<!-- Seller Navbar Partial -->
+<header class="bg-white shadow-sm border-b sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <!-- Left: Logo -->
+            <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-bold text-lg">U</span>
+                </div>
+                <span class="font-semibold text-lg">UlosTa Seller</span>
+            </a>
+
+            <!-- Center Nav -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                @php
+                    $nav = [
+                        [
+                            'route' => 'seller.dashboard',
+                            'label' => 'Dashboard',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10V8l2-2h11l2 2v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 21V10h14v11" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6" />',
+                        ],
+                        [
+                            'route' => 'seller.products.index',
+                            'label' => 'Produk',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" d="M21 16.5V7.5a1 1 0 0 0-.555-.832l-8-4a1 1 0 0 0-.89 0l-8 4A1 1 0 0 0 3 7.5v9a1 1 0 0 0 .555.832l8 4a1 1 0 0 0 .89 0l8-4A1 1 0 0 0 21 16.5ZM3.5 7.75l8.5 4.25 8.5-4.25M12 12v9" />',
+                        ],
+                        [
+                            'route' => 'seller.orders.index',
+                            'label' => 'Pesanan',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l3 12h10l3-8H6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />',
+                        ],
+                        [
+                            'route' => null,
+                            'label' => 'Laporan',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 3 3 5-5" />',
+                        ],
+                    ];
+                @endphp
+                @foreach ($nav as $item)
+                    @php $active = $item['route'] && request()->routeIs($item['route']); @endphp
+                    <a @if ($item['route']) href="{{ route($item['route']) }}" @else href="#" @endif
+                        class="flex items-center gap-2 {{ $active ? 'text-red-600' : 'text-gray-700 hover:text-red-600' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="1.5">{!! $item['icon'] !!}</svg>
+                        <span>{{ $item['label'] }}</span>
+                    </a>
+                @endforeach
+            </nav>
+
+            <!-- Right -->
+            <div class="flex items-center gap-3">
+                <a href="{{ route('homepage') }}"
+                    class="inline-flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 6 9 12l6 6" />
+                    </svg>
+                    <span>Kembali ke Toko</span>
+                </a>
+                <div class="relative" x-data="{ open: false }" x-on:keydown.escape="open=false">
+                    <button x-on:click="open=!open"
+                        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                        aria-haspopup="true" :aria-expanded="open ? 'true' : 'false'">
+                        <span class="sr-only">Profil</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12Zm0 1.5c-3.038 0-9 1.523-9 4.5v1.5h18V18c0-2.977-5.962-4.5-9-4.5Z" />
+                        </svg>
+                    </button>
+                    <div x-cloak x-show="open" x-on:click.outside="open=false"
+                        class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 text-sm">
+                        <div class="px-4 py-2 text-gray-700 font-medium">{{ Auth::user()->name ?? 'Pengguna' }}</div>
+                        <div class="border-t my-2"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
