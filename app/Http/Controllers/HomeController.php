@@ -10,18 +10,18 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // If authenticated, show role-specific dashboards
-        if (Auth::check()) {
-            $role = Auth::user()->role ?? 'buyer';
-            if ($role === 'admin') {
-                return view('admin.admindashboard');
-            }
-            if ($role === 'seller') {
-                return view('seller.dashboard');
-            }
+        // If user is admin, redirect directly to admin dashboard
+        if (Auth::check() && (Auth::user()->role ?? '') === 'admin') {
+            return redirect()->route('admin.dashboard');
         }
-
-        // Get cart/wishlist counts safely without assuming relations exist
+        
+        // If user is seller, redirect to seller dashboard
+        if (Auth::check() && (Auth::user()->role ?? '') === 'seller') {
+            return redirect()->route('seller.dashboard');
+        }
+        
+        // For buyers (logged in users) or guests, show appropriate homepage
+        // Get cart/wishlist counts for logged in users
         $cartCount = 0;
         $wishlistCount = 0;
 
@@ -43,7 +43,7 @@ class HomeController extends Controller
                 }
             }
         }
-
+        
         // Get search query and filters
         $search = $request->input('q');
         $jenisFilter = $request->input('jenis');
@@ -71,19 +71,29 @@ class HomeController extends Controller
 
         // Format products for view
         $products = $productsData->map(function ($product) {
+            $originalPrice = $product->formatted_original_price;
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'tag' => $product->tag,
                 'price' => $product->formatted_price,
-                'original' => $product->formatted_original_price ?? $product->formatted_price,
+                'original_price' => $originalPrice,
+                'original' => $originalPrice ?: $product->formatted_price,
                 'image' => $product->image,
+                'description' => $product->description,
                 'desc' => $product->description,
                 'category' => $product->category ?? '',
                 'function' => $product->function ?? '',
             ];
         })->toArray();
 
-        return view('welcomelogin', compact('cartCount', 'wishlistCount', 'products', 'search', 'jenisFilter', 'fungsiFilter'));
+        // Return appropriate view based on authentication status
+        if (Auth::check()) {
+            // For logged in users (buyers), use welcomelogin view with cart/wishlist data
+            return view('welcomelogin', compact('cartCount', 'wishlistCount', 'products', 'search', 'jenisFilter', 'fungsiFilter'));
+        } else {
+            // For guests, use welcome view
+            return view('welcome', compact('products', 'search', 'jenisFilter', 'fungsiFilter'));
+        }
     }
 }

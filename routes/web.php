@@ -11,13 +11,21 @@ use App\Http\Controllers\CheckoutController;
 use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 
-// Root: if authenticated go to /homepage, else public welcome landing
+// Root: redirect based on authentication and role
 Route::get('/', function () {
     if (Auth::check()) {
+        $role = Auth::user()->role ?? 'buyer';
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        if ($role === 'seller') {
+            return redirect()->route('seller.dashboard');
+        }
+        // For buyers, go to homepage
         return redirect()->route('homepage');
     }
 
-    // Fetch a few active, in-stock products for the public landing page
+    // For guests, show welcome page
     $products = Product::active()->inStock()->latest()->take(9)->get()->map(function ($p) {
         return [
             'id' => $p->id,
@@ -38,6 +46,8 @@ Route::get('/', function () {
 Route::get('/masuk', function () {
     return view('masuk');
 })->name('masuk');
+
+// logout route - moved to line 150 to avoid duplication
 
 // handle login submission
 Route::post('/masuk', function (Request $request) {
