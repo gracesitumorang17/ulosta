@@ -580,10 +580,8 @@
                                         data-image="{{ $p['image'] }}"
                                         class="btn-add-to-cart inline-flex items-center justify-center gap-2 px-4 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-shadow shadow-sm text-sm font-medium h-11"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
-                                            <circle cx="10" cy="20" r="1" />
-                                            <circle cx="18" cy="20" r="1" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                         </svg>
                                         <span>Keranjang</span>
                                     </button>

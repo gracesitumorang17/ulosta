@@ -317,7 +317,16 @@
                                 </div>
 
                                 <!-- Favorite heart (top-right) -->
-                                <button class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition" aria-label="Simpan favorit">
+                                <button 
+                                    class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition" 
+                                    aria-label="Simpan favorit"
+                                    onclick="toggleWishlist(event, this)"
+                                    data-name="{{ $product['name'] ?? '' }}"
+                                    data-price="{{ $product['price'] ?? '' }}"
+                                    data-original="{{ $product['original_price'] ?? '' }}"
+                                    data-tag="{{ $product['tag'] ?? '' }}"
+                                    data-image="{{ $product['image'] ?? '' }}"
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
                                     </svg>
@@ -453,6 +462,29 @@
     <script>
         // AOS init
         AOS.init({ duration: 700, once: true });
+
+        // Toggle wishlist function
+        function toggleWishlist(event, btn) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Check if user is authenticated
+            const isAuthenticated = @json(Auth::check());
+            if (!isAuthenticated) {
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            }
+
+            // Add to wishlist animation
+            btn.classList.add('scale-110');
+            setTimeout(() => btn.classList.remove('scale-110'), 200);
+            
+            const icon = btn.querySelector('svg');
+            icon.classList.toggle('fill-current');
+            icon.classList.toggle('text-red-600');
+            
+            alert('Produk ditambahkan ke wishlist');
+        }
 
         // Add-to-cart handler: only intercept for authenticated users.
         // Guests should follow the link (which redirects them to login) without any popup.

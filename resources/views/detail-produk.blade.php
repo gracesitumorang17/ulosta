@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{{ $product['name'] ?? 'Detail Produk' }} - UlosTa</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,15 +15,19 @@
 
     <style>
         /* Brand red overrides */
-        :root { --brand-red: #AE0808; }
+        :root { 
+            --brand-red: #AE0808;
+            --brand-red-700: #8F0606;
+            --brand-red-800: #6F0404;
+        }
 
         .bg-red-600 { background-color: var(--brand-red) !important; }
-        .bg-red-700 { background-color: var(--brand-red) !important; }
-        .bg-red-800 { background-color: var(--brand-red) !important; }
+        .bg-red-700 { background-color: var(--brand-red-700) !important; }
+        .bg-red-800 { background-color: var(--brand-red-800) !important; }
         .bg-red-50 { background-color: rgba(174,8,8,0.05) !important; }
         .text-red-600 { color: var(--brand-red) !important; }
-        .hover\:bg-red-700:hover { background-color: var(--brand-red) !important; }
-        .hover\:bg-red-800:hover { background-color: var(--brand-red) !important; }
+        .hover\:bg-red-700:hover { background-color: var(--brand-red-800) !important; }
+        .hover\:bg-red-800:hover { background-color: #6F0404 !important; }
         .hover\:bg-red-50:hover { background-color: rgba(174,8,8,0.05) !important; }
         .focus\:ring-red-300:focus { --tw-ring-color: rgba(174,8,8,0.3) !important; }
         .border-red-600 { border-color: var(--brand-red) !important; }
@@ -121,7 +126,7 @@
                 <!-- Left: Logo -->
                 <div class="flex items-center">
                     <a href="{{ url('/') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-md bg-red-600 flex items-center justify-center text-white font-bold">
+                        <div class="w-10 h-10 rounded-md bg-red-700 flex items-center justify-center text-white font-bold">
                             U
                         </div>
                         <span class="text-lg font-semibold">UlosTa</span>
@@ -151,7 +156,7 @@
                 <div class="flex items-center gap-6">
                     @auth
                         <!-- Home -->
-                        <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
@@ -159,7 +164,7 @@
                         </a>
 
                         <!-- Wishlist -->
-                        <a href="#" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
@@ -167,7 +172,7 @@
                         </a>
 
                         <!-- Keranjang -->
-                        <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition">
+                        <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                             </svg>
@@ -203,7 +208,7 @@
                         </div>
                     @else
                         <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
-                        <a href="{{ route('register') }}" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">Daftar</a>
+                        <a href="{{ route('register') }}" class="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition">Daftar</a>
                     @endauth
                 </div>
             </div>
@@ -260,7 +265,6 @@
                 <!-- Category Tags -->
                 <div class="flex gap-2">
                     <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">{{ $product['category'] ?? 'Ragihotang' }}</span>
-                    <span class="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">{{ $product['function'] ?? 'Pernikahan' }}</span>
                 </div>
 
                 <!-- Product Title -->
@@ -352,20 +356,44 @@
 
                     <!-- Action Buttons -->
                     <div class="flex gap-3">
-                        <button class="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition font-medium" onclick="addToCart()">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+                        <button
+                            class="flex-1 flex items-center justify-center gap-2 bg-red-700 text-white py-3 px-6 rounded-lg hover:bg-red-800 transition font-medium"
+                            onclick="addToCart(this)"
+                            data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
+                            data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
+                            data-original="{{ $product['original_price'] ?? '' }}"
+                            data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
+                            data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                             </svg>
-                            Tambah ke Keranjang
+                            <span>Keranjang</span>
                         </button>
-                        <button class="bg-gray-900 text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition font-medium" onclick="buyNow()">
-                            Buy Now
+                        <button
+                            class="flex-1 flex items-center justify-center bg-gray-900 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition font-medium"
+                            onclick="buyNow(this)"
+                            data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
+                            data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
+                            data-original="{{ $product['original_price'] ?? '' }}"
+                            data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
+                            data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
+                        >
+                            Beli Sekarang
                         </button>
                     </div>
 
                     <!-- Wishlist and Share -->
                     <div class="flex gap-3">
-                        <button class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition" onclick="toggleWishlist()">
+                        <button
+                            class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition"
+                            onclick="toggleWishlist(this)"
+                            data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
+                            data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
+                            data-original="{{ $product['original_price'] ?? '' }}"
+                            data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
+                            data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
+                        >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
@@ -377,34 +405,6 @@
                             </svg>
                             <span class="text-sm">Bagikan</span>
                         </button>
-                    </div>
-                </div>
-
-                <!-- Guarantees -->
-                <div class="grid grid-cols-3 gap-4 pt-6 border-t">
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">Garansi Uang Kembali</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">Gratis Ongkir</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="text-xs font-medium text-gray-600">30 Hari Pengembalian</div>
                     </div>
                 </div>
             </div>
@@ -456,7 +456,16 @@
                             <div class="absolute left-3 top-3">
                                 <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">{{ $item['badge'] }}</span>
                             </div>
-                            <button class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition">
+                            <button
+                                class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition"
+                                onclick="toggleWishlist(this)"
+                                data-name="{{ $item['name'] }}"
+                                data-price="{{ $item['price'] }}"
+                                data-original="{{ $item['original'] }}"
+                                data-tag="{{ $item['tag'] }}"
+                                data-image="{{ $item['image'] }}"
+                                aria-label="Tambah ke wishlist"
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
                                 </svg>
@@ -475,7 +484,15 @@
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-gray-200">
-                                <button class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                                <button
+                                    class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 transition text-sm font-medium"
+                                    onclick="addToCart(this)"
+                                    data-name="{{ $item['name'] }}"
+                                    data-price="{{ $item['price'] }}"
+                                    data-original="{{ $item['original'] }}"
+                                    data-tag="{{ $item['tag'] }}"
+                                    data-image="{{ $item['image'] }}"
+                                >
                                     Tambah ke Keranjang
                                 </button>
                             </div>
@@ -540,6 +557,39 @@
 
     <!-- Scripts -->
     <script>
+        // Toast helpers
+        function ensureToast() {
+            let toast = document.getElementById('toast-add-cart');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-add-cart';
+                toast.className = 'fixed top-5 right-5 z-50 hidden';
+                toast.innerHTML = `
+                    <div class="bg-white/95 backdrop-blur border border-gray-200 shadow-xl rounded-lg px-4 py-3 flex items-start gap-3 min-w-[280px]">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700">
+                            <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                                <path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 111.414-1.414L8.414 12.172l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' />
+                            </svg>
+                        </div>
+                        <div class="text-sm">
+                            <div class="font-semibold text-gray-800">Berhasil ditambahkan</div>
+                            <div class="text-gray-600" id="toast-text">Produk masuk ke keranjang.</div>
+                        </div>
+                        <button class="ml-2 text-gray-400 hover:text-gray-600" aria-label="Tutup" onclick="document.getElementById('toast-add-cart').classList.add('hidden')">×</button>
+                    </div>`;
+                document.body.appendChild(toast);
+            }
+            return toast;
+        }
+
+        function showToast(message) {
+            const toast = ensureToast();
+            toast.querySelector('#toast-text').textContent = message;
+            toast.classList.remove('hidden');
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
         // AOS init
         AOS.init({ duration: 700, once: true });
 
@@ -577,45 +627,140 @@
             }
         }
 
-        // Add to cart functionality
-        function addToCart() {
-            const quantity = document.getElementById('quantity').value;
-            const productName = '{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}';
-            
-            // Animation effect
-            event.target.classList.add('transform', 'scale-95');
-            setTimeout(() => event.target.classList.remove('scale-95'), 150);
-            
-            // Show success message
-            alert(`${productName} (${quantity} pcs) berhasil ditambahkan ke keranjang!`);
-        }
+        // Add to cart via AJAX then go to keranjang
+        async function addToCart(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let qty = 1;
+            const qtyEl = document.getElementById('quantity');
+            if (qtyEl) {
+                qty = parseInt(qtyEl.value) || 1;
+            }
+            const payload = {
+                name: btn.dataset.name,
+                price: btn.dataset.price,
+                original: btn.dataset.original,
+                tag: btn.dataset.tag,
+                image: btn.dataset.image,
+                qty: qty
+            };
 
-        // Buy now functionality  
-        function buyNow() {
-            const quantity = document.getElementById('quantity').value;
-            const productName = '{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}';
-            
-            // Simulate checkout process
-            if (confirm(`Lanjut ke pembayaran untuk ${productName} (${quantity} pcs)?`)) {
-                // Redirect to checkout page
-                window.location.href = '/checkout';
+            btn.classList.add('transform', 'scale-95');
+            setTimeout(() => btn.classList.remove('scale-95'), 150);
+
+            try {
+                const res = await fetch("{{ route('cart.add') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                // Jika tidak JSON (misal redirect ke login), arahkan ke halaman masuk
+                const ct = res.headers.get('content-type') || '';
+                if (!ct.includes('application/json')) {
+                    window.location.href = "{{ route('masuk') }}";
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`${payload.name} (${qty} pcs) berhasil ditambahkan ke keranjang!`);
+                } else {
+                    alert('Gagal menambahkan ke keranjang');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan saat menambahkan ke keranjang');
             }
         }
 
-        // Wishlist toggle
-        function toggleWishlist() {
-            const button = event.currentTarget;
-            const icon = button.querySelector('svg');
-            
-            // Toggle filled state
-            if (icon.classList.contains('fill-current')) {
-                icon.classList.remove('fill-current', 'text-red-600');
-                icon.classList.add('text-gray-600');
-                alert('Produk dihapus dari wishlist');
-            } else {
-                icon.classList.add('fill-current', 'text-red-600');
-                icon.classList.remove('text-gray-600');
-                alert('Produk ditambahkan ke wishlist');
+        // Wishlist toggle via database
+        async function toggleWishlist(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const icon = btn.querySelector('svg');
+            try {
+                const res = await fetch("{{ route('wishlist.add') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        name: btn.dataset.name,
+                        price: btn.dataset.price,
+                        original: btn.dataset.original,
+                        tag: btn.dataset.tag,
+                        image: btn.dataset.image
+                    })
+                });
+                const ct = res.headers.get('content-type') || '';
+                if (!ct.includes('application/json')) {
+                    window.location.href = "{{ route('masuk') }}";
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    // Toggle icon state
+                    if (data.action === 'added') {
+                        icon.classList.add('fill-current', 'text-red-600');
+                        icon.classList.remove('text-gray-600');
+                    } else {
+                        icon.classList.remove('fill-current', 'text-red-600');
+                        icon.classList.add('text-gray-600');
+                    }
+                } else {
+                    alert('Gagal memperbarui wishlist');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan saat memperbarui wishlist');
+            }
+        }
+
+        // Buy now - add to cart and redirect to checkout
+        async function buyNow(btn) {
+            @guest
+                window.location.href = "{{ route('masuk') }}";
+                return;
+            @endguest
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let qty = 1;
+            const qtyEl = document.getElementById('quantity');
+            if (qtyEl) {
+                qty = parseInt(qtyEl.value) || 1;
+            }
+            const payload = {
+                name: btn.dataset.name,
+                price: btn.dataset.price,
+                original: btn.dataset.original,
+                tag: btn.dataset.tag,
+                image: btn.dataset.image,
+                qty: qty
+            };
+
+            btn.classList.add('transform', 'scale-95');
+            setTimeout(() => btn.classList.remove('scale-95'), 150);
+
+            try {
+                const res = await fetch("{{ route('cart.add') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const ct = res.headers.get('content-type') || '';
+                if (!ct.includes('application/json')) {
+                    window.location.href = "{{ route('masuk') }}";
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    // Redirect langsung ke checkout
+                    window.location.href = "{{ route('checkout') }}";
+                } else {
+                    alert('Gagal menambahkan ke keranjang');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan saat memproses pesanan');
             }
         }
 
