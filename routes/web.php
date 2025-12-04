@@ -25,8 +25,9 @@ Route::get('/', function () {
             'description' => $p->description,
             'image' => $p->image,
             'tag' => $p->tag,
-            'formatted_price' => $p->formatted_price,
-            'formatted_original_price' => $p->formatted_original_price,
+            'price' => $p->formatted_price,
+            'original_price' => $p->formatted_original_price,
+            'desc' => $p->description,
         ];
     });
 
