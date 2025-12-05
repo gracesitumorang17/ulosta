@@ -79,4 +79,10 @@ class CartController extends Controller
         CartItem::where('user_id', Auth::id())->delete();
         return back()->with('success', 'Keranjang berhasil dikosongkan');
     }
+
+    public function getCount()
+    {
+        $count = CartItem::where('user_id', Auth::id())->sum('quantity');
+        return response()->json(['count' => $count]);
+    }
 }
