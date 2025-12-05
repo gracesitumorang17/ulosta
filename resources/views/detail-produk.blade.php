@@ -50,10 +50,15 @@
             background: white;
             border-radius: 0.5rem;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
             min-width: 200px;
             z-index: 50;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s, transform 0.2s;
         }
-        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown:hover .dropdown-menu { display: block; opacity: 1; transform: translateY(0); }
+        .dropdown-menu.show { display: block !important; opacity: 1 !important; transform: translateY(0) !important; }
 
         /* Thumbnail styles */
         .thumbnail-container {
@@ -164,39 +169,51 @@
                         </a>
 
                         <!-- Wishlist -->
-                        <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                        <a href="{{ route('wishlist.index') }}" class="relative flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                @php
+                                    $wishlistCount = Auth::check() ? \App\Models\Wishlist::where('user_id', Auth::id())->count() : 0;
+                                @endphp
+                                <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
+                            </div>
                             <span class="text-sm font-medium">Wishlist</span>
                         </a>
 
                         <!-- Keranjang -->
-                        <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
-                            </svg>
+                        <a href="{{ route('keranjang') }}" class="relative flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                                </svg>
+                                @php
+                                    $cartCount = Auth::check() ? \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity') : 0;
+                                @endphp
+                                <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
+                            </div>
                             <span class="text-sm font-medium">Keranjang</span>
                         </a>
 
                         <!-- Profile Dropdown -->
-                        <div class="dropdown">
-                            <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
+                        <div class="dropdown" id="profile-dropdown">
+                            <button id="profile-btn" class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition" onclick="toggleProfileDropdown(event)">
                                 <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=AE0808&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
                             
-                            <div class="dropdown-menu">
+                            <div class="dropdown-menu" id="profile-menu">
                                 <div class="py-2">
                                     <div class="px-4 py-2 border-b border-gray-100">
                                         <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'User' }}</p>
                                         <p class="text-xs text-gray-500">{{ Auth::user()->email ?? 'user@example.com' }}</p>
                                     </div>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Profil Saya</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Pesanan Saya</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Wishlist</a>
+                                    <a href="{{ route('profil') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Profil Saya</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition" onclick="alert('Fitur Pesanan akan segera hadir!'); return false;">Pesanan Saya</a>
+                                    <a href="{{ route('wishlist.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Wishlist</a>
                                     <div class="border-t border-gray-100 mt-2 pt-2">
                                         <form action="{{ route('logout') }}" method="POST">
                                             @csrf
@@ -359,6 +376,7 @@
                         <button
                             class="flex-1 flex items-center justify-center gap-2 bg-red-700 text-white py-3 px-6 rounded-lg hover:bg-red-800 transition font-medium"
                             onclick="addToCart(this)"
+                            data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
                             data-original="{{ $product['original_price'] ?? '' }}"
@@ -373,6 +391,7 @@
                         <button
                             class="flex-1 flex items-center justify-center bg-gray-900 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition font-medium"
                             onclick="buyNow(this)"
+                            data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
                             data-original="{{ $product['original_price'] ?? '' }}"
@@ -388,6 +407,7 @@
                         <button
                             class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition"
                             onclick="toggleWishlist(this)"
+                            data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
                             data-original="{{ $product['original_price'] ?? '' }}"
@@ -418,80 +438,55 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @php
-                    $recommendations = [
-                        [
-                            'name' => 'Ulos Bintang Maratur',
-                            'tag' => 'Kelahiran', 
-                            'price' => 'Rp 750.000',
-                            'original' => 'Rp 900.000',
-                            'image' => 'Ulos Bintang Maratur.jpg',
-                            'badge' => 'Terlaris'
-                        ],
-                        [
-                            'name' => 'Ulos Ragidup', 
-                            'tag' => 'Pernikahan',
-                            'price' => 'Rp 850.000', 
-                            'original' => 'Rp 1.000.000',
-                            'image' => 'Ulos Ragi Hotang.jpg',
-                            'badge' => 'Terlaris'
-                        ],
-                        [
-                            'name' => 'Ulos Bintang Maratur',
-                            'tag' => 'Kelahiran',
-                            'price' => 'Rp 750.000',
-                            'original' => 'Rp 900.000', 
-                            'image' => 'Ulos Bintang Maratur.jpg',
-                            'badge' => 'Terlaris'
-                        ]
-                    ];
-                @endphp
-
-                @foreach($recommendations as $index => $item)
+                @foreach($recommendations ?? [] as $index => $rec)
                     <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group" data-aos="fade-up" data-aos-delay="{{ $index * 100 }}">
-                        <div class="relative">
+                        <a href="{{ route('produk.detail', $rec->id) }}" class="block relative">
                             <div class="ratio-4-3">
-                                <img src="{{ asset('image/' . $item['image']) }}" alt="{{ $item['name'] }}">
+                                <img src="{{ $rec->image ? asset('image/' . $rec->image) : asset('image/default-product.jpg') }}" alt="{{ $rec->name }}">
                             </div>
                             <div class="absolute left-3 top-3">
-                                <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">{{ $item['badge'] }}</span>
+                                <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">Terlaris</span>
                             </div>
                             <button
-                                class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition"
-                                onclick="toggleWishlist(this)"
-                                data-name="{{ $item['name'] }}"
-                                data-price="{{ $item['price'] }}"
-                                data-original="{{ $item['original'] }}"
-                                data-tag="{{ $item['tag'] }}"
-                                data-image="{{ $item['image'] }}"
+                                class="absolute right-3 top-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition z-10"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(this)"
+                                data-product-id="{{ $rec->id }}"
+                                data-name="{{ $rec->name }}"
+                                data-price="{{ $rec->formatted_price }}"
+                                data-original="{{ $rec->formatted_original_price }}"
+                                data-tag="{{ $rec->tag ?? '' }}"
+                                data-image="{{ $rec->image }}"
                                 aria-label="Tambah ke wishlist"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
                                 </svg>
                             </button>
-                        </div>
+                        </a>
 
                         <div class="p-4">
                             <div class="mb-2">
-                                <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $item['tag'] }}</span>
+                                <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $rec->tag ?? 'Produk' }}</span>
                             </div>
-                            <h3 class="font-semibold text-gray-800">{{ $item['name'] }}</h3>
+                            <a href="{{ route('produk.detail', $rec->id) }}" class="block">
+                                <h3 class="font-semibold text-gray-800 hover:text-red-700 transition">{{ $rec->name }}</h3>
+                            </a>
                             
                             <div class="mt-3">
-                                <div class="text-red-600 font-bold text-lg">{{ $item['price'] }}</div>
-                                <div class="text-sm text-gray-400 line-through">{{ $item['original'] }}</div>
+                                <div class="text-red-600 font-bold text-lg">{{ $rec->formatted_price }}</div>
+                                <div class="text-sm text-gray-400 line-through">{{ $rec->formatted_original_price }}</div>
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-gray-200">
                                 <button
                                     class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 transition text-sm font-medium"
-                                    onclick="addToCart(this)"
-                                    data-name="{{ $item['name'] }}"
-                                    data-price="{{ $item['price'] }}"
-                                    data-original="{{ $item['original'] }}"
-                                    data-tag="{{ $item['tag'] }}"
-                                    data-image="{{ $item['image'] }}"
+                                    onclick="event.preventDefault(); event.stopPropagation(); addToCart(this)"
+                                    data-product-id="{{ $rec->id }}"
+                                    data-name="{{ $rec->name }}"
+                                    data-price="{{ $rec->formatted_price }}"
+                                    data-original="{{ $rec->formatted_original_price }}"
+                                    data-tag="{{ $rec->tag ?? '' }}"
+                                    data-image="{{ $rec->image }}"
                                 >
                                     Tambah ke Keranjang
                                 </button>
@@ -595,7 +590,14 @@
 
         // Image gallery functionality
         function changeMainImage(src, thumbnail) {
-            document.getElementById('main-image').src = src;
+            console.log('🖼️ Changing image to:', src);
+            const mainImage = document.getElementById('main-image');
+            if (!mainImage) {
+                console.error('❌ Main image element not found');
+                return;
+            }
+            
+            mainImage.src = src;
             
             // Remove active class from all thumbnails
             document.querySelectorAll('.thumbnail').forEach(thumb => {
@@ -603,33 +605,83 @@
             });
             
             // Add active class to clicked thumbnail
-            thumbnail.classList.add('active');
+            if (thumbnail) {
+                thumbnail.classList.add('active');
+            }
+            console.log('✅ Image changed successfully');
         }
 
         // Quantity controls
         function increaseQuantity() {
+            console.log('➕ Increase quantity');
             const input = document.getElementById('quantity');
             const currentValue = parseInt(input.value) || 1;
             const maxValue = parseInt(input.getAttribute('max')) || 10;
             
             if (currentValue < maxValue) {
                 input.value = currentValue + 1;
+                console.log('✅ Quantity increased to:', input.value);
+            } else {
+                console.log('⚠️ Max quantity reached');
             }
         }
 
         function decreaseQuantity() {
+            console.log('➖ Decrease quantity');
             const input = document.getElementById('quantity');
             const currentValue = parseInt(input.value) || 1;
             const minValue = parseInt(input.getAttribute('min')) || 1;
             
             if (currentValue > minValue) {
                 input.value = currentValue - 1;
+                console.log('✅ Quantity decreased to:', input.value);
+            } else {
+                console.log('⚠️ Min quantity reached');
+            }
+        }
+
+        // Update badge counters in navbar
+        async function updateBadges() {
+            try {
+                // Update cart badge
+                const cartRes = await fetch("{{ route('cart.count') }}");
+                if (cartRes.ok) {
+                    const cartData = await cartRes.json();
+                    const cartBadge = document.getElementById('cart-badge');
+                    if (cartBadge && cartData.count !== undefined) {
+                        cartBadge.textContent = cartData.count;
+                        if (cartData.count > 0) {
+                            cartBadge.classList.remove('hidden');
+                        } else {
+                            cartBadge.classList.add('hidden');
+                        }
+                    }
+                }
+
+                // Update wishlist badge
+                const wishRes = await fetch("{{ route('wishlist.count') }}");
+                if (wishRes.ok) {
+                    const wishData = await wishRes.json();
+                    const wishBadge = document.getElementById('wishlist-badge');
+                    if (wishBadge && wishData.count !== undefined) {
+                        wishBadge.textContent = wishData.count;
+                        if (wishData.count > 0) {
+                            wishBadge.classList.remove('hidden');
+                        } else {
+                            wishBadge.classList.add('hidden');
+                        }
+                    }
+                }
+            } catch (e) {
+                // Silent fail
             }
         }
 
         // Add to cart via AJAX then go to keranjang
         async function addToCart(btn) {
+            console.log('🛒 addToCart dipanggil');
             @guest
+                console.log('❌ User belum login');
                 window.location.href = "{{ route('masuk') }}";
                 return;
             @endguest
@@ -648,35 +700,52 @@
                 qty: qty
             };
 
+            console.log('📦 Payload:', payload);
+
             btn.classList.add('transform', 'scale-95');
-            setTimeout(() => btn.classList.remove('scale-95'), 150);
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.classList.remove('scale-95');
+                btn.disabled = false;
+            }, 150);
 
             try {
+                console.log('🌐 Sending request to:', "{{ route('cart.add') }}");
                 const res = await fetch("{{ route('cart.add') }}", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                console.log('📨 Response status:', res.status);
+                
                 // Jika tidak JSON (misal redirect ke login), arahkan ke halaman masuk
                 const ct = res.headers.get('content-type') || '';
                 if (!ct.includes('application/json')) {
+                    console.log('⚠️ Not JSON response, redirecting to login');
                     window.location.href = "{{ route('masuk') }}";
                     return;
                 }
                 const data = await res.json();
+                console.log('📥 Response data:', data);
+                
                 if (data.success) {
                     showToast(`${payload.name} (${qty} pcs) berhasil ditambahkan ke keranjang!`);
+                    await updateBadges();
                 } else {
-                    alert('Gagal menambahkan ke keranjang');
+                    console.error('❌ Failed:', data);
+                    alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
                 }
             } catch (e) {
-                alert('Terjadi kesalahan saat menambahkan ke keranjang');
+                console.error('❌ Error:', e);
+                alert('Terjadi kesalahan saat menambahkan ke keranjang: ' + e.message);
             }
         }
 
         // Wishlist toggle via database
         async function toggleWishlist(btn) {
+            console.log('❤️ toggleWishlist dipanggil');
             @guest
+                console.log('❌ User belum login');
                 window.location.href = "{{ route('masuk') }}";
                 return;
             @endguest
@@ -709,6 +778,7 @@
                         icon.classList.remove('fill-current', 'text-red-600');
                         icon.classList.add('text-gray-600');
                     }
+                    await updateBadges();
                 } else {
                     alert('Gagal memperbarui wishlist');
                 }
@@ -719,7 +789,9 @@
 
         // Buy now - add to cart and redirect to checkout
         async function buyNow(btn) {
+            console.log('💳 buyNow dipanggil');
             @guest
+                console.log('❌ User belum login');
                 window.location.href = "{{ route('masuk') }}";
                 return;
             @endguest
@@ -766,16 +838,27 @@
 
         // Share product
         function shareProduct() {
+            console.log('📤 Share button clicked');
             if (navigator.share) {
+                console.log('✅ Using native share API');
                 navigator.share({
                     title: '{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}',
                     text: 'Lihat produk ulos tradisional ini di UlosTa',
                     url: window.location.href
+                }).then(() => {
+                    console.log('✅ Share successful');
+                }).catch((error) => {
+                    console.log('⚠️ Share cancelled or failed:', error);
                 });
             } else {
+                console.log('⚠️ Native share not supported, copying to clipboard');
                 // Fallback: copy to clipboard
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     alert('Link produk berhasil disalin!');
+                    console.log('✅ Link copied to clipboard');
+                }).catch((error) => {
+                    console.error('❌ Failed to copy:', error);
+                    alert('Gagal menyalin link');
                 });
             }
         }
@@ -788,6 +871,63 @@
             
             if (value < min) this.value = min;
             if (value > max) this.value = max;
+        });
+
+        // Toggle profile dropdown
+        function toggleProfileDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('👤 Profile dropdown clicked');
+            
+            const menu = document.getElementById('profile-menu');
+            if (!menu) {
+                console.error('❌ Profile menu not found');
+                return;
+            }
+            
+            const isVisible = menu.classList.contains('show');
+            
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.remove('show');
+            });
+            
+            // Toggle current dropdown
+            if (!isVisible) {
+                menu.classList.add('show');
+                console.log('✅ Dropdown opened');
+            } else {
+                menu.classList.remove('show');
+                console.log('✅ Dropdown closed');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            
+            if (dropdown && menu && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Page load initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Detail Produk page loaded');
+            console.log('🛒 Cart badge:', document.getElementById('cart-badge')?.textContent);
+            console.log('❤️ Wishlist badge:', document.getElementById('wishlist-badge')?.textContent);
+            console.log('🔢 Quantity input:', document.getElementById('quantity')?.value);
+            console.log('🖼️ Main image:', document.getElementById('main-image')?.src);
+            
+            // Test if buttons are clickable
+            const addToCartBtn = document.querySelector('[onclick*="addToCart"]');
+            const wishlistBtn = document.querySelector('[onclick*="toggleWishlist"]');
+            const buyNowBtn = document.querySelector('[onclick*="buyNow"]');
+            
+            console.log('🔘 Add to Cart button:', addToCartBtn ? '✅ Found' : '❌ Not found');
+            console.log('🔘 Wishlist button:', wishlistBtn ? '✅ Found' : '❌ Not found');
+            console.log('🔘 Buy Now button:', buyNowBtn ? '✅ Found' : '❌ Not found');
         });
     </script>
 </body>

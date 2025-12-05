@@ -42,6 +42,49 @@ Route::get('/', function () {
     return view('welcome', compact('products'));
 })->name('welcome');
 
+// Product detail route (NO AUTHENTICATION REQUIRED - PUBLIC ACCESS)
+Route::get('/produk/{id}', function ($id) {
+    \Log::info('🔵 PRODUCT ROUTE HIT - ID: ' . $id . ' | User: ' . (Auth::check() ? Auth::user()->email : 'GUEST'));
+    
+    try {
+        $product = Product::findOrFail($id);
+        
+        // Get recommendations (other products, excluding current)
+        $recommendations = Product::where('id', '!=', $id)
+            ->active()
+            ->inStock()
+            ->latest()
+            ->take(3)
+            ->get();
+        
+        // Convert to array format expected by the view
+        $productData = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => $product->formatted_price,
+            'original_price' => $product->formatted_original_price,
+            'image' => $product->image,
+            'tag' => $product->tag,
+            'stock' => $product->stock,
+            'category' => $product->tag,
+            'function' => $product->tag,
+            'type' => $product->tag,
+            'size' => '200 x 150 cm',
+            'weight' => '800 gram',
+            'material' => 'Katun Premium', 
+            'origin' => 'Sumatera Utara',
+            'reviews' => '64 reviews'
+        ];
+
+        \Log::info('✅ PRODUCT LOADED: ' . $product->name);
+        return view('detail-produk', ['product' => $productData, 'recommendations' => $recommendations]);
+    } catch (\Exception $e) {
+        \Log::error('❌ PRODUCT ERROR - ID: ' . $id . ' | ' . $e->getMessage());
+        return redirect()->route('welcome')->with('error', 'Produk tidak ditemukan');
+    }
+})->name('produk.detail');
+
 // show login form
 Route::get('/masuk', function () {
     return view('masuk');
@@ -154,39 +197,6 @@ Route::get('/home', function () {
     return redirect()->route('homepage');
 })->middleware('auth')->name('home');
 
-// Product detail (temporary demo route)
-Route::get('/produk/{slug}', function ($slug) {
-    $product = [
-        'slug' => $slug,
-        'title' => 'Ulos Ragihotang Premium',
-        'price' => 1250000,
-        'original_price' => 1500000,
-        'reviews' => 28,
-        'tags' => ['Ragi Hotang', 'Pernikahan'],
-        'stock' => 15,
-        'jenis' => 'Ragi Hotang',
-        'fungsi' => 'Pernikahan',
-        'ukuran' => '200 x 150 cm',
-        'berat' => '800 gr',
-        'material' => 'Katun Premium',
-        'asal' => 'Sumatera Utara',
-        'images' => [
-            asset('image/Ulos Ragi Hotang.jpg'),
-            asset('image/ulos1.jpeg'),
-            asset('image/ulos2.jpg'),
-            asset('image/ulos3.jpg'),
-        ],
-        'description' => 'Ulos Ragi Hotang Premium adalah kain tenun tradisional Batak dengan motif yang melambangkan keharmonisan dan kekuatan. Cocok untuk upacara pernikahan adat, ditenun dari benang premium dengan pewarnaan alami yang tahan lama.',
-    ];
-
-    $recommendations = [
-        ['title' => 'Ulos Bintang Maratur', 'price' => 750000, 'old' => 900000, 'img' => asset('image/Ulos Bintang Maratur.jpg'), 'tag' => 'Kelahiran'],
-        ['title' => 'Ulos Mangiring', 'price' => 860000, 'old' => 990000, 'img' => asset('image/Ulos Mangiring.jpg'), 'tag' => 'Pernikahan'],
-        ['title' => 'Ulos Sibolang Rasta Pamontari', 'price' => 750000, 'old' => 1000000, 'img' => asset('image/Ulos Sibolang Rasta Pamontari.jpg'), 'tag' => 'Kelahiran'],
-    ];
-
-    return view('produk.detail', compact('product', 'recommendations'));
-})->name('produk.detail');
 // Cart routes (authenticated)
 Route::middleware('auth')->group(function () {
     Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
@@ -194,6 +204,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cart/{item}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
     Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.delete');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/count', [CartController::class, 'getCount'])->name('cart.count');
 });
 
 // Wishlist routes (authenticated)
