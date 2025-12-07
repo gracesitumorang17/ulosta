@@ -10,6 +10,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Models\Product;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\GoogleController;
 
 // Root: redirect based on authentication and role
 Route::get('/', function () {
@@ -636,3 +637,7 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
         return redirect()->route('seller.settings')->with('success', 'Pengaturan toko disimpan.');
     })->name('seller.settings.save');
 });
+
+// Google OAuth Routes (harus di LUAR middleware auth)
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
