@@ -127,11 +127,13 @@
     <!-- Navbar -->
     <header class="bg-white border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="{{ route('homepage') }}" class="flex items-center gap-3">
+            <a href="{{ Auth::check() ? route('homepage') : url('/') }}" class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-md bg-red-600 flex items-center justify-center text-white font-bold">U</div>
                 <span class="text-lg font-semibold">UlosTa</span>
             </a>
 
+            @auth
+            <!-- Navbar untuk user yang sudah login -->
             <div class="flex items-center gap-6">
                 <a href="{{ route('homepage') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,7 +148,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                         @php
-                            $wishlistCount = Auth::check() ? \App\Models\Wishlist::where('user_id', Auth::id())->count() : 0;
+                            $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
                         @endphp
                         @if($wishlistCount > 0)
                             <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
@@ -161,7 +163,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                         </svg>
                         @php
-                            $cartCount = Auth::check() ? \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity') : 0;
+                            $cartCount = \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity');
                         @endphp
                         @if($cartCount > 0)
                             <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
@@ -220,6 +222,30 @@
                     </div>
                 </div>
             </div>
+            @endauth
+
+            @guest
+            <!-- Navbar untuk guest (belum login) -->
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="{{ url('/') }}" class="text-gray-700 px-3 py-1 rounded-full hover:bg-gray-100 transition flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5L12 4l9 5.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
+                    </svg>
+                    <span class="text-sm">Home</span>
+                </a>
+                <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
+                <a href="{{ route('register') }}" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">Daftar</a>
+            </div>
+
+            <!-- For very small screens show icon-only buttons -->
+            <div class="sm:hidden flex items-center gap-2">
+                <a href="{{ route('masuk') }}" class="p-2 rounded-md hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+            </div>
+            @endguest
         </div>
     </header>
 
