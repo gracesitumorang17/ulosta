@@ -31,7 +31,7 @@
         .dropdown:focus-within .dropdown-menu,.dropdown:hover .dropdown-menu{display:block;}
     </style>
 </head>
-<body class="antialiased text-gray-800 bg-gray-50">
+<body class="antialiased text-gray-800 bg-white">
 
     <!-- Navbar - Authenticated User -->
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
