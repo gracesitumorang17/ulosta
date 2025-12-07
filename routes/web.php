@@ -34,6 +34,7 @@ Route::get('/', function () {
             'description' => $p->description,
             'image' => $p->image,
             'tag' => $p->tag,
+            'category' => $p->category,
             'price' => $p->formatted_price,
             'original_price' => $p->formatted_original_price,
             'desc' => $p->description,
@@ -220,6 +221,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/detail-pembayaran/{orderId}', [CheckoutController::class, 'detailPembayaran'])->name('detail.pembayaran');
+    Route::get('/instruksi-pembayaran/{orderId}', [CheckoutController::class, 'instruksiPembayaran'])->name('instruksi.pembayaran');
 });
 
 // Profile routes (authenticated)

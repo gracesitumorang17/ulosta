@@ -52,12 +52,56 @@
                     <span class="text-sm font-medium">Keranjang</span>
                 </a>
 
-                <button class="flex items-center gap-2 text-gray-600 hover:text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span class="text-sm font-medium">Profil</span>
-                </button>
+                <div class="relative">
+                    <button id="profile-button" type="button" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-sm font-medium">Profil</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Popup menu -->
+                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-900">Akun Saya</p>
+                            <p class="text-xs text-gray-500">Pembeli</p>
+                        </div>
+                        <nav class="py-2">
+                            <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span class="text-sm">Profil saya</span>
+                            </a>
+                            <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span class="text-sm">Wishlist Saya</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                                </svg>
+                                <span class="text-sm">Pesanan Saya</span>
+                            </a>
+                            <div class="my-2 border-t border-gray-100"></div>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span class="text-sm">Keluar</span>
+                                </button>
+                            </form>
+                        </nav>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </header>
@@ -220,29 +264,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Instruksi Pembayaran (rekening penjual) -->
-            <div class="max-w-4xl mx-auto mt-8">
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold mb-4">Instruksi Pembayaran</h2>
-                    <div class="p-4 bg-red-50 border-l-4 border-red-600 rounded">
-                        <h3 class="font-semibold text-red-700 mb-2">Transfer ke Rekening Penjual</h3>
-                        <p class="text-gray-700 text-sm mb-2">Silakan lakukan pembayaran ke nomor rekening berikut:</p>
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-2">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-semibold text-gray-800">Bank Mandiri</span>
-                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Rekening Penjual</span>
-                            </div>
-                            <div class="text-lg font-bold text-red-700 tracking-wider">1234 5678 9012</div>
-                            <div class="text-sm text-gray-600">a.n. Siti Manurung</div>
-                        </div>
-                        <p class="text-xs text-gray-500">Setelah melakukan pembayaran, pesanan Anda akan diproses oleh penjual.</p>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </form>
-    </main>
-
+           
     <!-- Footer -->
     <footer class="bg-neutral-900 text-neutral-300 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -294,5 +316,23 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Toggle profile dropdown
+        const profileButton = document.getElementById('profile-button');
+        const profileMenu = document.getElementById('profile-menu');
+
+        profileButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                profileMenu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ class Product extends Model
         'price',
         'original_price',
         'tag',
+        'category',
         'image',
         'stock',
         'is_active',
