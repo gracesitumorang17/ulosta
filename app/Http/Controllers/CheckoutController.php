@@ -40,16 +40,88 @@ class CheckoutController extends Controller
             'alamat_lengkap' => 'required|string',
             'kota' => 'required|string|max:100',
             'kode_pos' => 'required|string|max:10',
-            'metode_pembayaran' => 'required|string|in:mandiri,bca,dana,gopay,ovo,cod',
         ]);
 
-        // Here you would typically:
-        // 1. Create order
-        // 2. Create order items
-        // 3. Clear cart
-        // 4. Redirect to success page
+        // Get cart items
+        $items = CartItem::where('user_id', Auth::id())->get();
+        
+        if ($items->count() === 0) {
+            return redirect()->route('keranjang')->with('error', 'Keranjang Anda kosong!');
+        }
 
-        // For now, just redirect back with success message
-        return redirect()->route('homepage')->with('success', 'Pesanan berhasil dibuat! Kami akan segera memproses pesanan Anda.');
+        // Calculate totals
+        $subtotal = $items->sum(function($item) {
+            return $item->price * $item->quantity;
+        });
+
+        $shipping = 15000;
+        if ($subtotal >= 500000) {
+            $shipping = 0;
+        }
+        
+        $total = $subtotal + $shipping;
+
+        // Generate order number
+        $orderNumber = date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+
+        // Create order
+        $order = \App\Models\Order::create([
+            'user_id' => Auth::id(),
+            'order_number' => $orderNumber,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => $subtotal,
+            'shipping_cost' => $shipping,
+            'total_amount' => $total,
+            'shipping_first_name' => $request->nama_lengkap,
+            'shipping_phone' => $request->nomor_telepon,
+            'shipping_address_1' => $request->alamat_lengkap,
+            'shipping_city' => $request->kota,
+            'shipping_postal_code' => $request->kode_pos,
+        ]);
+
+        // Create order items
+        foreach ($items as $item) {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'product_image' => $item->image,
+                'quantity' => $item->quantity,
+                'price' => $item->price,
+                'subtotal' => $item->price * $item->quantity,
+                'total' => $item->price * $item->quantity,
+            ]);
+        }
+
+        // Clear cart
+        CartItem::where('user_id', Auth::id())->delete();
+
+        // Redirect to detail pembayaran
+        return redirect()->route('detail.pembayaran', $order->id);
+    }
+
+    public function detailPembayaran($orderId)
+    {
+        $order = \App\Models\Order::with(['items'])->findOrFail($orderId);
+        
+        // Make sure the order belongs to the authenticated user
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return view('detail_pembayaran', compact('order'));
+    }
+
+    public function instruksiPembayaran($orderId)
+    {
+        $order = \App\Models\Order::with(['items'])->findOrFail($orderId);
+        
+        // Make sure the order belongs to the authenticated user
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return view('instruksi_pembayaran', compact('order'));
     }
 }

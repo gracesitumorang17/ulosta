@@ -494,8 +494,8 @@
                                 <option value="Pernikahan" {{ ($fungsiFilter ?? '') == 'Pernikahan' ? 'selected' : '' }}>Pernikahan</option>
                                 <option value="Kelahiran" {{ ($fungsiFilter ?? '') == 'Kelahiran' ? 'selected' : '' }}>Kelahiran</option>
                                 <option value="Kematian" {{ ($fungsiFilter ?? '') == 'Kematian' ? 'selected' : '' }}>Kematian</option>
-                                <option value="Upacara Adat" {{ ($fungsiFilter ?? '') == 'Upacara Adat' ? 'selected' : '' }}>Upacara Adat</option>
-                                <option value="Pesta Tradisional" {{ ($fungsiFilter ?? '') == 'Pesta Tradisional' ? 'selected' : '' }}>Pesta Tradisional</option>
+                                <option value="Syukuran" {{ ($fungsiFilter ?? '') == 'Syukuran' ? 'selected' : '' }}>Syukuran</option>
+                                <option value="Serbaguna" {{ ($fungsiFilter ?? '') == 'Serbaguna' ? 'selected' : '' }}>Serbaguna</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -530,9 +530,9 @@
                                     </div>
                                 </a>
 
-                                <!-- Top-left badge "Populer" -->
+                                <!-- Top-left badge "Terlaris" -->
                                 <div class="absolute left-3 top-3">
-                                    <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">Populer</span>
+                                    <span class="bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">Terlaris</span>
                                 </div>
                                 
                                 <!-- Top-right Wishlist button -->
@@ -551,10 +551,12 @@
                         
 
                             <div class="p-4 flex-1 flex flex-col">
-                                <!-- Tag -->
+                                <!-- Category (Fungsi Ulos) -->
+                                @if(!empty($p['category']))
                                 <div class="mb-2">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
+                                    <span class="inline-block bg-yellow-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded">{{ $p['category'] }}</span>
                                 </div>
+                                @endif
                                 <!-- Title & desc -->
                                 <a href="{{ route('produk.detail', $p['id']) }}" class="hover:text-red-600 transition-colors">
                                     <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>

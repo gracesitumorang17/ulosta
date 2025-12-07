@@ -325,9 +325,9 @@
                                         <img src="{{ $product['image'] ? asset('image/' . $product['image']) : asset('image/default-product.jpg') }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover" loading="lazy" />
                                     </div>
 
-                                <!-- Top-left badge "Terlaris" -->
+                                <!-- Badge Terlaris (top-left) -->
                                 <div class="absolute left-3 top-3">
-                                    <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">Terlaris</span>
+                                    <span class="bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">Terlaris</span>
                                 </div>
 
                                 <!-- Favorite heart (top-right) -->
@@ -348,10 +348,13 @@
                             </div>
 
                             <div class="p-4 flex-1 flex flex-col">
-                                <!-- Tag -->
+                                <!-- Category (Fungsi Ulos) -->
+                                @if(!empty($product['category']))
                                 <div class="mb-2">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-[11px] font-medium px-3 py-1 rounded-full tracking-wide">{{ $product['tag'] ?? 'Produk' }}</span>
+                                    <span class="inline-block bg-yellow-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded">{{ $product['category'] }}</span>
                                 </div>
+                                @endif
+                                
                                 <!-- Title & desc -->
                                 <h3 class="font-semibold text-gray-800 text-base">{{ $product['name'] }}</h3>
                                 <p class="text-sm text-gray-500 mt-1">{{ Str::limit($product['description'], 60) }}</p>

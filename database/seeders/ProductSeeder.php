@@ -80,6 +80,28 @@ class ProductSeeder extends Seeder
                 'stock' => 25,
                 'is_active' => true,
             ],
+            [
+                'name' => 'Ulos Ragi Idup',
+                'description' => 'Ulos khusus untuk upacara kelahiran bayi',
+                'price' => 420000,
+                'original_price' => 550000,
+                'tag' => 'Ragi Idup',
+                'category' => 'Kelahiran',
+                'image' => 'Ulos Ragi Hotang.jpg',
+                'stock' => 15,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Ulos Tumtuman',
+                'description' => 'Ulos untuk pemberkatan bayi yang baru lahir',
+                'price' => 380000,
+                'original_price' => 480000,
+                'tag' => 'Tumtuman',
+                'category' => 'Kelahiran',
+                'image' => 'Ulos Sibolang Rasta Pamontari.jpg',
+                'stock' => 18,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($products as $product) {
