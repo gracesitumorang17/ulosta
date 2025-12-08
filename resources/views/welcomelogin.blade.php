@@ -571,7 +571,6 @@
                                 <!-- Price -->
                                 <div class="mt-3">
                                     <div class="text-red-600 font-bold text-lg">{{ $p['price'] }}</div>
-                                    <div class="text-sm text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
                                 </div>
 
                                 <!-- thin divider to separate price and CTA -->

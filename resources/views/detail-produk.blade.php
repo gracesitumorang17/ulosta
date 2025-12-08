@@ -371,12 +371,6 @@
                 <!-- Price -->
                 <div class="space-y-2">
                     <div class="text-3xl font-bold text-red-600">{{ $product['price'] ?? 'Rp 1.250.000' }}</div>
-                    @if(isset($product['original_price']))
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg text-gray-400 line-through">{{ $product['original_price'] }}</span>
-                            <span class="bg-red-100 text-red-600 text-sm px-2 py-1 rounded">Diskon 20%</span>
-                        </div>
-                    @endif
                 </div>
 
                 <!-- Product Description -->
@@ -541,7 +535,6 @@
                             
                             <div class="mt-3">
                                 <div class="text-red-600 font-bold text-lg">{{ $rec->formatted_price }}</div>
-                                <div class="text-sm text-gray-400 line-through">{{ $rec->formatted_original_price }}</div>
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-gray-200">
