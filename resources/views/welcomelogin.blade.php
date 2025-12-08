@@ -87,7 +87,11 @@
 </head>
 <body class="antialiased text-gray-800 bg-white">
 
-    <!-- Navbar for Authenticated Users -->
+    @if(Auth::check() && Auth::user()->role === 'seller')
+        <!-- Navbar for Seller (with Home, Wishlist, Keranjang, Profil) -->
+        @include('seller.partials.navbar-home')
+    @else
+    <!-- Navbar for Authenticated Users (Buyers) -->
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -194,8 +198,8 @@
                         <!-- Popup menu -->
                         <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
                             <div class="px-4 py-3 border-b border-gray-100">
-                                <p class="text-sm font-semibold text-gray-900">Akun Saya</p>
-                                <p class="text-xs text-gray-500">Pembeli</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name ?? 'Akun Saya' }}</p>
+                                <p class="text-xs text-gray-500">{{ Auth::user()->role === 'seller' ? 'Penjual' : 'Pembeli' }}</p>
                             </div>
                             <nav class="py-2">
                                 <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
@@ -318,6 +322,7 @@
             </div>
         </div>
     </header>
+    @endif
 
     <!-- Hero -->
     <main>

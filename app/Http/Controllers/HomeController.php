@@ -15,12 +15,7 @@ class HomeController extends Controller
             return redirect()->route('admin.dashboard');
         }
         
-        // If user is seller, redirect to seller dashboard
-        if (Auth::check() && (Auth::user()->role ?? '') === 'seller') {
-            return redirect()->route('seller.dashboard');
-        }
-        
-        // For buyers (logged in users) or guests, show appropriate homepage
+        // For buyers and sellers (logged in users) or guests, show appropriate homepage
         // Get cart/wishlist counts for logged in users
         $cartCount = 0;
         $wishlistCount = 0;

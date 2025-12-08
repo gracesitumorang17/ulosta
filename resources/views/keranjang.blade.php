@@ -244,10 +244,10 @@
                                         <span class="text-xs text-gray-500 inline-block mt-0.5">{{ $item->tag }}</span>
                                     @endif
                                 </div>
-                                <form action="{{ route('cart.delete', $item) }}" method="POST">
+                                <form id="delete-form-{{ $item->id }}" action="{{ route('cart.delete', $item) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="text-gray-400 hover:text-red-600" title="Hapus">
+                                    <button type="button" onclick="showDeleteModal({{ $item->id }})" class="text-gray-400 hover:text-red-600" title="Hapus">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.293l.853 10.24A2 2 0 007.141 18h5.718a2 2 0 001.995-1.76L15.707 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v6a1 1 0 11-2 0V8zm5 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd"/></svg>
                                     </button>
                                 </form>
@@ -397,7 +397,52 @@
         </div>
     </footer>
 
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Yakin Ingin Menghapus?</h3>
+                <p class="text-sm text-gray-600 mb-6">Yakin Ingin Menghapus Produk ini dari Keranjang</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg hover:bg-gray-300 transition font-medium">
+                        Batal
+                    </button>
+                    <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition font-medium">
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let deleteFormId = null;
+
+        function showDeleteModal(itemId) {
+            deleteFormId = itemId;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            deleteFormId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteFormId) {
+                const form = document.getElementById('delete-form-' + deleteFormId);
+                if (form) {
+                    closeDeleteModal();
+                    form.submit();
+                }
+            }
+        }
+
         // Auto hide alert after 3 seconds
         document.addEventListener('DOMContentLoaded', function() {
             const alert = document.querySelector('.bg-green-50');
@@ -412,8 +457,17 @@
             }
         });
 
-        // Add loading state for buttons
+        // Add loading state for buttons (except delete buttons)
         document.querySelectorAll('form').forEach(form => {
+            // Skip delete forms - they have their own handler with onclick
+            if (form.id && form.id.startsWith('delete-form-')) {
+                return;
+            }
+            // Skip clear cart form - it has inline confirm
+            if (form.action.includes('cart/clear')) {
+                return;
+            }
+            
             form.addEventListener('submit', function() {
                 const button = this.querySelector('button[type="submit"]');
                 if (button) {
@@ -421,17 +475,6 @@
                     button.innerHTML = button.innerHTML.includes('Loading') ? button.innerHTML : button.innerHTML + ' <span class="ml-2">...</span>';
                 }
             });
-        });
-
-        // Add confirm dialog for delete actions
-        document.querySelectorAll('form[action*="cart/"]').forEach(form => {
-            if (form.querySelector('input[name="_method"][value="DELETE"]')) {
-                form.addEventListener('submit', function(e) {
-                    if (!confirm('Yakin ingin menghapus produk ini dari keranjang?')) {
-                        e.preventDefault();
-                    }
-                });
-            }
         });
 
         // Mobile menu toggle
