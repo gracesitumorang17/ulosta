@@ -101,22 +101,35 @@ Route::post('/masuk', function (Request $request) {
         'password' => 'required|string',
     ]);
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        $role = Auth::user()->role;
-        // Redirect by role
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        if ($role === 'seller') {
-            return redirect()->route('seller.dashboard');
-        }
-        return redirect()->route('homepage');
+    // Check if user exists
+    $user = \App\Models\User::where('email', $credentials['email'])->first();
+    
+    if (!$user) {
+        return back()->withErrors([
+            'email' => 'Email tidak terdaftar.',
+        ])->withInput();
     }
 
-    return back()->withErrors([
-        'email' => 'Email atau kata sandi salah.',
-    ])->withInput();
+    // Verify password
+    if (!\Hash::check($credentials['password'], $user->password)) {
+        return back()->withErrors([
+            'email' => 'Password salah.',
+        ])->withInput();
+    }
+
+    // Login the user
+    Auth::login($user);
+    $request->session()->regenerate();
+    
+    $role = Auth::user()->role;
+    // Redirect by role
+    if ($role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($role === 'seller') {
+        return redirect()->route('seller.dashboard');
+    }
+    return redirect()->route('homepage');
 })->name('masuk.submit');
 
 // password reset request (placeholder)

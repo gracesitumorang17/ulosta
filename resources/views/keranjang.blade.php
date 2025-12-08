@@ -112,7 +112,7 @@
                                 $cartCount = Auth::check() ? Auth::user()->cartItems()->count() : 0;
                             @endphp
                             @if($cartCount > 0)
-                            <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
                                 {{ $cartCount > 99 ? '99+' : $cartCount }}
                             </span>
                             @endif
@@ -247,7 +247,7 @@
                                 <form id="delete-form-{{ $item->id }}" action="{{ route('cart.delete', $item) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" onclick="showDeleteModal({{ $item->id }})" class="text-gray-400 hover:text-red-600" title="Hapus">
+                                    <button type="button" onclick="deleteCartItem({{ $item->id }}, this)" class="text-gray-400 hover:text-red-600" title="Hapus">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.293l.853 10.24A2 2 0 007.141 18h5.718a2 2 0 001.995-1.76L15.707 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v6a1 1 0 11-2 0V8zm5 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd"/></svg>
                                     </button>
                                 </form>
@@ -397,49 +397,68 @@
         </div>
     </footer>
 
-    <!-- Modal Konfirmasi Hapus -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Yakin Ingin Menghapus?</h3>
-                <p class="text-sm text-gray-600 mb-6">Yakin Ingin Menghapus Produk ini dari Keranjang</p>
-                <div class="flex gap-3">
-                    <button onclick="closeDeleteModal()" class="flex-1 bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg hover:bg-gray-300 transition font-medium">
-                        Batal
-                    </button>
-                    <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition font-medium">
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let deleteFormId = null;
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        function showDeleteModal(itemId) {
-            deleteFormId = itemId;
-            document.getElementById('delete-modal').classList.remove('hidden');
-        }
+        function deleteCartItem(itemId, button) {
+            if (!confirm('Hapus dari keranjang?')) {
+                return;
+            }
 
-        function closeDeleteModal() {
-            document.getElementById('delete-modal').classList.add('hidden');
-            deleteFormId = null;
-        }
+            const form = document.getElementById('delete-form-' + itemId);
+            if (!form) return;
 
-        function confirmDelete() {
-            if (deleteFormId) {
-                const form = document.getElementById('delete-form-' + deleteFormId);
-                if (form) {
-                    closeDeleteModal();
-                    form.submit();
+            fetch(form.action, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
                 }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge counters
+                    updateCartBadge(data.count);
+                    
+                    // Remove item from DOM or reload
+                    if (data.count === 0) {
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        // Find and remove the cart item card
+                        const itemCard = form.closest('.bg-white.rounded-xl');
+                        if (itemCard) {
+                            itemCard.style.transition = 'opacity 0.3s';
+                            itemCard.style.opacity = '0';
+                            setTimeout(() => {
+                                itemCard.remove();
+                                // Recalculate total
+                                window.location.reload();
+                            }, 300);
+                        }
+                    }
+                } else {
+                    alert('Gagal menghapus produk');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan');
+            });
+        }
+
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cart-badge');
+            const mobileBadge = document.getElementById('mobile-cart-badge');
+            
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            
+            if (mobileBadge) {
+                mobileBadge.textContent = count;
+                mobileBadge.style.display = count > 0 ? 'flex' : 'none';
             }
         }
 

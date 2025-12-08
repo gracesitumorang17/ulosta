@@ -214,7 +214,7 @@
                                     </svg>
                                     <span class="text-sm">Wishlist Saya</span>
                                 </a>
-                                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <a href="{{ route('profil') }}?tab=pesanan" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                     </svg>
@@ -571,7 +571,6 @@
                                 <!-- Price -->
                                 <div class="mt-3">
                                     <div class="text-red-600 font-bold text-lg">{{ $p['price'] }}</div>
-                                    <div class="text-sm text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
                                 </div>
 
                                 <!-- thin divider to separate price and CTA -->

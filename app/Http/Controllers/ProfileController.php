@@ -12,13 +12,46 @@ class ProfileController extends Controller
     /**
      * Display the user profile page.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $wishlistCount = $user->wishlists()->count();
         $cartCount = $user->cartItems()->count();
         
-        return view('profil', compact('user', 'wishlistCount', 'cartCount'));
+        // Get orders with filters
+        $statusFilter = $request->get('status', 'all');
+        $search = $request->get('search');
+        
+        $ordersQuery = $user->orders()->with('orderItems');
+        
+        // Apply status filter
+        if ($statusFilter && $statusFilter !== 'all') {
+            $ordersQuery->where('status', $statusFilter);
+        }
+        
+        // Apply search
+        if ($search) {
+            $ordersQuery->where(function($q) use ($search) {
+                $q->where('order_number', 'like', '%' . $search . '%')
+                  ->orWhereHas('orderItems', function($q2) use ($search) {
+                      $q2->where('product_name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        $orders = $ordersQuery->orderBy('created_at', 'desc')->get();
+        
+        // Get status counts
+        $statusCounts = [
+            'all' => $user->orders()->count(),
+            'pending' => $user->orders()->where('status', 'pending')->count(),
+            'processing' => $user->orders()->where('status', 'processing')->count(),
+            'shipped' => $user->orders()->where('status', 'shipped')->count(),
+            'delivered' => $user->orders()->where('status', 'delivered')->count(),
+            'cancelled' => $user->orders()->where('status', 'cancelled')->count(),
+        ];
+        
+        return view('profil', compact('user', 'wishlistCount', 'cartCount', 'orders', 'statusCounts'));
     }
 
     /**

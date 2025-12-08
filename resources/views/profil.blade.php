@@ -45,6 +45,35 @@
             background-color: #f3f4f6;
             border-bottom: 2px solid var(--brand-red-600);
         }
+
+        /* Filter tabs styling */
+        .filter-tab {
+            color: #6b7280;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab:hover {
+            color: var(--brand-red-600);
+            border-bottom-color: #EFA3A3;
+        }
+
+        .filter-tab.active {
+            color: var(--brand-red-600);
+            border-bottom-color: var(--brand-red-600);
+        }
+
+        .filter-tab span {
+            background-color: transparent;
+            color: #6b7280;
+        }
+
+        .filter-tab.active span {
+            background-color: transparent;
+            color: var(--brand-red-600);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800 bg-gray-50">
@@ -104,7 +133,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             @if($wishlistCount > 0)
-                            <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
                                 {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
                             </span>
                             @endif
@@ -447,7 +476,161 @@
 
                     <!-- Tab Content: Pesanan -->
                     <div id="content-pesanan" class="tab-content hidden p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Pesanan Saya</h3>
+                        <!-- Back Button & Header -->
+                        <div class="flex items-center gap-3 mb-5">
+                            <button onclick="switchTab('profil')" class="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Kembali
+                            </button>
+                        </div>
+
+                        <div class="mb-5">
+                            <h3 class="text-xl font-bold text-gray-900">Pesanan Saya</h3>
+                            @if(isset($orders))
+                            <p class="text-xs text-gray-500 mt-1">{{ $orders->count() }} pesanan ditemukan</p>
+                            @endif
+                        </div>
+
+                        @if(isset($orders) && isset($statusCounts))
+                        <!-- Filter Tabs -->
+                        <div class="mb-5 overflow-x-auto">
+                            <div class="flex gap-2 border-b">
+                                <a href="{{ route('profil') }}?tab=pesanan&status=all{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status', 'all') === 'all' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Semua</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['all'] }}</span>
+                                </a>
+                                <a href="{{ route('profil') }}?tab=pesanan&status=pending{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status') === 'pending' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Menunggu</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['pending'] }}</span>
+                                </a>
+                                <a href="{{ route('profil') }}?tab=pesanan&status=processing{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status') === 'processing' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Diproses</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['processing'] }}</span>
+                                </a>
+                                <a href="{{ route('profil') }}?tab=pesanan&status=shipped{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status') === 'shipped' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Dikirim</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['shipped'] }}</span>
+                                </a>
+                                <a href="{{ route('profil') }}?tab=pesanan&status=delivered{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status') === 'delivered' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Selesai</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['delivered'] }}</span>
+                                </a>
+                                <a href="{{ route('profil') }}?tab=pesanan&status=cancelled{{ request('search') ? '&search='.request('search') : '' }}" 
+                                   class="filter-tab pb-2.5 px-3 {{ request('status') === 'cancelled' ? 'active' : '' }}">
+                                    <span class="font-semibold text-sm">Dibatalkan</span>
+                                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full">{{ $statusCounts['cancelled'] }}</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="mb-5">
+                            <form action="{{ route('profil') }}" method="GET" class="relative">
+                                <input type="hidden" name="tab" value="pesanan">
+                                <input type="hidden" name="status" value="{{ request('status', 'all') }}">
+                                <input type="text" name="search" value="{{ request('search') }}" 
+                                       placeholder="Cari pesanan..." 
+                                       class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <svg class="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </form>
+                        </div>
+
+                        @if($orders->count() > 0)
+                        <!-- Orders Table -->
+                        <div class="bg-white border rounded-lg overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 border-b">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ID Pesanan</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Produk</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        @foreach($orders as $order)
+                                        <tr class="hover:bg-gray-50 transition">
+                                            <td class="px-4 py-3">
+                                                <p class="text-xs font-semibold text-gray-900">{{ $order->order_number }}</p>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex flex-col gap-2">
+                                                    @foreach($order->orderItems as $item)
+                                                    <div class="flex items-center gap-2">
+                                                        <img src="{{ asset('image/' . $item->product_image) }}" 
+                                                             alt="Product" 
+                                                             class="w-10 h-10 object-cover rounded-lg flex-shrink-0">
+                                                        <div class="min-w-0">
+                                                            <p class="text-xs font-medium text-gray-900 truncate">{{ $item->product_name }}</p>
+                                                            <p class="text-xs text-gray-500">{{ $item->quantity }}x</p>
+                                                        </div>
+                                                    </div>
+                                                    @endforeach
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <p class="text-xs font-bold text-red-600">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                @php
+                                                    $statusConfig = [
+                                                        'pending' => ['label' => 'Menunggu', 'color' => 'bg-yellow-100 text-yellow-800', 'dot' => 'bg-yellow-400'],
+                                                        'processing' => ['label' => 'Diproses', 'color' => 'bg-blue-100 text-blue-800', 'dot' => 'bg-blue-400'],
+                                                        'shipped' => ['label' => 'Dikirim', 'color' => 'bg-purple-100 text-purple-800', 'dot' => 'bg-purple-400'],
+                                                        'delivered' => ['label' => 'Selesai', 'color' => 'bg-green-100 text-green-800', 'dot' => 'bg-green-400'],
+                                                        'cancelled' => ['label' => 'Dibatalkan', 'color' => 'bg-red-100 text-red-800', 'dot' => 'bg-red-400'],
+                                                    ];
+                                                    $status = $statusConfig[$order->status] ?? ['label' => $order->status, 'color' => 'bg-gray-100 text-gray-800', 'dot' => 'bg-gray-400'];
+                                                @endphp
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium {{ $status['color'] }}">
+                                                    <span class="w-1.5 h-1.5 rounded-full {{ $status['dot'] }}"></span>
+                                                    {{ $status['label'] }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <p class="text-xs text-gray-600">{{ $order->created_at->format('Y-m-d') }}</p>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <button onclick="showOrderDetail({{ $order->id }})" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    Lihat Detail
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @else
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1">{{ request('search') ? 'Tidak ada hasil untuk "'.request('search').'"' : 'Belum ada pesanan' }}</p>
+                            <a href="{{ route('homepage') }}" class="inline-block mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                                Mulai Belanja
+                            </a>
+                        </div>
+                        @endif
+                        @else
                         <div class="text-center py-12">
                             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -459,6 +642,16 @@
                                 Mulai Belanja
                             </a>
                         </div>
+                        @endif
+                    </div>
+
+                    <!-- Modal Detail Pesanan -->
+                    <div id="orderDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-6" style="padding-top: calc(8rem + 3cm); padding-left: calc(1.5rem + 50px + 4cm);">
+                        <div class="bg-white rounded-xl max-w-md w-full shadow-2xl" style="max-height: 85vh; display: flex; flex-direction: column;">
+                            <div id="orderDetailContent" class="p-6 overflow-y-auto" style="flex: 1;">
+                                <!-- Content will be loaded dynamically -->
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tab Content: Wishlist -->
@@ -467,20 +660,22 @@
                         @if($user->wishlists->count() > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($user->wishlists as $wishlist)
-                            <div class="bg-white border rounded-xl shadow-sm overflow-hidden">
-                                <div class="ratio-4-3 relative">
+                            <div class="bg-white border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition" data-wishlist-id="{{ $wishlist->id }}">
+                                <div class="aspect-[4/3] relative">
                                     <img src="{{ asset('image/' . $wishlist->product_image) }}" alt="{{ $wishlist->product_name }}" class="absolute inset-0 w-full h-full object-cover" />
                                 </div>
                                 <div class="p-4">
                                     <h4 class="font-semibold text-gray-900 text-base mb-1">{{ $wishlist->product_name }}</h4>
-                                    <div class="text-sm text-gray-500 mb-2">{{ $wishlist->getFormattedPriceAttribute() }}</div>
-                                    <form action="{{ route('wishlist.delete', $wishlist->id) }}" method="POST" onsubmit="return confirm('Hapus dari wishlist?')">
-                                        <form action="{{ route('wishlist.delete', $wishlist->id) }}" method="POST" onsubmit="return confirm('Hapus dari wishlist?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs">Hapus</button>
-                                        </form>
-                                    </form>
+                                    <div class="text-red-600 font-bold text-lg mb-3">{{ $wishlist->getFormattedPriceAttribute() }}</div>
+                                    <button 
+                                        onclick="deleteWishlist({{ $wishlist->id }})"
+                                        class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium flex items-center justify-center gap-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        Hapus
+                                    </button>
                                 </div>
                             </div>
                             @endforeach
@@ -493,8 +688,8 @@
                                 </svg>
                             </div>
                             <p class="text-gray-600 text-sm">Belum ada wishlist</p>
-                            <a href="{{ route('wishlist.index') }}" class="inline-block mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium">
-                                Lihat Wishlist
+                            <a href="{{ route('homepage') }}" class="inline-block mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                                Belanja Sekarang
                             </a>
                         </div>
                         @endif
@@ -604,6 +799,186 @@
         @if($errors->any())
         toggleEditMode();
         @endif
+
+        // Auto-switch tab based on URL parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            
+            if (tab && ['profil', 'pesanan', 'wishlist'].includes(tab)) {
+                switchTab(tab);
+            }
+        });
+
+        // Show order detail modal
+        function showOrderDetail(orderId) {
+            const modal = document.getElementById('orderDetailModal');
+            const content = document.getElementById('orderDetailContent');
+            
+            // Find order data
+            const orders = @json($orders ?? []);
+            const order = orders.find(o => o.id === orderId);
+            
+            if (!order) return;
+            
+            // Status configuration
+            const statusConfig = {
+                'pending': { label: 'Menunggu', color: 'text-yellow-600', dot: 'bg-yellow-400' },
+                'processing': { label: 'Diproses', color: 'text-blue-600', dot: 'bg-blue-400' },
+                'shipped': { label: 'Dikirim', color: 'text-purple-600', dot: 'bg-purple-400' },
+                'delivered': { label: 'Selesai', color: 'text-green-600', dot: 'bg-green-400' },
+                'cancelled': { label: 'Dibatalkan', color: 'text-red-600', dot: 'bg-red-400' }
+            };
+            const status = statusConfig[order.status] || { label: order.status, color: 'text-gray-600', dot: 'bg-gray-400' };
+            
+            // Build products HTML
+            let productsHtml = '';
+            order.order_items.forEach(item => {
+                productsHtml += `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${item.product_name}</p>
+                            <p class="text-xs text-gray-500">${item.quantity} x Rp ${parseInt(item.price).toLocaleString('id-ID')}</p>
+                        </div>
+                        <p class="text-sm font-semibold text-red-600">Rp ${parseInt(item.price * item.quantity).toLocaleString('id-ID')}</p>
+                    </div>
+                `;
+            });
+            
+            // Build modal content
+            content.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Detail Pesanan ${order.order_number}</h3>
+                        <p class="text-xs text-gray-500 mt-1">Informasi lengkap pesanan Anda</p>
+                    </div>
+                    <button onclick="closeOrderDetail()" class="text-gray-400 hover:text-gray-600 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Status Pesanan</h4>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full ${status.dot}"></span>
+                        <span class="text-sm font-medium ${status.color}">${status.label}</span>
+                    </div>
+                </div>
+
+                <div class="mb-5 bg-gray-50 p-4 rounded-lg">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Informasi Pengiriman</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Alamat:</p>
+                            <p class="text-sm text-gray-900 leading-relaxed">${order.shipping_address_1 || 'Tidak ada alamat'}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Telepon:</p>
+                            <p class="text-sm text-gray-900">${order.shipping_phone || '-'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Produk</h4>
+                    <div class="space-y-3">
+                        ${productsHtml}
+                    </div>
+                </div>
+
+                <div class="border-t pt-4 mt-4 bg-red-50 -mx-6 px-6 py-4 rounded-b-xl">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm font-semibold text-gray-900">Total Pembayaran</p>
+                        <p class="text-xl font-bold text-red-600">Rp ${parseInt(order.total_amount).toLocaleString('id-ID')}</p>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Close order detail modal
+        function closeOrderDetail() {
+            document.getElementById('orderDetailModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('orderDetailModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeOrderDetail();
+            }
+        });
+
+        // Wishlist Delete Function
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        function deleteWishlist(id) {
+            if (!confirm('Hapus dari wishlist?')) {
+                return;
+            }
+
+            fetch(`/wishlist/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge counter
+                    updateWishlistBadge(data.count);
+                    
+                    // Remove item from DOM
+                    const item = document.querySelector(`[data-wishlist-id="${id}"]`);
+                    if (item) {
+                        item.style.transition = 'opacity 0.3s';
+                        item.style.opacity = '0';
+                        setTimeout(() => {
+                            item.remove();
+                            
+                            // Check if empty, show empty state
+                            const container = document.querySelector('#content-wishlist .grid');
+                            if (container && container.children.length === 0) {
+                                window.location.reload();
+                            }
+                        }, 300);
+                    }
+                } else {
+                    alert('Gagal menghapus produk');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan');
+            });
+        }
+
+        function updateWishlistBadge(count) {
+            const badge = document.getElementById('wishlist-badge');
+            const mobileBadge = document.getElementById('mobile-wishlist-badge');
+            
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            if (mobileBadge) {
+                if (count > 0) {
+                    mobileBadge.textContent = count > 99 ? '99+' : count;
+                    mobileBadge.style.display = 'flex';
+                } else {
+                    mobileBadge.style.display = 'none';
+                }
+            }
+        }
     </script>
 </body>
 </html>
