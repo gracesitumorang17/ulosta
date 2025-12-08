@@ -238,14 +238,11 @@
 
                     <div class="mb-4">
                         <div class="text-red-600 font-bold text-lg">{{ $item->formatted_price }}</div>
-                        @if($item->formatted_original_price)
-                        <div class="text-sm text-gray-400 line-through">{{ $item->formatted_original_price }}</div>
-                        @endif
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <button 
-                            onclick="addToCart('{{ $item->product_name }}', '{{ $item->formatted_price }}', '{{ $item->formatted_original_price }}', '', '{{ $item->product_image }}')"
+                            onclick="addToCart('{{ $item->product_name }}', '{{ $item->formatted_price }}', '', '{{ $item->product_image }}')"
                             class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition text-sm font-medium"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -323,22 +320,7 @@
             });
         }
 
-        function updateWishlistBadge(count) {
-            const badge = document.getElementById('wishlist-badge');
-            const mobileBadge = document.getElementById('mobile-wishlist-badge');
-            
-            if (badge) {
-                badge.textContent = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
-            }
-            
-            if (mobileBadge) {
-                mobileBadge.textContent = count;
-                mobileBadge.style.display = count > 0 ? 'flex' : 'none';
-            }
-        }
-
-        function addToCart(name, price, original, tag, image) {
+        function addToCart(name, price, tag, image) {
             fetch('{{ route('cart.add') }}', {
                 method: 'POST',
                 headers: {
@@ -346,7 +328,7 @@
                     'X-CSRF-TOKEN': csrf,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ name, price, original, tag, image })
+                body: JSON.stringify({ name, price, tag, image })
             })
             .then(res => res.json())
             .then(data => {

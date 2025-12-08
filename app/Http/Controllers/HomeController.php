@@ -66,14 +66,11 @@ class HomeController extends Controller
 
         // Format products for view
         $products = $productsData->map(function ($product) {
-            $originalPrice = $product->formatted_original_price;
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'tag' => $product->tag,
                 'price' => $product->formatted_price,
-                'original_price' => $originalPrice,
-                'original' => $originalPrice ?: $product->formatted_price,
                 'image' => $product->image,
                 'description' => $product->description,
                 'desc' => $product->description,
