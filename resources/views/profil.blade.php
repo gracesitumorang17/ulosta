@@ -49,7 +49,11 @@
 </head>
 <body class="antialiased text-gray-800 bg-gray-50">
 
-    <!-- Navbar -->
+    @if(Auth::user()->role === 'seller')
+        <!-- Navbar Seller (with Home, Wishlist, Keranjang, Profil) -->
+        @include('seller.partials.navbar-home')
+    @else
+    <!-- Navbar Buyer -->
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -134,12 +138,15 @@
             </div>
         </div>
     </header>
+    @endif
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Breadcrumb -->
-        <div class="mb-6 text-sm text-gray-600">
-            <a href="{{ route('homepage') }}" class="hover:text-red-600">Beranda</a>
+        <div class="flex items-center text-sm text-gray-600 mb-6">
+            <a href="{{ route('homepage') }}" class="hover:text-red-600">
+                Beranda
+            </a>
             <span class="mx-2">/</span>
             <span class="text-gray-900 font-medium">Profil</span>
         </div>
@@ -167,11 +174,11 @@
                         <p class="text-sm text-gray-500 text-center mt-1">{{ $user->email }}</p>
                         
                         <span class="inline-block mt-3 bg-red-100 text-red-700 text-xs font-medium px-3 py-1 rounded-full">
-                            Pembeli
+                            {{ $user->role === 'seller' ? 'Penjual' : 'Pembeli' }}
                         </span>
                     </div>
 
-                    <!-- User Details -->
+                    <!-- User Details (untuk semua user) -->
                     <div class="mt-6 space-y-4 border-t pt-4">
                         <div class="flex items-start gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -204,6 +211,49 @@
                             </div>
                         </div>
                     </div>
+
+                    @if($user->role === 'seller')
+                    <!-- Statistik Toko (untuk seller) -->
+                    <div class="mt-6 space-y-3 border-t pt-4">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-4">Statistik Toko</h3>
+                        
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm text-gray-600">Total Produk</span>
+                            </div>
+                            <span class="text-lg font-semibold text-gray-900">24</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm text-gray-600">Terjual</span>
+                            </div>
+                            <span class="text-lg font-semibold text-gray-900">156</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm text-gray-600">Rating</span>
+                            </div>
+                            <span class="text-lg font-semibold text-gray-900">4.8/5</span>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Settings Button -->
                     <div class="mt-6 pt-4 border-t">
