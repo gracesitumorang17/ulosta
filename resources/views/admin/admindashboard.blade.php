@@ -102,7 +102,7 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('admin.verifikasi-penjual') }}" class="nav-link">
+                    <a href="{{ route('admin.verification.list') }}" class="nav-link">
                         <div class="nav-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z"/>
@@ -111,48 +111,13 @@
                         Verifikasi Penjual
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a href="{{ route('admin.semua-penjual') }}" class="nav-link">
-                        <div class="nav-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-1c0-2.66 5.33-4 8-4s8 1.34 8 4v1H4zM12 12c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4z"/>
-                                <path d="M8 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
-                                <path d="M12.51 4.05C13.43 5.11 14 6.49 14 8c0 1.51-.57 2.89-1.49 3.95C14.47 11.7 16 10.04 16 8s-1.53-3.7-3.49-3.95z"/>
-                            </svg>
-                        </div>
-                        Semua Penjual
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('admin.penjual-tidak-aktif') }}" class="nav-link">
-                        <div class="nav-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
-                                <path d="M15 7c0-1.66-1.34-3-3-3S9 5.34 9 7s1.34 3 3 3 3-1.34 3-3zm-3 1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
-                                <path d="M18 17v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-1c0-1.1 1.79-2 6-2s6 .9 6 2z"/>
-                            </svg>
-                        </div>
-                        Penjual Tidak Aktif
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('admin.laporan') }}" class="nav-link">
-                        <div class="nav-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"/>
-                                <path d="M7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/>
-                            </svg>
-                        </div>
-                        Laporan
-                    </a>
-                </div>
                 
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
                 
                 <div class="nav-item">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="nav-link" style="background: none; border: none; color: #dc3545; width: 100%; text-align: left; cursor: pointer;">
+                        <button type="submit" class="nav-link" style="background: none; border: none; color: var(--red); width: 100%; text-align: left; cursor: pointer;">
                             <div class="nav-icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
@@ -174,7 +139,7 @@
                             <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                             <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
                         </svg>
-                        <input type="text" placeholder="nabil">
+                        <input type="text" placeholder="Cari...">
                     </div>
                     
                     <div class="user-info">
@@ -191,81 +156,64 @@
                 <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-title">Total Perujuk</div>
-                        <div class="stat-number">{{ isset($verifications) ? $verifications->count() : 156 }}</div>
+                        <div class="stat-title">Total Penjual</div>
+                        <div class="stat-number">{{ $totalSellers ?? 0 }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Menunggu Verifikasi</div>
-                        <div class="stat-number">{{ isset($verifications) ? $verifications->where('status', 'pending')->count() : 23 }}</div>
+                        <div class="stat-number">{{ isset($pendingVerifications) ? $pendingVerifications->count() : 0 }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Terverifikasi</div>
-                        <div class="stat-number">{{ isset($verifications) ? $verifications->where('status', 'approved')->count() : 89 }}</div>
+                        <div class="stat-number">{{ isset($approvedVerifications) ? $approvedVerifications->count() : 0 }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Tidak Aktif</div>
-                        <div class="stat-number">{{ isset($verifications) ? $verifications->where('status', 'inactive')->count() : 12 }}</div>
+                        <div class="stat-title">Ditolak</div>
+                        <div class="stat-number">{{ isset($rejectedVerifications) ? $rejectedVerifications->count() : 0 }}</div>
                     </div>
                 </div>
 
                 <!-- Action Cards -->
-                <div class="action-grid">
+                <div class="action-grid" style="grid-template-columns: 1fr;">
                     <div class="action-card">
                         <div class="action-title">Verifikasi Pending</div>
                         <div class="action-desc">Beberapa akun menunggu verifikasi Anda</div>
-                        <a href="#" class="action-link">Lihat Detail →</a>
-                    </div>
-                    <div class="action-card">
-                        <div class="action-title">Pengguna Tidak Aktif</div>
-                        <div class="action-desc">Kelola akun yang sudah tidak aktif lam</div>
-                        <a href="#" class="action-link">Lihat Detail →</a>
-                    </div>
-                    <div class="action-card">
-                        <div class="action-title">Lihat Laporan</div>
-                        <div class="action-desc">Statistik dan laporan aktivitas</div>
-                        <a href="#" class="action-link">Lihat Detail →</a>
+                        <a href="{{ route('admin.verification.list') }}" class="action-link">Lihat Detail →</a>
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
                 <div class="activity-section">
-                    <div class="section-title">Aktivasi Terbaru</div>
+                    <div class="section-title">Aktivitas Verifikasi Terbaru</div>
                     <div class="activity-list">
-                        @forelse($verifications ?? [] as $v)
+                        @forelse($recentVerifications ?? [] as $verification)
                             <div class="activity-item">
                                 <div class="activity-avatar">
-                                    {{ strtoupper(substr($v->name ?? 'N', 0, 1)) }}
+                                    {{ strtoupper(substr($verification->name ?? 'N', 0, 1)) }}
                                 </div>
                                 <div class="activity-info">
-                                    <div class="activity-name">{{ $v->name ?? 'Unknown' }}</div>
-                                    <div class="activity-email">{{ $v->email ?? 'No email' }}</div>
-                                    <div class="activity-desc">Menunggu Verifikasi pengajuan baru</div>
+                                    <div class="activity-name">{{ $verification->name ?? 'Unknown' }}</div>
+                                    <div class="activity-email">{{ $verification->email ?? 'No email' }}</div>
+                                    <div class="activity-desc">
+                                        @if($verification->verification_status === 'pending')
+                                            Menunggu verifikasi - disubmit {{ $verification->verification_submitted_at ? $verification->verification_submitted_at->diffForHumans() : 'baru-baru ini' }}
+                                        @elseif($verification->verification_status === 'approved')
+                                            Verifikasi disetujui {{ $verification->verification_approved_at ? $verification->verification_approved_at->diffForHumans() : 'baru-baru ini' }}
+                                        @elseif($verification->verification_status === 'rejected')
+                                            Verifikasi ditolak {{ $verification->verification_rejected_at ? $verification->verification_rejected_at->diffForHumans() : 'baru-baru ini' }}
+                                        @else
+                                            Status verifikasi: {{ $verification->verification_status }}
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @empty
-                            <div class="activity-item">
-                                <div class="activity-avatar">N</div>
-                                <div class="activity-info">
-                                    <div class="activity-name">Nabila sadarion</div>
-                                    <div class="activity-email">nabila@gmail.com</div>
-                                    <div class="activity-desc">Menunggu Verifikasi pengajuan baru</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">K</div>
-                                <div class="activity-info">
-                                    <div class="activity-name">Karni Prasetyo</div>
-                                    <div class="activity-email">karni@gmail.com</div>
-                                    <div class="activity-desc">Menunggu Verifikasi pengajuan baru</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">A</div>
-                                <div class="activity-info">
-                                    <div class="activity-name">Amos balaba</div>
-                                    <div class="activity-email">amos@gmail.com</div>
-                                    <div class="activity-desc">Menunggu Verifikasi pengajuan baru</div>
-                                </div>
+                            <div style="text-align: center; padding: 40px; color: var(--muted);">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom: 16px; opacity: 0.5;">
+                                    <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z"/>
+                                </svg>
+                                <div>Belum ada aktivitas verifikasi terbaru</div>
+                                <div style="font-size: 14px; margin-top: 8px;">Aktivitas akan muncul ketika ada seller yang mengajukan verifikasi</div>
                             </div>
                         @endforelse
                     </div>

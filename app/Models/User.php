@@ -25,6 +25,21 @@ class User extends Authenticatable
         'provider',
         'provider_id',
         'avatar',
+        // Seller verification fields
+        'verification_status',
+        'ktp_number',
+        'ktp_photo_path',
+        'store_name',
+        'store_address',
+        'store_photo_path',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
+        'selfie_with_ktp_path',
+        'verification_submitted_at',
+        'verification_approved_at',
+        'verification_rejected_at',
+        'rejection_reason',
     ];
 
     protected $hidden = [
@@ -37,6 +52,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'verification_submitted_at' => 'datetime',
+            'verification_approved_at' => 'datetime',
+            'verification_rejected_at' => 'datetime',
         ];
     }
 
@@ -118,5 +136,38 @@ class User extends Authenticatable
     public function hasAnyRole(array $roles): bool
     {
         return in_array($this->role, $roles);
+    }
+
+    // Seller Verification Methods
+    public function isPendingVerification(): bool
+    {
+        return $this->verification_status === 'pending';
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verification_status === 'approved';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->verification_status === 'rejected';
+    }
+
+    public function hasCompleteDocuments(): bool
+    {
+        return !empty($this->ktp_number) && 
+               !empty($this->ktp_photo_path) && 
+               !empty($this->selfie_with_ktp_path) &&
+               !empty($this->store_name) &&
+               !empty($this->store_address) &&
+               !empty($this->bank_name) &&
+               !empty($this->bank_account_number) &&
+               !empty($this->bank_account_name);
+    }
+
+    public function canAccessSellerFeatures(): bool
+    {
+        return $this->isSeller() && $this->isVerified();
     }
 }
