@@ -71,7 +71,14 @@ class CartController extends Controller
     {
         abort_unless($item->user_id === Auth::id(), 403);
         $item->delete();
-        return back()->with('success', 'Produk dihapus dari keranjang');
+        
+        $count = CartItem::where('user_id', Auth::id())->sum('quantity');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk dihapus dari keranjang',
+            'count' => $count
+        ]);
     }
 
     public function clear()

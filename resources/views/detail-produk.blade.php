@@ -151,7 +151,9 @@
                             $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
                         @endphp
                         @if($wishlistCount > 0)
-                            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
+                        @else
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold hidden">0</span>
                         @endif
                     </div>
                     <span class="text-sm font-medium">Wishlist</span>
@@ -166,7 +168,9 @@
                             $cartCount = \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity');
                         @endphp
                         @if($cartCount > 0)
-                            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
+                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
+                        @else
+                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold hidden">0</span>
                         @endif
                     </div>
                     <span class="text-sm font-medium">Keranjang</span>
@@ -704,39 +708,55 @@
         }
 
         // Update badge counters in navbar
-        async function updateBadges() {
-            try {
-                // Update cart badge
-                const cartRes = await fetch("{{ route('cart.count') }}");
-                if (cartRes.ok) {
-                    const cartData = await cartRes.json();
-                    const cartBadge = document.getElementById('cart-badge');
-                    if (cartBadge && cartData.count !== undefined) {
-                        cartBadge.textContent = cartData.count;
-                        if (cartData.count > 0) {
-                            cartBadge.classList.remove('hidden');
-                        } else {
-                            cartBadge.classList.add('hidden');
-                        }
-                    }
+        function updateCartBadge(count) {
+            const cartBadge = document.getElementById('cart-badge');
+            const mobileCartBadge = document.getElementById('mobile-cart-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (cartBadge) {
+                    cartBadge.textContent = displayCount;
+                    cartBadge.classList.remove('hidden');
                 }
+                
+                if (mobileCartBadge) {
+                    mobileCartBadge.textContent = displayCount;
+                    mobileCartBadge.classList.remove('hidden');
+                }
+            } else {
+                if (cartBadge) {
+                    cartBadge.classList.add('hidden');
+                }
+                if (mobileCartBadge) {
+                    mobileCartBadge.classList.add('hidden');
+                }
+            }
+        }
 
-                // Update wishlist badge
-                const wishRes = await fetch("{{ route('wishlist.count') }}");
-                if (wishRes.ok) {
-                    const wishData = await wishRes.json();
-                    const wishBadge = document.getElementById('wishlist-badge');
-                    if (wishBadge && wishData.count !== undefined) {
-                        wishBadge.textContent = wishData.count;
-                        if (wishData.count > 0) {
-                            wishBadge.classList.remove('hidden');
-                        } else {
-                            wishBadge.classList.add('hidden');
-                        }
-                    }
+        function updateWishlistBadge(count) {
+            const wishBadge = document.getElementById('wishlist-badge');
+            const mobileWishBadge = document.getElementById('mobile-wishlist-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (wishBadge) {
+                    wishBadge.textContent = displayCount;
+                    wishBadge.classList.remove('hidden');
                 }
-            } catch (e) {
-                // Silent fail
+                
+                if (mobileWishBadge) {
+                    mobileWishBadge.textContent = displayCount;
+                    mobileWishBadge.classList.remove('hidden');
+                }
+            } else {
+                if (wishBadge) {
+                    wishBadge.classList.add('hidden');
+                }
+                if (mobileWishBadge) {
+                    mobileWishBadge.classList.add('hidden');
+                }
             }
         }
 
@@ -793,7 +813,10 @@
                 
                 if (data.success) {
                     showToast(`${payload.name} (${qty} pcs) berhasil ditambahkan ke keranjang!`);
-                    await updateBadges();
+                    // Update cart badge with count from response
+                    if (data.count !== undefined) {
+                        updateCartBadge(data.count);
+                    }
                 } else {
                     console.error('❌ Failed:', data);
                     alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
@@ -841,7 +864,10 @@
                         icon.classList.remove('fill-current', 'text-red-600');
                         icon.classList.add('text-gray-600');
                     }
-                    await updateBadges();
+                    // Update wishlist badge with count from response
+                    if (data.count !== undefined) {
+                        updateWishlistBadge(data.count);
+                    }
                 } else {
                     alert('Gagal memperbarui wishlist');
                 }

@@ -94,7 +94,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             @if($wishlistCount > 0)
-                            <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
                                 {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
                             </span>
                             @endif
@@ -280,47 +280,15 @@
         @endif
     </main>
 
-    <!-- Modal Konfirmasi Hapus -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Yakin Ingin Menghapus?</h3>
-                <p class="text-sm text-gray-600 mb-6">Yakin Ingin Menghapus Produk ini dari Wishlist</p>
-                <div class="flex gap-3">
-                    <button onclick="closeDeleteModal()" class="flex-1 bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg hover:bg-gray-300 transition font-medium">
-                        Batal
-                    </button>
-                    <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition font-medium">
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        let deleteItemId = null;
 
         function removeFromWishlist(id) {
-            deleteItemId = id;
-            document.getElementById('delete-modal').classList.remove('hidden');
-        }
+            if (!confirm('Hapus dari wishlist?')) {
+                return;
+            }
 
-        function closeDeleteModal() {
-            document.getElementById('delete-modal').classList.add('hidden');
-            deleteItemId = null;
-        }
-
-        function confirmDelete() {
-            if (!deleteItemId) return;
-
-            fetch(`/wishlist/${deleteItemId}`, {
+            fetch(`/wishlist/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrf,
@@ -330,27 +298,44 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    closeDeleteModal();
-                    const item = document.querySelector(`[data-wishlist-id="${deleteItemId}"]`);
+                    // Update badge counter
+                    updateWishlistBadge(data.count);
+                    
+                    const item = document.querySelector(`[data-wishlist-id="${id}"]`);
                     if (item) {
-                        item.remove();
+                        item.style.transition = 'opacity 0.3s';
+                        item.style.opacity = '0';
+                        setTimeout(() => {
+                            item.remove();
+                            
+                            if (data.count === 0) {
+                                window.location.reload();
+                            }
+                        }, 300);
                     }
-                    
-                    if (data.count === 0) {
-                        setTimeout(() => window.location.reload(), 500);
-                    }
-                    
-                    showToast('Produk dihapus dari wishlist');
                 } else {
-                    closeDeleteModal();
                     alert('Gagal menghapus produk');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                closeDeleteModal();
                 alert('Terjadi kesalahan');
             });
+        }
+
+        function updateWishlistBadge(count) {
+            const badge = document.getElementById('wishlist-badge');
+            const mobileBadge = document.getElementById('mobile-wishlist-badge');
+            
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            
+            if (mobileBadge) {
+                mobileBadge.textContent = count;
+                mobileBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
         }
 
         function addToCart(name, price, original, tag, image) {
