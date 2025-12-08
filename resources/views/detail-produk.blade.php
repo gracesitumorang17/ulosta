@@ -151,9 +151,13 @@
                             $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
                         @endphp
                         @if($wishlistCount > 0)
-                            <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                            </span>
                         @else
-                            <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold hidden">0</span>
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
                         @endif
                     </div>
                     <span class="text-sm font-medium">Wishlist</span>
@@ -168,9 +172,13 @@
                             $cartCount = \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity');
                         @endphp
                         @if($cartCount > 0)
-                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
                         @else
-                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold hidden">0</span>
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
                         @endif
                     </div>
                     <span class="text-sm font-medium">Keranjang</span>
@@ -440,7 +448,6 @@
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
@@ -455,7 +462,6 @@
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
@@ -466,16 +472,15 @@
                     <!-- Wishlist and Share -->
                     <div class="flex gap-3">
                         <button
-                            class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition"
+                            class="flex items-center gap-2 {{ isset($product['is_in_wishlist']) && $product['is_in_wishlist'] ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 transition"
                             onclick="toggleWishlist(this)"
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ isset($product['is_in_wishlist']) && $product['is_in_wishlist'] ? 'fill-current' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             <span class="text-sm">Simpan</span>
@@ -514,12 +519,11 @@
                                 data-product-id="{{ $rec->id }}"
                                 data-name="{{ $rec->name }}"
                                 data-price="{{ $rec->formatted_price }}"
-                                data-original="{{ $rec->formatted_original_price }}"
                                 data-tag="{{ $rec->tag ?? '' }}"
                                 data-image="{{ $rec->image }}"
                                 aria-label="Tambah ke wishlist"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ isset($recommendationWishlist[$rec->id]) && $recommendationWishlist[$rec->id] ? 'text-red-600 fill-current' : 'text-gray-500' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
                                 </svg>
                             </button>
@@ -544,7 +548,6 @@
                                     data-product-id="{{ $rec->id }}"
                                     data-name="{{ $rec->name }}"
                                     data-price="{{ $rec->formatted_price }}"
-                                    data-original="{{ $rec->formatted_original_price }}"
                                     data-tag="{{ $rec->tag ?? '' }}"
                                     data-image="{{ $rec->image }}"
                                 >
@@ -770,7 +773,6 @@
             const payload = {
                 name: btn.dataset.name,
                 price: btn.dataset.price,
-                original: btn.dataset.original,
                 tag: btn.dataset.tag,
                 image: btn.dataset.image,
                 qty: qty
@@ -835,9 +837,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
                     body: JSON.stringify({
+                        product_id: btn.dataset.productId,
                         name: btn.dataset.name,
                         price: btn.dataset.price,
-                        original: btn.dataset.original,
                         tag: btn.dataset.tag,
                         image: btn.dataset.image
                     })
@@ -852,10 +854,14 @@
                     // Toggle icon state
                     if (data.action === 'added') {
                         icon.classList.add('fill-current', 'text-red-600');
-                        icon.classList.remove('text-gray-600');
+                        icon.classList.remove('text-gray-500', 'text-gray-600');
+                        btn.classList.remove('text-gray-600');
+                        btn.classList.add('text-red-600');
                     } else {
                         icon.classList.remove('fill-current', 'text-red-600');
-                        icon.classList.add('text-gray-600');
+                        icon.classList.add('text-gray-500');
+                        btn.classList.remove('text-red-600');
+                        btn.classList.add('text-gray-600');
                     }
                     // Update wishlist badge with count from response
                     if (data.count !== undefined) {
@@ -886,7 +892,6 @@
             const payload = {
                 name: btn.dataset.name,
                 price: btn.dataset.price,
-                original: btn.dataset.original,
                 tag: btn.dataset.tag,
                 image: btn.dataset.image,
                 qty: qty

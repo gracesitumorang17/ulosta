@@ -11,6 +11,10 @@ use App\Http\Controllers\CheckoutController;
 use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\FacebookController;
+
+// Test routes for Facebook
+require __DIR__.'/test-facebook.php';
 
 // Root: redirect based on authentication and role
 Route::get('/', function () {
@@ -36,7 +40,6 @@ Route::get('/', function () {
             'tag' => $p->tag,
             'category' => $p->category,
             'price' => $p->formatted_price,
-            'original_price' => $p->formatted_original_price,
             'desc' => $p->description,
         ];
     });
@@ -59,13 +62,29 @@ Route::get('/produk/{id}', function ($id) {
             ->take(3)
             ->get();
         
+        // Check if product is in user's wishlist
+        $isInWishlist = false;
+        $recommendationWishlist = [];
+        if (Auth::check()) {
+            $isInWishlist = \App\Models\Wishlist::where('user_id', Auth::id())
+                ->where('product_id', $product->id)
+                ->exists();
+            
+            // Check wishlist status for recommendations
+            $wishlistProductIds = \App\Models\Wishlist::where('user_id', Auth::id())
+                ->pluck('product_id')
+                ->toArray();
+            foreach ($recommendations as $rec) {
+                $recommendationWishlist[$rec->id] = in_array($rec->id, $wishlistProductIds);
+            }
+        }
+        
         // Convert to array format expected by the view
         $productData = [
             'id' => $product->id,
             'name' => $product->name,
             'description' => $product->description,
             'price' => $product->formatted_price,
-            'original_price' => $product->formatted_original_price,
             'image' => $product->image,
             'tag' => $product->tag,
             'stock' => $product->stock,
@@ -76,11 +95,16 @@ Route::get('/produk/{id}', function ($id) {
             'weight' => '800 gram',
             'material' => 'Katun Premium', 
             'origin' => 'Sumatera Utara',
-            'reviews' => '64 reviews'
+            'reviews' => '64 reviews',
+            'is_in_wishlist' => $isInWishlist
         ];
 
         \Log::info('✅ PRODUCT LOADED: ' . $product->name);
-        return view('detail-produk', ['product' => $productData, 'recommendations' => $recommendations]);
+        return view('detail-produk', [
+            'product' => $productData, 
+            'recommendations' => $recommendations,
+            'recommendationWishlist' => $recommendationWishlist
+        ]);
     } catch (\Exception $e) {
         \Log::error('❌ PRODUCT ERROR - ID: ' . $id . ' | ' . $e->getMessage());
         return redirect()->route('welcome')->with('error', 'Produk tidak ditemukan');
@@ -657,3 +681,13 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
 // Google OAuth Routes (harus di LUAR middleware auth)
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+// Facebook OAuth Routes
+Route::get('/auth/facebook', [FacebookController::class, 'redirect'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [FacebookController::class, 'callback'])->name('auth.facebook.callback');
+
+// API Routes for Facebook Authentication
+Route::prefix('api/auth')->group(function () {
+    Route::get('/facebook/redirect', [FacebookController::class, 'apiRedirect'])->name('api.auth.facebook.redirect');
+    Route::get('/facebook/callback', [FacebookController::class, 'apiCallback'])->name('api.auth.facebook.callback');
+});

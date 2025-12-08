@@ -337,7 +337,6 @@
                                     onclick="toggleWishlist(event, this)"
                                     data-name="{{ $product['name'] ?? '' }}"
                                     data-price="{{ $product['price'] ?? '' }}"
-                                    data-original="{{ $product['original_price'] ?? '' }}"
                                     data-tag="{{ $product['tag'] ?? '' }}"
                                     data-image="{{ $product['image'] ?? '' }}"
                                 >
@@ -363,9 +362,6 @@
                                 <!-- Price -->
                                 <div class="mt-3">
                                     <div class="text-red-600 font-semibold text-base">{{ $product['price'] }}</div>
-                                    @if(isset($product['original_price']) && $product['original_price'])
-                                        <div class="text-xs text-gray-400 line-through mt-0.5">{{ $product['original_price'] }}</div>
-                                    @endif
                                 </div>
 
                                 <div class="my-3 border-t border-dashed border-gray-200"></div>

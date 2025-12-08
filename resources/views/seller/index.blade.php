@@ -196,7 +196,61 @@
                         </svg>
                         Kembali ke Toko
                     </a>
-                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100">👤</span>
+                    
+                    <!-- Profil Dropdown -->
+                    <div class="relative" id="profile-dd">
+                        <button id="profile-btn" type="button" aria-expanded="false" class="flex items-center gap-2 text-gray-800 hover:text-red-600 transition focus:outline-none">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100">👤</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <!-- Popup menu -->
+                        <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
+                            <!-- Header dengan Gradient Merah -->
+                            <div class="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700">
+                                <p class="text-sm font-semibold text-white">{{ Auth::user()->name ?? 'Nama Penjual' }}</p>
+                                <p class="text-xs text-red-100 mt-0.5">Penjual</p>
+                            </div>
+                            <nav class="py-2">
+                                <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Dashboard Penjual</span>
+                                </a>
+                                <a href="{{ route('seller.products.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Kelola Produk</span>
+                                </a>
+                                <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Pesanan Masuk</span>
+                                </a>
+                                <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Profil Saya</span>
+                                </a>
+                                <div class="my-2 border-t border-gray-100"></div>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Keluar</span>
+                                    </button>
+                                </form>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -278,7 +332,6 @@
                         'desc' => 'Ulos tradisional dengan motif...',
                         'cat' => 'Pernikahan',
                         'price' => 'Rp 800.000',
-                        'old' => null,
                         'stock' => 25,
                         'status' => 'aktif',
                         'sold' => 100,
@@ -289,7 +342,6 @@
                         'desc' => 'Ulos tradisional dengan motif...',
                         'cat' => 'Penghormatan',
                         'price' => 'Rp 1.000.000',
-                        'old' => 'Rp 1.100.000',
                         'stock' => 3,
                         'status' => 'aktif',
                         'sold' => 175,
@@ -300,7 +352,6 @@
                         'desc' => 'Ulos tradisional dengan motif...',
                         'cat' => 'Kematian',
                         'price' => 'Rp 1.500.000',
-                        'old' => 'Rp 2.000.000',
                         'stock' => 3,
                         'status' => 'aktif',
                         'sold' => 111,
@@ -357,9 +408,6 @@
 
                     <div class="w-36 center text-sm">
                         <div class="font-semibold">{{ $p['price'] }}</div>
-                        @if (!empty($p['old']))
-                            <div class="text-xs text-gray-400 line-through">{{ $p['old'] }}</div>
-                        @endif
                     </div>
 
                     <div class="w-24 center">
@@ -409,6 +457,35 @@
     <script>
         // update count
         document.getElementById('count').textContent = document.querySelectorAll('.table-row').length;
+        
+        // Profile dropdown toggle
+        const profileBtn = document.getElementById('profile-btn');
+        const profileMenu = document.getElementById('profile-menu');
+        
+        if (profileBtn && profileMenu) {
+            profileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isHidden = profileMenu.classList.contains('hidden');
+                profileMenu.classList.toggle('hidden');
+                profileBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', function(e) {
+                if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                    profileBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !profileMenu.classList.contains('hidden')) {
+                    profileMenu.classList.add('hidden');
+                    profileBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
     </script>
 </body>
 
