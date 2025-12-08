@@ -14,7 +14,7 @@ class MultiRoleSeeder extends Seeder
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Administrator',
-                'password' => Hash::make('AdminPassword123'),
+                'password' => Hash::make('e'),
                 'role' => 'admin',
             ]
         );
