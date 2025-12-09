@@ -72,127 +72,50 @@
 </head>
 
 <body class="bg-gray-50 text-gray-800">
-    <header class="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
-                <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center shadow-sm"><span
-                            class="text-white font-bold text-lg">U</span></div>
-                    <span class="font-semibold text-lg">UlosTa Seller</span>
-                </a>
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-                    <a href="{{ route('seller.dashboard') }}"
-                        class="flex items-center gap-2 {{ request()->routeIs('seller.dashboard') ? 'text-red-600' : 'text-gray-700 hover:text-red-600' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 3h7v7H3V3Zm11 0h7v5h-7V3ZM3 14h7v7H3v-7Zm11-6h7v13h-7V8Z" />
-                        </svg>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="{{ route('seller.products.index') }}"
-                        class="flex items-center gap-2 {{ request()->routeIs('seller.products.*') ? 'text-red-600' : 'text-gray-700 hover:text-red-600' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 16.5V7.5a1 1 0 0 0-.555-.832l-8-4a1 1 0 0 0-.89 0l-8 4A1 1 0 0 0 3 7.5v9a1 1 0 0 0 .555.832l8 4a1 1 0 0 0 .89 0l8-4A1 1 0 0 0 21 16.5ZM3.5 7.75l8.5 4.25 8.5-4.25M12 12v9" />
-                        </svg>
-                        <span>Produk</span>
-                    </a>
-                    <a href="{{ route('seller.orders.index') }}"
-                        class="flex items-center gap-2 {{ request()->routeIs('seller.orders.*') ? 'text-red-600' : 'text-gray-700 hover:text-red-600' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l3 12h10l3-8H6" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
-                        </svg>
-                        <span>Pesanan</span>
-                    </a>
-                    <a href="#" class="flex items-center gap-2 text-gray-700 hover:text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 3 3 5-5" />
-                        </svg>
-                        <span>Laporan</span>
-                    </a>
-                </nav>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('homepage') }}"
-                        class="hidden sm:inline-block border border-gray-300 rounded-full px-4 py-2 text-sm hover:bg-gray-100">Kembali
-                        ke Toko</a>
-                </div>
-            </div>
-        </div>
-    </header>
+    @include('seller.partials.navbar')
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         @php
-            // Sample dataset (replace later with DB)
             if (!function_exists('format_rp')) {
                 function format_rp($v)
                 {
                     return 'Rp ' . number_format($v, 0, ',', '.');
                 }
             }
-            $orders = [
-                [
-                    'code' => 'ORD001234',
-                    'customer' => 'Budi Santoso',
-                    'phone' => '081234567890',
-                    'items' => 1,
-                    'total' => 1250000,
-                    'date' => '2025-01-15 10:30',
-                    'status' => 'Menunggu',
-                ],
-                [
-                    'code' => 'ORD001235',
-                    'customer' => 'Siti Nurhaliza',
-                    'phone' => '082345678901',
-                    'items' => 1,
-                    'total' => 950000,
-                    'date' => '2025-01-14 15:20',
-                    'status' => 'Diproses',
-                ],
-                [
-                    'code' => 'ORD001236',
-                    'customer' => 'Ahmad Dhani',
-                    'phone' => '083456789012',
-                    'items' => 1,
-                    'total' => 1100000,
-                    'date' => '2025-01-13 09:15',
-                    'status' => 'Dikirim',
-                ],
-                [
-                    'code' => 'ORD001237',
-                    'customer' => 'Dewi Lestari',
-                    'phone' => '084567890123',
-                    'items' => 1,
-                    'total' => 2700000,
-                    'date' => '2025-01-10 14:45',
-                    'status' => 'Selesai',
-                ],
+            // Backend key -> Indonesian label
+            $labelMap = [
+                'pending' => 'Menunggu',
+                'processing' => 'Diproses',
+                'shipped' => 'Dikirim',
+                'delivered' => 'Selesai',
+                'cancelled' => 'Dibatalkan',
             ];
-            $statuses = ['Semua', 'Menunggu', 'Diproses', 'Dikirim', 'Selesai', 'Dibatalkan'];
-            $statusColors = [
-                'Menunggu' => 'bg-yellow-100 text-yellow-800',
-                'Diproses' => 'bg-indigo-100 text-indigo-700',
-                'Dikirim' => 'bg-purple-100 text-purple-700',
-                'Selesai' => 'bg-green-100 text-green-700',
-                'Dibatalkan' => 'bg-red-100 text-red-700',
+            // Backend key -> badge classes
+            $classMap = [
+                'pending' => 'bg-yellow-100 text-yellow-800',
+                'processing' => 'bg-indigo-100 text-indigo-700',
+                'shipped' => 'bg-purple-100 text-purple-700',
+                'delivered' => 'bg-green-100 text-green-700',
+                'cancelled' => 'bg-red-100 text-red-700',
             ];
+            $tabStatuses = ['Semua', 'Menunggu', 'Diproses', 'Dikirim', 'Selesai', 'Dibatalkan'];
+            // Build counts from real $orders provided by controller
             $counts = [];
-            foreach ($statuses as $s) {
+            foreach ($tabStatuses as $s) {
                 if ($s === 'Semua') {
-                    $counts[$s] = count($orders);
+                    $counts[$s] = isset($orders) ? $orders->count() : 0;
                 } else {
-                    $counts[$s] = count(array_filter($orders, fn($o) => $o['status'] === $s));
+                    $key = array_search($s, $labelMap, true);
+                    $counts[$s] = isset($orders) ? $orders->where('status', $key)->count() : 0;
                 }
             }
             $activeStatus = request('status');
-            $list = $orders;
+            $list = isset($orders) ? $orders : collect();
             if ($activeStatus && $activeStatus !== 'Semua') {
-                $list = array_values(array_filter($orders, fn($o) => $o['status'] === $activeStatus));
+                $key = array_search($activeStatus, $labelMap, true);
+                if ($key) {
+                    $list = $list->where('status', $key);
+                }
             }
         @endphp
 
@@ -202,13 +125,13 @@
         <!-- Status Filter Tabs -->
         <div class="bg-white border border-gray-200 rounded-xl p-4 mb-6">
             <div class="flex flex-wrap gap-6">
-                @foreach ($statuses as $s)
+                @foreach ($tabStatuses as $s)
                     @php $active = ($activeStatus === $s) || (!$activeStatus && $s==='Semua'); @endphp
                     <a href="{{ $s === 'Semua' ? route('seller.orders.index') : route('seller.orders.index', ['status' => $s]) }}"
                         class="relative flex flex-col items-center justify-center min-w-[100px] px-4 py-3 rounded-lg text-xs font-medium {{ $active ? 'bg-gray-50 border border-gray-300 shadow-sm' : 'hover:bg-gray-50' }}">
                         <span class="mb-1">{{ $s }}</span>
                         <span
-                            class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-semibold rounded-full bg-gray-200 text-gray-700">{{ $counts[$s] }}</span>
+                            class="inline-flex items-center justify-center w-5 h-5 text-[11px] font-semibold rounded-full bg-gray-200 text-gray-700">{{ $counts[$s] ?? 0 }}</span>
                         @if ($active)
                             <span class="absolute inset-0 rounded-lg ring-1 ring-gray-300 pointer-events-none"></span>
                         @endif
@@ -262,22 +185,28 @@
                 <tbody class="divide-y divide-gray-200 text-gray-700">
                     @forelse ($list as $o)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium">{{ $o['code'] }}</td>
+                            <td class="px-4 py-3 font-medium">{{ $o->order_number ?? 'ORD-' . $o->id }}</td>
                             <td class="px-4 py-3">
-                                <div class="font-medium">{{ $o['customer'] }}</div>
-                                <div class="text-xs text-gray-500">{{ $o['phone'] }}</div>
+                                <div class="font-medium">{{ optional($o->user)->name ?? '—' }}</div>
+                                <div class="text-xs text-gray-500">{{ optional($o->user)->phone ?? '—' }}</div>
                             </td>
-                            <td class="px-4 py-3">{{ $o['items'] }} item</td>
-                            <td class="px-4 py-3 text-red-600 font-medium">{{ format_rp($o['total']) }}</td>
-                            <td class="px-4 py-3">{{ $o['date'] }}</td>
+                            <td class="px-4 py-3">{{ $o->orderItems ? $o->orderItems->count() : 0 }} item</td>
+                            <td class="px-4 py-3 text-red-600 font-medium">
+                                {{ format_rp((int) ($o->total_amount ?? ($o->subtotal ?? 0))) }}</td>
+                            <td class="px-4 py-3">{{ $o->created_at ? $o->created_at->format('Y-m-d H:i') : '—' }}</td>
                             <td class="px-4 py-3">
-                                @php $sc = $statusColors[$o['status']] ?? 'bg-gray-100 text-gray-700'; @endphp
+                                @php
+                                    $statusKey = $o->status;
+                                    $badgeClass = $classMap[$statusKey] ?? 'bg-gray-100 text-gray-700';
+                                @endphp
                                 <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $sc }}">{{ $o['status'] }}</span>
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $badgeClass }} js-status-badge"
+                                    data-order-id="{{ $o->id }}">{{ $labelMap[$statusKey] ?? ucfirst($statusKey) }}</span>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3 text-gray-500">
-                                    <a href="#" class="hover:text-gray-700" title="Detail">
+                                    <a href="{{ route('seller.orders.show', $o->id) }}" class="hover:text-gray-700"
+                                        title="Detail">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -293,34 +222,27 @@
                                         </svg>
                                         <div class="action-menu" hidden role="menu" aria-label="Aksi Pesanan">
                                             <ul>
-                                                <li data-action="accept" role="menuitem">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        class="w-4 h-4 text-green-600" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="m4.5 12.75 6 6 9-13.5" />
-                                                    </svg>
-                                                    Terima Pesanan
-                                                </li>
-                                                <li data-action="cancel" data-danger="true" role="menuitem">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="1.8">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M6 18 18 6M6 6l12 12" />
-                                                    </svg>
-                                                    Batalkan Pesanan
-                                                </li>
+                                                <li data-action="set-status" data-status="pending" role="menuitem">
+                                                    Tandai Menunggu</li>
+                                                <li data-action="set-status" data-status="processing" role="menuitem">
+                                                    Tandai Diproses</li>
+                                                <li data-action="set-status" data-status="shipped" role="menuitem">
+                                                    Tandai Dikirim</li>
+                                                <li data-action="set-status" data-status="delivered" role="menuitem">
+                                                    Tandai Selesai</li>
+                                                <li data-action="set-status" data-status="cancelled"
+                                                    data-danger="true" role="menuitem">Batalkan</li>
                                             </ul>
                                         </div>
                                     </button>
+                                    <input type="hidden" class="js-order-id" value="{{ $o->id }}" />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500">Tidak ada pesanan
-                                untuk status ini.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500">Belum ada pesanan.
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -362,14 +284,53 @@
                 });
             }
         });
-        // Demo handlers (show alert) - replace later with real actions
-        document.addEventListener('click', e => {
+        // Status update via AJAX
+        const LABELS = {
+            pending: 'Menunggu',
+            processing: 'Diproses',
+            shipped: 'Dikirim',
+            delivered: 'Selesai',
+            cancelled: 'Dibatalkan'
+        };
+        const CLASSES = {
+            pending: 'bg-yellow-100 text-yellow-800',
+            processing: 'bg-indigo-100 text-indigo-700',
+            shipped: 'bg-purple-100 text-purple-700',
+            delivered: 'bg-green-100 text-green-700',
+            cancelled: 'bg-red-100 text-red-700'
+        };
+        document.addEventListener('click', async e => {
             const li = e.target.closest('.action-menu li');
             if (!li) return;
             const action = li.dataset.action;
-            if (action === 'accept') alert('Pesanan diterima (demo).');
-            if (action === 'cancel') alert('Pesanan dibatalkan (demo).');
-            // close menu after action
+            if (action !== 'set-status') return;
+            const status = li.dataset.status;
+            const row = li.closest('tr');
+            const idInput = row.querySelector('.js-order-id');
+            const orderId = idInput ? idInput.value : null;
+            if (!orderId) return;
+            try {
+                const res = await fetch(`/seller/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        status
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const key = data.status || status;
+                    const badge = row.querySelector('.js-status-badge');
+                    if (badge) {
+                        badge.className =
+                            `inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold js-status-badge ${CLASSES[key] || 'bg-gray-100 text-gray-700'}`;
+                        badge.textContent = LABELS[key] || key;
+                    }
+                }
+            } catch (err) {}
             const menu = li.closest('.action-menu');
             if (menu) {
                 menu.hidden = true;
@@ -378,25 +339,7 @@
             }
         });
 
-        // Wire up navbar "Laporan" link without changing the partial
-        (function() {
-            try {
-                const laporanHref = @json(route('seller.reports.index'));
-                const header = document.querySelector('header');
-                if (!header) return;
-                header.querySelectorAll('nav a').forEach(a => {
-                    const label = a.querySelector('span');
-                    if (label && label.textContent.trim() === 'Laporan') {
-                        a.setAttribute('href', laporanHref);
-                        const path = new URL(laporanHref, window.location.origin).pathname;
-                        if (window.location.pathname === path) {
-                            a.classList.remove('text-gray-700');
-                            a.classList.add('text-red-600');
-                        }
-                    }
-                });
-            } catch (_) {}
-        })();
+        // Using shared navbar partial; no per-page nav patch required
     </script>
 </body>
 

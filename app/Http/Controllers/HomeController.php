@@ -38,7 +38,7 @@ class HomeController extends Controller
                 }
             }
         }
-        
+
         // Get search query and filters
         $search = $request->input('q');
         $jenisFilter = $request->input('jenis');
@@ -64,7 +64,7 @@ class HomeController extends Controller
 
         $productsData = $query->orderBy('created_at', 'desc')->get();
 
-        // Format products for view
+        // Format products for view (from DB)
         $products = $productsData->map(function ($product) {
             return [
                 'id' => $product->id,
@@ -78,6 +78,25 @@ class HomeController extends Controller
                 'function' => $product->function ?? '',
             ];
         })->toArray();
+
+        // Append seller custom products stored in session (demo persistence)
+        $custom = session()->get('custom_products', []);
+        foreach ($custom as $slug => $p) {
+            $products[] = [
+                'id' => $p['slug'] ?? $slug,
+                'name' => $p['title'] ?? 'Produk',
+                'tag' => $p['category'] ?? 'Produk',
+                // price already formatted for DB items; format here for custom
+                'price' => number_format((int)($p['price'] ?? 0), 0, ',', '.'),
+                'original_price' => null,
+                'original' => null,
+                'image' => $p['img'] ?? asset('image/ulos1.jpeg'),
+                'description' => $p['description'] ?? '',
+                'desc' => $p['description'] ?? '',
+                'category' => $p['category'] ?? '',
+                'function' => $p['jenis'] ?? '',
+            ];
+        }
 
         // Return appropriate view based on authentication status
         if (Auth::check()) {
