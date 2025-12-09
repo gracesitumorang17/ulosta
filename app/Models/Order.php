@@ -92,7 +92,6 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Alias to match existing controller/view usage
     public function items()
     {
         return $this->hasMany(OrderItem::class);

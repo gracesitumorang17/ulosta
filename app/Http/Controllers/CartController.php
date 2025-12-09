@@ -26,12 +26,10 @@ class CartController extends Controller
             'tag' => 'nullable|string|max:100',
             'image' => 'nullable|string|max:255',
             'price' => 'required|string', // e.g. "Rp.800.000"
-            'original' => 'nullable|string',
             'qty' => 'nullable|integer|min:1'
         ]);
 
         $price = (int) preg_replace('/[^0-9]/', '', $data['price']);
-        $original = isset($data['original']) ? (int) preg_replace('/[^0-9]/', '', $data['original']) : null;
         $qty = $data['qty'] ?? 1;
 
         $item = CartItem::firstOrNew([
@@ -45,7 +43,6 @@ class CartController extends Controller
                 'tag' => $data['tag'] ?? null,
                 'image' => $data['image'] ?? null,
                 'price' => $price,
-                'original_price' => $original,
                 'quantity' => $qty,
             ]);
         }
@@ -71,7 +68,14 @@ class CartController extends Controller
     {
         abort_unless($item->user_id === Auth::id(), 403);
         $item->delete();
-        return back()->with('success', 'Produk dihapus dari keranjang');
+        
+        $count = CartItem::where('user_id', Auth::id())->sum('quantity');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk dihapus dari keranjang',
+            'count' => $count
+        ]);
     }
 
     public function clear()

@@ -11,9 +11,10 @@ use App\Http\Controllers\CheckoutController;
 use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\SellerOrderController;
+use App\Http\Controllers\Auth\FacebookController;
 
+// Test routes for Facebook
+require __DIR__.'/test-facebook.php';
 
 // Root: redirect based on authentication and role
 Route::get('/', function () {
@@ -37,8 +38,8 @@ Route::get('/', function () {
             'description' => $p->description,
             'image' => $p->image,
             'tag' => $p->tag,
+            'category' => $p->category,
             'price' => $p->formatted_price,
-            'original_price' => $p->formatted_original_price,
             'desc' => $p->description,
         ];
     });
@@ -60,14 +61,13 @@ Route::get('/produk/{id}', function ($id) {
             ->latest()
             ->take(3)
             ->get();
-
+        
         // Convert to array format expected by the view
         $productData = [
             'id' => $product->id,
             'name' => $product->name,
             'description' => $product->description,
             'price' => $product->formatted_price,
-            'original_price' => $product->formatted_original_price,
             'image' => $product->image,
             'tag' => $product->tag,
             'stock' => $product->stock,
@@ -78,11 +78,16 @@ Route::get('/produk/{id}', function ($id) {
             'weight' => '800 gram',
             'material' => 'Katun Premium',
             'origin' => 'Sumatera Utara',
-            'reviews' => '64 reviews'
+            'reviews' => '64 reviews',
+            'is_in_wishlist' => $isInWishlist
         ];
 
         \Log::info('✅ PRODUCT LOADED: ' . $product->name);
-        return view('detail-produk', ['product' => $productData, 'recommendations' => $recommendations]);
+        return view('detail-produk', [
+            'product' => $productData, 
+            'recommendations' => $recommendations,
+            'recommendationWishlist' => $recommendationWishlist
+        ]);
     } catch (\Exception $e) {
         \Log::error('❌ PRODUCT ERROR - ID: ' . $id . ' | ' . $e->getMessage());
         return redirect()->route('welcome')->with('error', 'Produk tidak ditemukan');
@@ -103,22 +108,35 @@ Route::post('/masuk', function (Request $request) {
         'password' => 'required|string',
     ]);
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        $role = Auth::user()->role;
-        // Redirect by role
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        if ($role === 'seller') {
-            return redirect()->route('seller.dashboard');
-        }
-        return redirect()->route('homepage');
+    // Check if user exists
+    $user = \App\Models\User::where('email', $credentials['email'])->first();
+    
+    if (!$user) {
+        return back()->withErrors([
+            'email' => 'Email tidak terdaftar.',
+        ])->withInput();
     }
 
-    return back()->withErrors([
-        'email' => 'Email atau kata sandi salah.',
-    ])->withInput();
+    // Verify password
+    if (!\Hash::check($credentials['password'], $user->password)) {
+        return back()->withErrors([
+            'email' => 'Password salah.',
+        ])->withInput();
+    }
+
+    // Login the user
+    Auth::login($user);
+    $request->session()->regenerate();
+    
+    $role = Auth::user()->role;
+    // Redirect by role
+    if ($role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($role === 'seller') {
+        return redirect()->route('seller.dashboard');
+    }
+    return redirect()->route('homepage');
 })->name('masuk.submit');
 
 // password reset request (placeholder)
@@ -223,6 +241,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/detail-pembayaran/{orderId}', [CheckoutController::class, 'detailPembayaran'])->name('detail.pembayaran');
+    Route::get('/instruksi-pembayaran/{orderId}', [CheckoutController::class, 'instruksiPembayaran'])->name('instruksi.pembayaran');
 });
 
 // Profile routes (authenticated)
@@ -239,24 +259,52 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     })->name('dashboard');
 
     Route::get('/dashboard', function () {
-        return view('admin.admindashboard');
+        // Get verification statistics
+        $pendingVerifications = \App\Models\User::where('role', 'seller')
+            ->where('verification_status', 'pending')
+            ->get();
+        
+        $approvedVerifications = \App\Models\User::where('role', 'seller')
+            ->where('verification_status', 'approved')
+            ->get();
+        
+        $rejectedVerifications = \App\Models\User::where('role', 'seller')
+            ->where('verification_status', 'rejected')
+            ->get();
+            
+        $totalSellers = \App\Models\User::where('role', 'seller')->count();
+        
+        $recentVerifications = \App\Models\User::where('role', 'seller')
+            ->whereNotNull('verification_status')
+            ->orderBy('verification_submitted_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        return view('admin.admindashboard', compact(
+            'pendingVerifications', 
+            'approvedVerifications', 
+            'rejectedVerifications',
+            'totalSellers',
+            'recentVerifications'
+        ));
     })->name('dashboard');
 
     Route::get('/verifikasi-penjual', function () {
         return view('admin.verifikasi-penjual');
     })->name('verifikasi-penjual');
 
-    Route::get('/semua-penjual', function () {
-        return view('admin.semua-penjual');
-    })->name('semua-penjual');
+    // TODO: Implement these admin features later
+    // Route::get('/semua-penjual', function () {
+    //     return view('admin.semua-penjual');
+    // })->name('semua-penjual');
 
-    Route::get('/penjual-tidak-aktif', function () {
-        return view('admin.penjual-tidak-aktif');
-    })->name('penjual-tidak-aktif');
+    // Route::get('/penjual-tidak-aktif', function () {
+    //     return view('admin.penjual-tidak-aktif');
+    // })->name('penjual-tidak-aktif');
 
-    Route::get('/laporan', function () {
-        return view('admin.laporan');
-    })->name('laporan');
+    // Route::get('/laporan', function () {
+    //     return view('admin.laporan');
+    // })->name('laporan');
 });
 
 // (removed duplicate admin route group)
@@ -364,11 +412,15 @@ Route::middleware('auth')->group(function () {
     })->name('seller.onboarding.verify');
 
     Route::post('/seller/onboarding/verify', function (Request $request) {
+        $user = Auth::user();
+        $store = session('seller_store', []);
+
+        // Validate form data
         $data = $request->validate([
             'ktp_number' => ['required', 'regex:/^\d{16}$/'],
-            'ktp_photo' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-            'selfie_photo' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-            'store_photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'ktp_photo' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'selfie_photo' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'store_photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
         ], [
             'ktp_number.required' => 'Nomor KTP wajib diisi.',
             'ktp_number.regex' => 'Nomor KTP harus 16 digit angka.',
@@ -376,26 +428,38 @@ Route::middleware('auth')->group(function () {
             'selfie_photo.required' => 'Foto selfie dengan KTP wajib diunggah.',
         ]);
 
-        $store = session('seller_store', []);
-
-        // Simpan file ke storage/app/private/seller_verifications/{userId}
-        $basePath = 'private/seller_verifications/' . \Illuminate\Support\Facades\Auth::id();
-        $saved = [];
-        if ($request->hasFile('ktp_photo')) {
-            $saved['ktp_photo'] = $request->file('ktp_photo')->store($basePath);
-        }
-        if ($request->hasFile('selfie_photo')) {
-            $saved['selfie_photo'] = $request->file('selfie_photo')->store($basePath);
-        }
+        // Create storage directory for user
+        $userDir = 'seller_verification/' . $user->id;
+        
+        // Upload files to private storage
+        $ktpPath = $request->file('ktp_photo')->store($userDir, 'private');
+        $selfiePath = $request->file('selfie_photo')->store($userDir, 'private');
+        $storePath = null;
         if ($request->hasFile('store_photo')) {
-            $saved['store_photo'] = $request->file('store_photo')->store($basePath);
+            $storePath = $request->file('store_photo')->store($userDir, 'private');
         }
 
-        session(['seller_store' => array_merge($store, [
+        // Update user with verification data from onboarding + session
+        $user->update([
             'ktp_number' => $data['ktp_number'],
-        ], $saved)]);
+            'phone_number' => $user->phone ?? '', // Use existing phone if available
+            'store_name' => $store['name'] ?? ($user->name . ' Store'),
+            'store_address' => $store['address'] ?? '',
+            'bank_name' => $store['bank_name'] ?? '',
+            'bank_account_number' => $store['account_number'] ?? '',
+            'bank_account_name' => $store['account_name'] ?? '',
+            'ktp_photo_path' => $ktpPath,
+            'selfie_with_ktp_path' => $selfiePath,
+            'store_photo_path' => $storePath,
+            'verification_status' => 'pending',
+            'verification_submitted_at' => now(),
+        ]);
 
-        return redirect()->route('seller.settings')->with('success', 'Dokumen verifikasi berhasil diunggah.');
+        // Clear session data after saving to database
+        session()->forget('seller_store');
+
+        return redirect()->route('seller.verification.pending')
+            ->with('success', 'Dokumen verifikasi berhasil diunggah! Tim kami akan meninjau dalam 1-3 hari kerja.');
     })->name('seller.onboarding.verify.save');
 });
 // Dashboard penjual
@@ -525,6 +589,172 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     })->name('seller.settings.save');
 });
 
+// Seller Verification Routes
+Route::middleware(['auth', 'role:seller'])->group(function () {
+    // Verification form page (for new submission or resubmission after rejection)
+    Route::get('/seller/verification', function () {
+        $user = Auth::user();
+        
+        // If already verified, redirect to dashboard
+        if ($user->verification_status === 'approved') {
+            return redirect()->route('seller.dashboard')
+                ->with('info', 'Akun Anda sudah terverifikasi.');
+        }
+        
+        // If pending, redirect to pending page
+        if ($user->verification_status === 'pending') {
+            return redirect()->route('seller.verification.pending');
+        }
+        
+        // Show verification form (for first-time or rejected users)
+        return redirect()->route('seller.onboarding.verify');
+    })->name('seller.verification');
+    
+    // Verification pending page
+    Route::get('/seller/verification/pending', function () {
+        $user = Auth::user();
+        
+        // If not submitted verification yet or rejected, redirect to verification form
+        if (!$user->verification_status || $user->verification_status === 'rejected') {
+            return redirect()->route('seller.verification');
+        }
+        
+        // If already verified, redirect to dashboard
+        if ($user->verification_status === 'approved') {
+            return redirect()->route('seller.dashboard')
+                ->with('info', 'Akun Anda sudah terverifikasi.');
+        }
+        
+        return view('seller.verification-pending');
+    })->name('seller.verification.pending');
+    
+    // AJAX endpoint for checking verification status
+    Route::get('/seller/verification/status', function () {
+        $user = Auth::user();
+        
+        return response()->json([
+            'status' => $user->verification_status,
+            'submitted_at' => $user->verification_submitted_at ? $user->verification_submitted_at->format('Y-m-d H:i:s') : null,
+            'approved_at' => $user->verification_approved_at ? $user->verification_approved_at->format('Y-m-d H:i:s') : null,
+            'rejected_at' => $user->verification_rejected_at ? $user->verification_rejected_at->format('Y-m-d H:i:s') : null,
+            'rejection_reason' => $user->rejection_reason,
+        ]);
+    })->name('seller.verification.status');
+});
+
+// Admin Routes for Seller Verification  
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Admin verification list
+    Route::get('/admin/verification', function () {
+        $users = \App\Models\User::where('role', 'seller')
+            ->whereNotNull('verification_status')
+            ->orderByRaw("FIELD(verification_status, 'pending', 'approved', 'rejected')")
+            ->orderBy('verification_submitted_at', 'desc')
+            ->get();
+        
+        return view('admin.verification-list', compact('users'));
+    })->name('admin.verification.list');
+    
+    // Admin verification detail
+    Route::get('/admin/verification/{user}', function (\App\Models\User $user) {
+        if ($user->role !== 'seller') {
+            abort(404);
+        }
+        
+        return view('admin.verification-detail', compact('user'));
+    })->name('admin.verification.detail');
+    
+    // Admin approve verification
+    Route::post('/admin/verification/{user}/approve', function (\App\Models\User $user) {
+        if ($user->role !== 'seller' || $user->verification_status !== 'pending') {
+            return redirect()->back()->with('error', 'Verifikasi tidak valid.');
+        }
+        
+        $user->update([
+            'verification_status' => 'approved',
+            'verification_approved_at' => now(),
+            'verification_rejected_at' => null,
+            'rejection_reason' => null,
+        ]);
+        
+        // Send approval email
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SellerApprovedMail($user));
+        } catch (\Exception $e) {
+            // Log error but don't block the approval
+            \Log::error('Failed to send approval email: ' . $e->getMessage());
+        }
+        
+        return redirect()->route('admin.verification.list')
+            ->with('success', 'Verifikasi seller berhasil disetujui! Email notifikasi telah dikirim.');
+    })->name('admin.verification.approve');
+    
+    // Admin reject verification
+    Route::post('/admin/verification/{user}/reject', function (\App\Models\User $user, Request $request) {
+        if ($user->role !== 'seller' || $user->verification_status !== 'pending') {
+            return redirect()->back()->with('error', 'Verifikasi tidak valid.');
+        }
+        
+        $reason = $request->input('rejection_reason', 'Dokumen tidak memenuhi persyaratan');
+        
+        $user->update([
+            'verification_status' => 'rejected',
+            'verification_approved_at' => null,
+            'verification_rejected_at' => now(),
+            'rejection_reason' => $reason,
+        ]);
+        
+        // Send rejection email
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SellerRejectedMail($user, $reason));
+        } catch (\Exception $e) {
+            // Log error but don't block the rejection
+            \Log::error('Failed to send rejection email: ' . $e->getMessage());
+        }
+        
+        return redirect()->route('admin.verification.list')
+            ->with('success', 'Verifikasi seller ditolak. Email notifikasi telah dikirim.');
+    })->name('admin.verification.reject');
+    
+    // Admin view private documents
+    Route::get('/admin/verification/{user}/document/{type}', function (\App\Models\User $user, $type) {
+        if ($user->role !== 'seller') {
+            abort(404);
+        }
+        
+        $path = null;
+        switch ($type) {
+            case 'ktp':
+                $path = $user->ktp_photo_path;
+                break;
+            case 'selfie':
+                $path = $user->selfie_with_ktp_path;
+                break;
+            case 'store':
+                $path = $user->store_photo_path;
+                break;
+            default:
+                abort(404);
+        }
+        
+        if (!$path || !Storage::disk('private')->exists($path)) {
+            abort(404);
+        }
+        
+        return Storage::disk('private')->response($path);
+    })->name('admin.verification.document');
+});
+
 // Google OAuth Routes (harus di LUAR middleware auth)
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+// Facebook OAuth Routes
+Route::get('/auth/facebook', [FacebookController::class, 'redirect'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [FacebookController::class, 'callback'])->name('auth.facebook.callback');
+
+// API Routes for Facebook Authentication
+Route::prefix('api/auth')->group(function () {
+    Route::get('/facebook/redirect', [FacebookController::class, 'apiRedirect'])->name('api.auth.facebook.redirect');
+    Route::get('/facebook/callback', [FacebookController::class, 'apiCallback'])->name('api.auth.facebook.callback');
+});

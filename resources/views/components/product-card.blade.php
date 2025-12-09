@@ -32,7 +32,6 @@
 
         <div class="mt-3">
             <div class="text-red-600 font-semibold text-base">{{ $p['price'] }}</div>
-            <div class="text-xs text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
         </div>
 
         <div class="my-3 border-t border-dashed border-gray-200"></div>

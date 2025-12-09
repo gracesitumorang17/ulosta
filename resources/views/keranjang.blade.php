@@ -112,7 +112,7 @@
                                 $cartCount = Auth::check() ? Auth::user()->cartItems()->count() : 0;
                             @endphp
                             @if($cartCount > 0)
-                            <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
                                 {{ $cartCount > 99 ? '99+' : $cartCount }}
                             </span>
                             @endif
@@ -244,10 +244,10 @@
                                         <span class="text-xs text-gray-500 inline-block mt-0.5">{{ $item->tag }}</span>
                                     @endif
                                 </div>
-                                <form action="{{ route('cart.delete', $item) }}" method="POST">
+                                <form id="delete-form-{{ $item->id }}" action="{{ route('cart.delete', $item) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="text-gray-400 hover:text-red-600" title="Hapus">
+                                    <button type="button" onclick="deleteCartItem({{ $item->id }}, this)" class="text-gray-400 hover:text-red-600" title="Hapus">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.293l.853 10.24A2 2 0 007.141 18h5.718a2 2 0 001.995-1.76L15.707 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v6a1 1 0 11-2 0V8zm5 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd"/></svg>
                                     </button>
                                 </form>
@@ -398,6 +398,70 @@
     </footer>
 
     <script>
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        function deleteCartItem(itemId, button) {
+            if (!confirm('Hapus dari keranjang?')) {
+                return;
+            }
+
+            const form = document.getElementById('delete-form-' + itemId);
+            if (!form) return;
+
+            fetch(form.action, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge counters
+                    updateCartBadge(data.count);
+                    
+                    // Remove item from DOM or reload
+                    if (data.count === 0) {
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        // Find and remove the cart item card
+                        const itemCard = form.closest('.bg-white.rounded-xl');
+                        if (itemCard) {
+                            itemCard.style.transition = 'opacity 0.3s';
+                            itemCard.style.opacity = '0';
+                            setTimeout(() => {
+                                itemCard.remove();
+                                // Recalculate total
+                                window.location.reload();
+                            }, 300);
+                        }
+                    }
+                } else {
+                    alert('Gagal menghapus produk');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan');
+            });
+        }
+
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cart-badge');
+            const mobileBadge = document.getElementById('mobile-cart-badge');
+            
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            
+            if (mobileBadge) {
+                mobileBadge.textContent = count;
+                mobileBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
+        }
+
         // Auto hide alert after 3 seconds
         document.addEventListener('DOMContentLoaded', function() {
             const alert = document.querySelector('.bg-green-50');
@@ -412,8 +476,17 @@
             }
         });
 
-        // Add loading state for buttons
+        // Add loading state for buttons (except delete buttons)
         document.querySelectorAll('form').forEach(form => {
+            // Skip delete forms - they have their own handler with onclick
+            if (form.id && form.id.startsWith('delete-form-')) {
+                return;
+            }
+            // Skip clear cart form - it has inline confirm
+            if (form.action.includes('cart/clear')) {
+                return;
+            }
+            
             form.addEventListener('submit', function() {
                 const button = this.querySelector('button[type="submit"]');
                 if (button) {
@@ -421,17 +494,6 @@
                     button.innerHTML = button.innerHTML.includes('Loading') ? button.innerHTML : button.innerHTML + ' <span class="ml-2">...</span>';
                 }
             });
-        });
-
-        // Add confirm dialog for delete actions
-        document.querySelectorAll('form[action*="cart/"]').forEach(form => {
-            if (form.querySelector('input[name="_method"][value="DELETE"]')) {
-                form.addEventListener('submit', function(e) {
-                    if (!confirm('Yakin ingin menghapus produk ini dari keranjang?')) {
-                        e.preventDefault();
-                    }
-                });
-            }
         });
 
         // Mobile menu toggle

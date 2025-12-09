@@ -125,110 +125,185 @@
 <body class="antialiased text-gray-800 bg-gray-50">
 
     <!-- Navbar -->
-    <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Left: Logo -->
-                <div class="flex items-center">
-                    <a href="{{ url('/') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-md bg-red-700 flex items-center justify-center text-white font-bold">
-                            U
-                        </div>
-                        <span class="text-lg font-semibold">UlosTa</span>
-                    </a>
-                </div>
+    <header class="bg-white border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="{{ Auth::check() ? route('homepage') : url('/') }}" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-md bg-red-600 flex items-center justify-center text-white font-bold">U</div>
+                <span class="text-lg font-semibold">UlosTa</span>
+            </a>
 
-                <!-- Center: Search -->
-                <div class="flex-1 hidden md:flex justify-center px-4 max-w-2xl">
-                    <form action="#" method="GET" class="w-full">
-                        <div class="relative">
-                            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+            @auth
+            <!-- Navbar untuk user yang sudah login -->
+            <div class="flex items-center gap-6">
+                <a href="{{ route('homepage') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span class="text-sm font-medium">Home</span>
+                </a>
+
+                <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        @php
+                            $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
+                        @endphp
+                        @if($wishlistCount > 0)
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                            </span>
+                        @else
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                        @endif
+                    </div>
+                    <span class="text-sm font-medium">Wishlist</span>
+                </a>
+
+                <a href="{{ route('keranjang') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                        </svg>
+                        @php
+                            $cartCount = \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity');
+                        @endphp
+                        @if($cartCount > 0)
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
+                        @else
+                            <span id="cart-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full hidden">
+                                0
+                            </span>
+                        @endif
+                    </div>
+                    <span class="text-sm font-medium">Keranjang</span>
+                </a>
+
+                <div class="relative">
+                    <button id="profile-button" type="button" class="flex items-center gap-2 text-gray-600 hover:text-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-sm font-medium">Profil</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    @if(Auth::check() && Auth::user()->role === 'seller')
+                    <!-- Popup menu untuk Seller -->
+                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
+                        <div class="px-4 py-3" style="background: linear-gradient(to right, #AE0808, #8F0606);">
+                            <p class="text-sm font-semibold text-white">{{ Auth::user()->name ?? 'Penjual' }}</p>
+                            <p class="text-xs text-red-100 mt-0.5">Penjual</p>
+                        </div>
+                        <nav class="py-2">
+                            <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                            </div>
-                            <input
-                                name="q"
-                                type="search"
-                                placeholder="Cari ulos tradisional ..."
-                                class="w-full border border-gray-200 rounded-full py-2.5 pl-10 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-                            />
+                                <span class="text-sm font-medium">Profil Saya</span>
+                            </a>
+                            <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                                </svg>
+                                <span class="text-sm font-medium">Pesanan Saya</span>
+                            </a>
+                            <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span class="text-sm font-medium">Wishlist</span>
+                            </a>
+                            <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M4.5 10V8l2-2h11l2 2v2M5 21V10h14v11M9 21v-6h6v6" />
+                                </svg>
+                                <span class="text-sm font-medium">Dashboard Toko</span>
+                            </a>
+                            <div class="my-2 border-t border-gray-100"></div>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Logout</span>
+                                </button>
+                            </form>
+                        </nav>
+                    </div>
+                    @else
+                    <!-- Popup menu untuk Buyer -->
+                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-900">{{ Auth::check() ? Auth::user()->name : 'Akun Saya' }}</p>
+                            <p class="text-xs text-gray-500">Pembeli</p>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Right: Navigation -->
-                <div class="flex items-center gap-6">
-                    @auth
-                        <!-- Home -->
-                        <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span class="text-sm font-medium">Home</span>
-                        </a>
-
-                        <!-- Wishlist -->
-                        <a href="{{ route('wishlist.index') }}" class="relative flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
-                            <div class="relative">
+                        <nav class="py-2">
+                            <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span class="text-sm">Profil saya</span>
+                            </a>
+                            <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
-                                @php
-                                    $wishlistCount = Auth::check() ? \App\Models\Wishlist::where('user_id', Auth::id())->count() : 0;
-                                @endphp
-                                <span id="wishlist-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $wishlistCount }}</span>
-                            </div>
-                            <span class="text-sm font-medium">Wishlist</span>
-                        </a>
-
-                        <!-- Keranjang -->
-                        <a href="{{ route('keranjang') }}" class="relative flex items-center gap-2 text-gray-600 hover:text-red-700 transition">
-                            <div class="relative">
+                                <span class="text-sm">Wishlist Saya</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                 </svg>
-                                @php
-                                    $cartCount = Auth::check() ? \App\Models\CartItem::where('user_id', Auth::id())->sum('quantity') : 0;
-                                @endphp
-                                <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">{{ $cartCount }}</span>
-                            </div>
-                            <span class="text-sm font-medium">Keranjang</span>
-                        </a>
-
-                        <!-- Profile Dropdown -->
-                        <div class="dropdown" id="profile-dropdown">
-                            <button id="profile-btn" class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition" onclick="toggleProfileDropdown(event)">
-                                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'User' }}&background=AE0808&color=fff" alt="Profile" class="w-9 h-9 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            
-                            <div class="dropdown-menu" id="profile-menu">
-                                <div class="py-2">
-                                    <div class="px-4 py-2 border-b border-gray-100">
-                                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'User' }}</p>
-                                        <p class="text-xs text-gray-500">{{ Auth::user()->email ?? 'user@example.com' }}</p>
-                                    </div>
-                                    <a href="{{ route('profil') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Profil Saya</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition" onclick="alert('Fitur Pesanan akan segera hadir!'); return false;">Pesanan Saya</a>
-                                    <a href="{{ route('wishlist.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Wishlist</a>
-                                    <div class="border-t border-gray-100 mt-2 pt-2">
-                                        <form action="{{ route('logout') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">Keluar</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
-                        <a href="{{ route('register') }}" class="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition">Daftar</a>
-                    @endauth
+                                <span class="text-sm">Pesanan Saya</span>
+                            </a>
+                            <div class="my-2 border-t border-gray-100"></div>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span class="text-sm">Keluar</span>
+                                </button>
+                            </form>
+                        </nav>
+                    </div>
+                    @endif
                 </div>
             </div>
+            @endauth
+
+            @guest
+            <!-- Navbar untuk guest (belum login) -->
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="{{ url('/') }}" class="text-gray-700 px-3 py-1 rounded-full hover:bg-gray-100 transition flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5L12 4l9 5.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
+                    </svg>
+                    <span class="text-sm">Home</span>
+                </a>
+                <a href="{{ route('masuk') }}" class="text-gray-700 px-4 py-2 rounded-full hover:bg-gray-100 transition">Masuk</a>
+                <a href="{{ route('register') }}" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">Daftar</a>
+            </div>
+
+            <!-- For very small screens show icon-only buttons -->
+            <div class="sm:hidden flex items-center gap-2">
+                <a href="{{ route('masuk') }}" class="p-2 rounded-md hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+            </div>
+            @endguest
         </div>
     </header>
 
@@ -304,12 +379,6 @@
                 <!-- Price -->
                 <div class="space-y-2">
                     <div class="text-3xl font-bold text-red-600">{{ $product['price'] ?? 'Rp 1.250.000' }}</div>
-                    @if(isset($product['original_price']))
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg text-gray-400 line-through">{{ $product['original_price'] }}</span>
-                            <span class="bg-red-100 text-red-600 text-sm px-2 py-1 rounded">Diskon 20%</span>
-                        </div>
-                    @endif
                 </div>
 
                 <!-- Product Description -->
@@ -379,7 +448,6 @@
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
@@ -394,7 +462,6 @@
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
@@ -405,16 +472,15 @@
                     <!-- Wishlist and Share -->
                     <div class="flex gap-3">
                         <button
-                            class="flex items-center gap-2 text-gray-600 hover:text-red-600 transition"
+                            class="flex items-center gap-2 {{ isset($product['is_in_wishlist']) && $product['is_in_wishlist'] ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 transition"
                             onclick="toggleWishlist(this)"
                             data-product-id="{{ $product['id'] ?? '' }}"
                             data-name="{{ $product['name'] ?? 'Ulos Ragihotang Premium' }}"
                             data-price="{{ $product['price'] ?? 'Rp 1.250.000' }}"
-                            data-original="{{ $product['original_price'] ?? '' }}"
                             data-tag="{{ $product['tag'] ?? ($product['category'] ?? '') }}"
                             data-image="{{ $product['image'] ?? 'Ulos Ragi Hotang.jpg' }}"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ isset($product['is_in_wishlist']) && $product['is_in_wishlist'] ? 'fill-current' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             <span class="text-sm">Simpan</span>
@@ -453,12 +519,11 @@
                                 data-product-id="{{ $rec->id }}"
                                 data-name="{{ $rec->name }}"
                                 data-price="{{ $rec->formatted_price }}"
-                                data-original="{{ $rec->formatted_original_price }}"
                                 data-tag="{{ $rec->tag ?? '' }}"
                                 data-image="{{ $rec->image }}"
                                 aria-label="Tambah ke wishlist"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ isset($recommendationWishlist[$rec->id]) && $recommendationWishlist[$rec->id] ? 'text-red-600 fill-current' : 'text-gray-500' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.8 6.6c-1.6-3-5.6-3.4-7.8-.9l-.9 1-.9-1C9 3.2 5 3.6 3.4 6.6-1 14 11.8 20.5 12 20.6c.2-.1 13-6.6 8.8-14z" />
                                 </svg>
                             </button>
@@ -474,7 +539,6 @@
                             
                             <div class="mt-3">
                                 <div class="text-red-600 font-bold text-lg">{{ $rec->formatted_price }}</div>
-                                <div class="text-sm text-gray-400 line-through">{{ $rec->formatted_original_price }}</div>
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-gray-200">
@@ -484,7 +548,6 @@
                                     data-product-id="{{ $rec->id }}"
                                     data-name="{{ $rec->name }}"
                                     data-price="{{ $rec->formatted_price }}"
-                                    data-original="{{ $rec->formatted_original_price }}"
                                     data-tag="{{ $rec->tag ?? '' }}"
                                     data-image="{{ $rec->image }}"
                                 >
@@ -641,39 +704,55 @@
         }
 
         // Update badge counters in navbar
-        async function updateBadges() {
-            try {
-                // Update cart badge
-                const cartRes = await fetch("{{ route('cart.count') }}");
-                if (cartRes.ok) {
-                    const cartData = await cartRes.json();
-                    const cartBadge = document.getElementById('cart-badge');
-                    if (cartBadge && cartData.count !== undefined) {
-                        cartBadge.textContent = cartData.count;
-                        if (cartData.count > 0) {
-                            cartBadge.classList.remove('hidden');
-                        } else {
-                            cartBadge.classList.add('hidden');
-                        }
-                    }
+        function updateCartBadge(count) {
+            const cartBadge = document.getElementById('cart-badge');
+            const mobileCartBadge = document.getElementById('mobile-cart-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (cartBadge) {
+                    cartBadge.textContent = displayCount;
+                    cartBadge.classList.remove('hidden');
                 }
+                
+                if (mobileCartBadge) {
+                    mobileCartBadge.textContent = displayCount;
+                    mobileCartBadge.classList.remove('hidden');
+                }
+            } else {
+                if (cartBadge) {
+                    cartBadge.classList.add('hidden');
+                }
+                if (mobileCartBadge) {
+                    mobileCartBadge.classList.add('hidden');
+                }
+            }
+        }
 
-                // Update wishlist badge
-                const wishRes = await fetch("{{ route('wishlist.count') }}");
-                if (wishRes.ok) {
-                    const wishData = await wishRes.json();
-                    const wishBadge = document.getElementById('wishlist-badge');
-                    if (wishBadge && wishData.count !== undefined) {
-                        wishBadge.textContent = wishData.count;
-                        if (wishData.count > 0) {
-                            wishBadge.classList.remove('hidden');
-                        } else {
-                            wishBadge.classList.add('hidden');
-                        }
-                    }
+        function updateWishlistBadge(count) {
+            const wishBadge = document.getElementById('wishlist-badge');
+            const mobileWishBadge = document.getElementById('mobile-wishlist-badge');
+            
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+                
+                if (wishBadge) {
+                    wishBadge.textContent = displayCount;
+                    wishBadge.classList.remove('hidden');
                 }
-            } catch (e) {
-                // Silent fail
+                
+                if (mobileWishBadge) {
+                    mobileWishBadge.textContent = displayCount;
+                    mobileWishBadge.classList.remove('hidden');
+                }
+            } else {
+                if (wishBadge) {
+                    wishBadge.classList.add('hidden');
+                }
+                if (mobileWishBadge) {
+                    mobileWishBadge.classList.add('hidden');
+                }
             }
         }
 
@@ -694,7 +773,6 @@
             const payload = {
                 name: btn.dataset.name,
                 price: btn.dataset.price,
-                original: btn.dataset.original,
                 tag: btn.dataset.tag,
                 image: btn.dataset.image,
                 qty: qty
@@ -730,7 +808,10 @@
                 
                 if (data.success) {
                     showToast(`${payload.name} (${qty} pcs) berhasil ditambahkan ke keranjang!`);
-                    await updateBadges();
+                    // Update cart badge with count from response
+                    if (data.count !== undefined) {
+                        updateCartBadge(data.count);
+                    }
                 } else {
                     console.error('❌ Failed:', data);
                     alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
@@ -756,9 +837,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
                     body: JSON.stringify({
+                        product_id: btn.dataset.productId,
                         name: btn.dataset.name,
                         price: btn.dataset.price,
-                        original: btn.dataset.original,
                         tag: btn.dataset.tag,
                         image: btn.dataset.image
                     })
@@ -773,12 +854,19 @@
                     // Toggle icon state
                     if (data.action === 'added') {
                         icon.classList.add('fill-current', 'text-red-600');
-                        icon.classList.remove('text-gray-600');
+                        icon.classList.remove('text-gray-500', 'text-gray-600');
+                        btn.classList.remove('text-gray-600');
+                        btn.classList.add('text-red-600');
                     } else {
                         icon.classList.remove('fill-current', 'text-red-600');
-                        icon.classList.add('text-gray-600');
+                        icon.classList.add('text-gray-500');
+                        btn.classList.remove('text-red-600');
+                        btn.classList.add('text-gray-600');
                     }
-                    await updateBadges();
+                    // Update wishlist badge with count from response
+                    if (data.count !== undefined) {
+                        updateWishlistBadge(data.count);
+                    }
                 } else {
                     alert('Gagal memperbarui wishlist');
                 }
@@ -804,7 +892,6 @@
             const payload = {
                 name: btn.dataset.name,
                 price: btn.dataset.price,
-                original: btn.dataset.original,
                 tag: btn.dataset.tag,
                 image: btn.dataset.image,
                 qty: qty
@@ -874,43 +961,23 @@
         });
 
         // Toggle profile dropdown
-        function toggleProfileDropdown(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            console.log('👤 Profile dropdown clicked');
-            
-            const menu = document.getElementById('profile-menu');
-            if (!menu) {
-                console.error('❌ Profile menu not found');
-                return;
-            }
-            
-            const isVisible = menu.classList.contains('show');
-            
-            // Close all other dropdowns first
-            document.querySelectorAll('.dropdown-menu').forEach(m => {
-                m.classList.remove('show');
+        const profileButton = document.getElementById('profile-button');
+        const profileMenu = document.getElementById('profile-menu');
+
+        if (profileButton && profileMenu) {
+            profileButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileMenu.classList.toggle('hidden');
+                console.log('👤 Profile dropdown toggled');
             });
-            
-            // Toggle current dropdown
-            if (!isVisible) {
-                menu.classList.add('show');
-                console.log('✅ Dropdown opened');
-            } else {
-                menu.classList.remove('show');
-                console.log('✅ Dropdown closed');
-            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
         }
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('profile-dropdown');
-            const menu = document.getElementById('profile-menu');
-            
-            if (dropdown && menu && !dropdown.contains(event.target)) {
-                menu.classList.remove('show');
-            }
-        });
 
         // Page load initialization
         document.addEventListener('DOMContentLoaded', function() {

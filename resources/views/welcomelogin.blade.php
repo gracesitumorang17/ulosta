@@ -85,7 +85,7 @@
         }
     </style>
 </head>
-<body class="antialiased text-gray-800 bg-gray-50">
+<body class="antialiased text-gray-800 bg-white">
 
     <!-- Navbar for Authenticated Users -->
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b">
@@ -193,37 +193,78 @@
 
                         <!-- Popup menu -->
                         <div id="profile-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden z-50">
-                            <div class="px-4 py-3 border-b border-gray-100">
-                                <p class="text-sm font-semibold text-gray-900">Akun Saya</p>
-                                <p class="text-xs text-gray-500">Pembeli</p>
-                            </div>
+                            @if(Auth::user()->role === 'seller')
+                                <!-- Header Penjual dengan Gradient Merah -->
+                                <div class="px-4 py-3" style="background-color: #AE0808;">
+                                    <p class="text-sm font-semibold text-white">{{ Auth::user()->name ?? 'Nama Penjual' }}</p>
+                                    <p class="text-xs text-white/80 mt-0.5">Penjual</p>
+                                </div>
+                            @else
+                                <!-- Header Pembeli -->
+                                <div class="px-4 py-3 border-b border-gray-100">
+                                    <p class="text-sm font-semibold text-gray-900">Akun Saya</p>
+                                    <p class="text-xs text-gray-500">Pembeli</p>
+                                </div>
+                            @endif
+                            
                             <nav class="py-2">
-                                <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    <span class="text-sm">Profil saya</span>
-                                </a>
-                                <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                    <span class="text-sm">Wishlist Saya</span>
-                                </a>
-                                <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
-                                    </svg>
-                                    <span class="text-sm">Pesanan Saya</span>
-                                </a>
+                                @if(Auth::user()->role === 'seller')
+                                    <!-- Menu untuk Penjual -->
+                                    <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Profil Saya</span>
+                                    </a>
+                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Pesanan Saya</span>
+                                    </a>
+                                    <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Wishlist</span>
+                                    </a>
+                                    <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Dashboard Toko</span>
+                                    </a>
+                                @else
+                                    <!-- Menu untuk Pembeli -->
+                                    <a href="{{ route('profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Profil saya</span>
+                                    </a>
+                                    <a href="{{ route('wishlist.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Wishlist Saya</span>
+                                    </a>
+                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+                                        </svg>
+                                        <span class="text-sm font-medium">Pesanan Saya</span>
+                                    </a>
+                                @endif
+                                
                                 <div class="my-2 border-t border-gray-100"></div>
+                                
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0v-1m6-10V5a3 3 0 10-6 0v1" />
+                                    <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
-                                        <span class="text-sm">Keluar</span>
+                                        <span class="text-sm font-medium">Keluar</span>
                                     </button>
                                 </form>
                             </nav>
@@ -494,8 +535,8 @@
                                 <option value="Pernikahan" {{ ($fungsiFilter ?? '') == 'Pernikahan' ? 'selected' : '' }}>Pernikahan</option>
                                 <option value="Kelahiran" {{ ($fungsiFilter ?? '') == 'Kelahiran' ? 'selected' : '' }}>Kelahiran</option>
                                 <option value="Kematian" {{ ($fungsiFilter ?? '') == 'Kematian' ? 'selected' : '' }}>Kematian</option>
-                                <option value="Upacara Adat" {{ ($fungsiFilter ?? '') == 'Upacara Adat' ? 'selected' : '' }}>Upacara Adat</option>
-                                <option value="Pesta Tradisional" {{ ($fungsiFilter ?? '') == 'Pesta Tradisional' ? 'selected' : '' }}>Pesta Tradisional</option>
+                                <option value="Syukuran" {{ ($fungsiFilter ?? '') == 'Syukuran' ? 'selected' : '' }}>Syukuran</option>
+                                <option value="Serbaguna" {{ ($fungsiFilter ?? '') == 'Serbaguna' ? 'selected' : '' }}>Serbaguna</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -530,9 +571,9 @@
                                     </div>
                                 </a>
 
-                                <!-- Top-left badge "Populer" -->
+                                <!-- Top-left badge "Terlaris" -->
                                 <div class="absolute left-3 top-3">
-                                    <span class="bg-red-600 text-white text-xs rounded-full px-3 py-1 font-medium">Populer</span>
+                                    <span class="bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">Terlaris</span>
                                 </div>
                                 
                                 <!-- Top-right Wishlist button -->
@@ -551,10 +592,12 @@
                         
 
                             <div class="p-4 flex-1 flex flex-col">
-                                <!-- Tag -->
+                                <!-- Category (Fungsi Ulos) -->
+                                @if(!empty($p['category']))
                                 <div class="mb-2">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full">{{ $p['tag'] }}</span>
+                                    <span class="inline-block bg-yellow-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded">{{ $p['category'] }}</span>
                                 </div>
+                                @endif
                                 <!-- Title & desc -->
                                 <a href="{{ route('produk.detail', $p['id']) }}" class="hover:text-red-600 transition-colors">
                                     <h3 class="font-semibold text-gray-800 text-base">{{ $p['name'] }}</h3>
@@ -564,7 +607,6 @@
                                 <!-- Price -->
                                 <div class="mt-3">
                                     <div class="text-red-600 font-bold text-lg">{{ $p['price'] }}</div>
-                                    <div class="text-sm text-gray-400 line-through mt-0.5">{{ $p['original'] }}</div>
                                 </div>
 
                                 <!-- thin divider to separate price and CTA -->
@@ -575,7 +617,6 @@
                                     <button
                                         data-name="{{ $p['name'] }}"
                                         data-price="{{ $p['price'] }}"
-                                        data-original="{{ $p['original'] }}"
                                         data-tag="{{ $p['tag'] }}"
                                         data-image="{{ $p['image'] }}"
                                         class="btn-add-to-cart inline-flex items-center justify-center gap-2 px-4 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-shadow shadow-sm text-sm font-medium h-11"

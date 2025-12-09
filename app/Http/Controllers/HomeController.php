@@ -14,13 +14,8 @@ class HomeController extends Controller
         if (Auth::check() && (Auth::user()->role ?? '') === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-
-        // If user is seller, redirect to seller dashboard
-        if (Auth::check() && (Auth::user()->role ?? '') === 'seller') {
-            return redirect()->route('seller.dashboard');
-        }
-
-        // For buyers (logged in users) or guests, show appropriate homepage
+        
+        // For buyers and sellers (logged in users) or guests, show appropriate homepage
         // Get cart/wishlist counts for logged in users
         $cartCount = 0;
         $wishlistCount = 0;
@@ -71,14 +66,11 @@ class HomeController extends Controller
 
         // Format products for view (from DB)
         $products = $productsData->map(function ($product) {
-            $originalPrice = $product->formatted_original_price;
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'tag' => $product->tag,
                 'price' => $product->formatted_price,
-                'original_price' => $originalPrice,
-                'original' => $originalPrice ?: $product->formatted_price,
                 'image' => $product->image,
                 'description' => $product->description,
                 'desc' => $product->description,

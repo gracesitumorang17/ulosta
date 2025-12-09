@@ -94,7 +94,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             @if($wishlistCount > 0)
-                            <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                            <span id="wishlist-badge" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
                                 {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
                             </span>
                             @endif
@@ -238,14 +238,11 @@
 
                     <div class="mb-4">
                         <div class="text-red-600 font-bold text-lg">{{ $item->formatted_price }}</div>
-                        @if($item->formatted_original_price)
-                        <div class="text-sm text-gray-400 line-through">{{ $item->formatted_original_price }}</div>
-                        @endif
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <button 
-                            onclick="addToCart('{{ $item->product_name }}', '{{ $item->formatted_price }}', '{{ $item->formatted_original_price }}', '', '{{ $item->product_image }}')"
+                            onclick="addToCart('{{ $item->product_name }}', '{{ $item->formatted_price }}', '', '{{ $item->product_image }}')"
                             class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition text-sm font-medium"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -284,7 +281,9 @@
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         function removeFromWishlist(id) {
-            if (!confirm('Yakin ingin menghapus produk dari wishlist?')) return;
+            if (!confirm('Hapus dari wishlist?')) {
+                return;
+            }
 
             fetch(`/wishlist/${id}`, {
                 method: 'DELETE',
@@ -296,16 +295,21 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    // Update badge counter
+                    updateWishlistBadge(data.count);
+                    
                     const item = document.querySelector(`[data-wishlist-id="${id}"]`);
                     if (item) {
-                        item.remove();
+                        item.style.transition = 'opacity 0.3s';
+                        item.style.opacity = '0';
+                        setTimeout(() => {
+                            item.remove();
+                            
+                            if (data.count === 0) {
+                                window.location.reload();
+                            }
+                        }, 300);
                     }
-                    
-                    if (data.count === 0) {
-                        setTimeout(() => window.location.reload(), 500);
-                    }
-                    
-                    showToast('Produk dihapus dari wishlist');
                 } else {
                     alert('Gagal menghapus produk');
                 }
@@ -316,7 +320,7 @@
             });
         }
 
-        function addToCart(name, price, original, tag, image) {
+        function addToCart(name, price, tag, image) {
             fetch('{{ route('cart.add') }}', {
                 method: 'POST',
                 headers: {
@@ -324,7 +328,7 @@
                     'X-CSRF-TOKEN': csrf,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ name, price, original, tag, image })
+                body: JSON.stringify({ name, price, tag, image })
             })
             .then(res => res.json())
             .then(data => {
