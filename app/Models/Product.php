@@ -11,10 +11,12 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
         'original_price',
         'tag',
+        'category',
         'image',
         'stock',
         'is_active',
@@ -87,10 +89,10 @@ class Product extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where(function($q) use ($search) {
+        return $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
-              ->orWhere('description', 'like', "%{$search}%")
-              ->orWhere('tag', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('tag', 'like', "%{$search}%");
         });
     }
 }

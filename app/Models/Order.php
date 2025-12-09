@@ -10,6 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'seller_id',
         'user_id',
         'order_number',
         'status',
@@ -25,7 +26,7 @@ class Order extends Model
         'notes',
         'shipped_at',
         'delivered_at',
-        
+
         // Billing Address
         'billing_first_name',
         'billing_last_name',
@@ -37,7 +38,7 @@ class Order extends Model
         'billing_state',
         'billing_postal_code',
         'billing_country',
-        
+
         // Shipping Address
         'shipping_first_name',
         'shipping_last_name',
@@ -81,7 +82,18 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
     public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    // Alias to match existing controller/view usage
+    public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
@@ -176,17 +188,17 @@ class Order extends Model
         $prefix = 'UL-';
         $date = now()->format('Ymd');
         $lastOrder = static::whereDate('created_at', today())
-                          ->where('order_number', 'like', $prefix . $date . '%')
-                          ->orderBy('id', 'desc')
-                          ->first();
-        
+            ->where('order_number', 'like', $prefix . $date . '%')
+            ->orderBy('id', 'desc')
+            ->first();
+
         if ($lastOrder) {
             $lastNumber = (int) substr($lastOrder->order_number, -4);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
         }
-        
+
         return $prefix . $date . $newNumber;
     }
 }

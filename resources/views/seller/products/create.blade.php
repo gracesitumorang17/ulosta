@@ -106,6 +106,11 @@
     @include('seller.partials.navbar')
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if (session('success'))
+            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-md">
+                {{ session('success') }}
+            </div>
+        @endif
         <a href="{{ route('seller.products.index') }}"
             class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-gray-900 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24"
@@ -144,12 +149,19 @@
                                 required />
                         </div>
                         <div>
-                            <label class="field-label">Kategori *</label>
+                            <label class="field-label">Fungsi<label>
                             <select name="category" class="input-base" required>
                                 <option value="Pernikahan" @selected(old('category') === 'Pernikahan')>Pernikahan</option>
-                                <option value="Penghormatan" @selected(old('category') === 'Penghormatan')>Penghormatan</option>
+                                <option value="Kelahiran" @selected(old('category') === 'Kelahiran')>Kelahiran</option>
                                 <option value="Kematian" @selected(old('category') === 'Kematian')>Kematian</option>
+                                <option value="Syukuran" @selected(old('category') === 'Syukuran')>Syukuran</option>
+                                <option value="Serbaguna" @selected(old('category') === 'Serbaguna')>Serbaguna</option>
+
                             </select>
+                        </div>
+                        <div>
+                            <label class="field-label">Jenis Ulos</label>
+                            <input type="text" name="jenis" class="input-base" value="{{ old('jenis') }}" />
                         </div>
                         <div>
                             <label class="field-label">Stok *</label>
