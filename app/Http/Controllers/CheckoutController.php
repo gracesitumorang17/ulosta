@@ -11,22 +11,22 @@ class CheckoutController extends Controller
     public function index()
     {
         $items = CartItem::where('user_id', Auth::id())->get();
-        
+
         if ($items->count() === 0) {
             return redirect()->route('keranjang')->with('error', 'Keranjang Anda kosong!');
         }
 
-        $subtotal = $items->sum(function($item) {
+        $subtotal = $items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
 
         $shipping = 15000;
-        
+
         // Free shipping if subtotal >= 500000
         if ($subtotal >= 500000) {
             $shipping = 0;
         }
-        
+
         $total = $subtotal + $shipping;
 
         return view('pembayaran', compact('items', 'subtotal', 'shipping', 'total'));

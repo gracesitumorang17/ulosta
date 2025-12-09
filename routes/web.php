@@ -50,10 +50,10 @@ Route::get('/', function () {
 // Product detail route (NO AUTHENTICATION REQUIRED - PUBLIC ACCESS)
 Route::get('/produk/{id}', function ($id) {
     \Log::info('🔵 PRODUCT ROUTE HIT - ID: ' . $id . ' | User: ' . (Auth::check() ? Auth::user()->email : 'GUEST'));
-    
+
     try {
         $product = Product::findOrFail($id);
-        
+
         // Get recommendations (other products, excluding current)
         $recommendations = Product::where('id', '!=', $id)
             ->active()
@@ -100,7 +100,7 @@ Route::get('/produk/{id}', function ($id) {
             'type' => $product->tag,
             'size' => '200 x 150 cm',
             'weight' => '800 gram',
-            'material' => 'Katun Premium', 
+            'material' => 'Katun Premium',
             'origin' => 'Sumatera Utara',
             'reviews' => '64 reviews',
             'is_in_wishlist' => $isInWishlist
@@ -386,6 +386,8 @@ Route::middleware('auth')->group(function () {
     })->name('seller.onboarding.address');
 
     Route::post('/seller/onboarding/address', function (Request $request) {
+        Route::post('/seller/products', [\App\Http\Controllers\SellerProductController::class, 'store'])
+            ->middleware(['auth', 'role:seller'])->name('seller.products.store');
         $data = $request->validate([
             'province' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
@@ -515,175 +517,57 @@ Route::get('/seller/products/create', function () {
     return view('seller.products.create', compact('product', 'slugValue', 'uploaded'));
 })->middleware(['auth', 'role:seller'])->name('seller.products.create');
 
-// Simpan produk baru (demo: ke session + simpan gambar)
-Route::post('/seller/products', function (Request $request) {
-    $data = $request->validate([
-        'name' => 'required|string|max:255',
-        'category' => 'required|string',
-        'price' => 'required|numeric',
-        'stock' => 'required|integer',
-        'description' => 'nullable|string',
-        'material' => 'nullable|string',
-        'size' => 'nullable|string',
-        'weight' => 'nullable|integer',
-        'origin' => 'nullable|string',
-        'status' => 'nullable|boolean',
-        'images.*' => 'image|mimes:jpg,jpeg,png|max:2048',
-    ]);
-    // fungsi slug sederhana
-    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
-    $dir = 'public/products/' . $slug;
-    $images = [];
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $file) {
-            $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs($dir, $name);
-            $images[] = asset('storage/products/' . $slug . '/' . $name);
-        }
-    }
-    $custom = session()->get('custom_products', []);
-    $custom[$slug] = [
-        'title' => $data['name'],
-        'slug' => $slug,
-        'category' => $data['category'],
-        'price' => (int) $data['price'],
-        'stock' => (int) $data['stock'],
-        'sold' => 0,
-        'status' => $data['status'] ? 'Aktif' : 'Nonaktif',
-        'img' => $images[0] ?? asset('image/ulos1.jpeg'),
-    ];
-    session()->put('custom_products', $custom);
-    return redirect()->route('seller.products.edit', $slug)->with('success', 'Produk baru dibuat (demo).');
-})->middleware(['auth', 'role:seller'])->name('seller.products.store');
+// Simpan produk baru -> gunakan Controller (persist DB + storage publik)
+Route::post('/seller/products', [\App\Http\Controllers\SellerProductController::class, 'store'])
+    ->middleware(['auth', 'role:seller'])->name('seller.products.store');
 
-// Halaman edit produk (placeholder berdasarkan slug)
-Route::get('/seller/products/{slug}/edit', function ($slug) {
-    // Data dummy untuk demo edit
-    $products = [
-        'ulos-ragihotang-premium' => [
-            'name' => 'Ulos Ragihotang Premium',
-            'category' => 'Pernikahan',
-            'price' => 1250000,
-            'stock' => 15,
-            'description' => 'Ulos Ragihotang Premium adalah kain tenun tradisional Batak dengan teknik ikat benang premium.',
-            'material' => 'Benang katun premium',
-            'size' => '200cm x 100cm',
-            'weight' => 500,
-            'origin' => 'Sumatera Utara',
-            'status' => true,
-            'images' => [asset('image/Ulos Ragi Hotang.jpg')],
-        ],
-        'ulos-bintang-maratur-klasik' => [
-            'name' => 'Ulos Bintang Maratur Klasik',
-            'category' => 'Penghormatan',
-            'price' => 950000,
-            'stock' => 8,
-            'description' => 'Ulos Bintang Maratur dengan motif klasik untuk acara penghormatan adat.',
-            'material' => 'Benang katun premium',
-            'size' => '190cm x 95cm',
-            'weight' => 480,
-            'origin' => 'Sumatera Utara',
-            'status' => true,
-            'images' => [asset('image/Ulos Bintang Maratur.jpg')],
-        ],
-        'ulos-sibolong-tradisional' => [
-            'name' => 'Ulos Sibolong Tradisional',
-            'category' => 'Kematian',
-            'price' => 1100000,
-            'stock' => 12,
-            'description' => 'Ulos Sibolong tradisional digunakan dalam upacara kedukaan.',
-            'material' => 'Katun tenun',
-            'size' => '200cm x 110cm',
-            'weight' => 520,
-            'origin' => 'Sumatera Utara',
-            'status' => true,
-            // Perbaikan: file yang tersedia adalah 'Ulos Sibolang Rasta Pamontari.jpg'
-            'images' => [asset('image/Ulos Sibolang Rasta Pamontari.jpg')],
-        ],
-        'ulos-ragi-hidup-eksklusif' => [
-            'name' => 'Ulos Ragi Hidup Eksklusif',
-            'category' => 'Pernikahan',
-            'price' => 1350000,
-            'stock' => 0,
-            'description' => 'Versi eksklusif Ulos Ragi Hidup untuk seremoni adat istimewa.',
-            'material' => 'Katun premium',
-            'size' => '200cm x 100cm',
-            'weight' => 530,
-            'origin' => 'Sumatera Utara',
-            'status' => false,
-            'images' => [asset('image/ulos2.jpg')],
-        ],
-        'ulos-mangiring-premium' => [
-            'name' => 'Ulos Mangiring Premium',
-            'category' => 'Penghormatan',
-            'price' => 875000,
-            'stock' => 20,
-            'description' => 'Ulos Mangiring bermotif khas untuk acara penghormatan keluarga.',
-            'material' => 'Katun premium',
-            'size' => '195cm x 100cm',
-            'weight' => 500,
-            'origin' => 'Sumatera Utara',
-            'status' => true,
-            'images' => [asset('image/ulos3.jpg')],
-        ],
-    ];
+// Halaman edit produk -> gunakan Controller agar konsisten DB + storage
+Route::get('/seller/products/{slug}/edit', [\App\Http\Controllers\SellerProductController::class, 'edit'])
+    ->middleware(['auth', 'role:seller'])->name('seller.products.edit');
 
-    if (!isset($products[$slug])) {
-        abort(404);
-    }
+// Update produk (persist ke DB)
+Route::put('/seller/products/{slug}', [\App\Http\Controllers\SellerProductController::class, 'update'])
+    ->middleware(['auth', 'role:seller'])->name('seller.products.update');
 
-    $product = $products[$slug];
-    // Ambil file yang sudah diupload untuk slug ini
-    $uploaded = [];
-    $dir = 'public/products/' . $slug;
-    if (Storage::exists($dir)) {
-        foreach (Storage::files($dir) as $f) {
-            $uploaded[] = asset('storage/products/' . $slug . '/' . basename($f));
-        }
-    }
-    $slugValue = $slug;
-    return view('seller.products.edit', compact('product', 'slugValue', 'uploaded'));
-})->middleware(['auth', 'role:seller'])->name('seller.products.edit');
+// Upload gambar produk (multiple) -> gunakan Controller
+Route::post('/seller/products/{slug}/images', [\App\Http\Controllers\SellerProductController::class, 'uploadImages'])
+    ->middleware(['auth', 'role:seller'])->name('seller.products.images.upload');
 
-// Upload gambar produk (multiple)
-Route::post('/seller/products/{slug}/images', function (Request $request, $slug) {
-    $request->validate([
-        'images' => 'required|array',
-        'images.*' => 'image|mimes:jpg,jpeg,png|max:2048',
-    ], [
-        'images.required' => 'Minimal satu gambar harus dipilih.',
-        'images.*.image' => 'File harus berupa gambar.',
-        'images.*.mimes' => 'Format yang diizinkan: JPG, JPEG, PNG.',
-        'images.*.max' => 'Ukuran gambar maksimal 2MB.',
-    ]);
-
-    $dir = 'public/products/' . $slug;
-    foreach ($request->file('images') as $file) {
-        // Nama unik agar tidak tertimpa
-        $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs($dir, $name);
-    }
-
-    return redirect()->route('seller.products.edit', $slug)->with('success', 'Gambar berhasil diupload.');
-})->middleware(['auth', 'role:seller'])->name('seller.products.images.upload');
-
-// Hapus produk (demo: hanya menandai di session + hapus gambar yang diupload)
+// Hapus produk (persist ke DB + hapus gambar di storage)
 Route::delete('/seller/products/{slug}', function ($slug) {
-    // Catat slug yang dihapus di session agar tidak tampil di daftar
-    $deleted = session()->get('deleted_products', []);
-    if (!in_array($slug, $deleted)) {
-        $deleted[] = $slug;
-        session()->put('deleted_products', $deleted);
+    try {
+        $product = \App\Models\Product::where('slug', $slug)
+            ->orWhere('name', 'like', str_replace('-', ' ', $slug) . '%')
+            ->first();
+    } catch (\Illuminate\Database\QueryException $e) {
+        $product = \App\Models\Product::where('name', 'like', str_replace('-', ' ', $slug) . '%')->first();
     }
-    // Hapus direktori gambar jika ada
-    Storage::deleteDirectory('public/products/' . $slug);
-    return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus (demo).');
+
+    if ($product) {
+        // Hapus direktori gambar jika ada
+        Storage::deleteDirectory('public/products/' . $slug);
+        // Hapus record dari database
+        $product->delete();
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus.');
+    }
+
+    return redirect()->route('seller.products.index')->with('error', 'Produk tidak ditemukan, tidak ada yang dihapus.');
 })->middleware(['auth', 'role:seller'])->name('seller.products.destroy');
 
-// Daftar pesanan
-Route::get('/seller/orders', function () {
-    return view('seller.orders.index');
-})->middleware(['auth', 'role:seller'])->name('seller.orders.index');
+// Daftar pesanan (gunakan controller agar membaca dari DB)
+Route::get('/seller/orders', [SellerOrderController::class, 'index'])
+    ->middleware(['auth', 'role:seller'])
+    ->name('seller.orders.index');
+
+// Detail pesanan penjual
+Route::get('/seller/orders/{id}', [SellerOrderController::class, 'show'])
+    ->middleware(['auth', 'role:seller'])
+    ->name('seller.orders.show');
+
+// Ubah status pesanan (Menunggu/Diproses/Dikirim/Selesai/Dibatalkan)
+Route::put('/seller/orders/{id}/status', [SellerOrderController::class, 'updateStatus'])
+    ->middleware(['auth', 'role:seller'])
+    ->name('seller.orders.update-status');
 
 // Laporan penjualan (seller reports)
 Route::get('/seller/laporan', function () {

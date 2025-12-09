@@ -169,10 +169,11 @@
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
                 <div class="flex items-start justify-between">
                     <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 8h4m0 0h4m-4 0v8" />
+                        <!-- Dollar icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 3v18M17 7a4 4 0 0 0-4-3H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H8a4 4 0 0 1-4-3" />
                         </svg>
                     </div>
                 </div>
@@ -184,11 +185,12 @@
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
                 <div class="flex items-start justify-between">
                     <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <!-- Cart icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l3 12h10l3-8H6" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                            <circle cx="10" cy="20" r="1" />
+                            <circle cx="19" cy="20" r="1" />
                         </svg>
                     </div>
                 </div>
@@ -200,9 +202,10 @@
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
                 <div class="flex items-start justify-between">
                     <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 3 3 5-5" />
+                        <!-- Trending up icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 7-7" />
                         </svg>
                     </div>
                 </div>
@@ -214,11 +217,11 @@
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
                 <div class="flex items-start justify-between">
                     <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 4.5 7l7.5 4 7.5-4L12 3Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7v8l7.5 4 7.5-4V7" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v8" />
+                        <!-- Cube/box icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v10l-8 4-8-4V7l8-4Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7l8 4 8-4" />
                         </svg>
                     </div>
                 </div>

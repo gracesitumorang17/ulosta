@@ -17,26 +17,28 @@
                         [
                             'route' => 'seller.dashboard',
                             'label' => 'Dashboard',
-                            'icon' =>
-                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10V8l2-2h11l2 2v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 21V10h14v11" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6" />',
+                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18l-1.5-4.5H4.5L3 7z" />
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7" />
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-5h6v5" />',
                         ],
                         [
                             'route' => 'seller.products.index',
                             'label' => 'Produk',
-                            'icon' =>
-                                '<path stroke-linecap="round" stroke-linejoin="round" d="M21 16.5V7.5a1 1 0 0 0-.555-.832l-8-4a1 1 0 0 0-.89 0l-8 4A1 1 0 0 0 3 7.5v9a1 1 0 0 0 .555.832l8 4a1 1 0 0 0 .89 0l8-4A1 1 0 0 0 21 16.5ZM3.5 7.75l8.5 4.25 8.5-4.25M12 12v9" />',
+                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v10l-8 4-8-4V7l8-4Z" />
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 7l8 4 8-4" />',
                         ],
                         [
                             'route' => 'seller.orders.index',
                             'label' => 'Pesanan',
-                            'icon' =>
-                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l3 12h10l3-8H6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />',
+                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 8V7a4 4 0 0 1 8 0v1" />
+                                         <rect x="5" y="8" width="14" height="12" rx="2" ry="2" />
+                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6" />',
                         ],
                         [
-                            'route' => null,
+                            'route' => 'seller.reports.index',
                             'label' => 'Laporan',
-                            'icon' =>
-                                '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 3 3 5-5" />',
+                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 7-7" />
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5h6v6" />',
                         ],
                     ];
                 @endphp

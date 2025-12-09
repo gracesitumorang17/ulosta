@@ -149,69 +149,40 @@
                 return 'Rp ' . number_format($v, 0, ',', '.');
             }
         }
-        $products = [
-            [
-                'title' => 'Ulos Ragihotang Premium',
-                'slug' => 'ulos-ragihotang-premium',
-                'category' => 'Pernikahan',
-                'price' => 1250000,
-                'stock' => 15,
-                'sold' => 45,
-                'status' => 'Aktif',
-                'img' => asset('image/' . rawurlencode('Ulos Ragi Hotang.jpg')),
-            ],
-            [
-                'title' => 'Ulos Bintang Maratur Klasik',
-                'slug' => 'ulos-bintang-maratur-klasik',
-                'category' => 'Penghormatan',
-                'price' => 950000,
-                'stock' => 8,
-                'sold' => 38,
-                'status' => 'Aktif',
-                'img' => asset('image/' . rawurlencode('Ulos Bintang Maratur.jpg')),
-            ],
-            [
-                'title' => 'Ulos Sibolong Tradisional',
-                'slug' => 'ulos-sibolong-tradisional',
-                'category' => 'Kematian',
-                'price' => 1100000,
-                'stock' => 12,
-                'sold' => 32,
-                'status' => 'Aktif',
-                // Perbaikan: file 'Ulos Sibolang.jpg' tidak ada, gunakan nama yang benar di folder public/image
-                'img' => asset('image/' . rawurlencode('Ulos Sibolang Rasta Pamontari.jpg')),
-            ],
-            [
-                'title' => 'Ulos Ragi Hidup Eksklusif',
-                'slug' => 'ulos-ragi-hidup-eksklusif',
-                'category' => 'Pernikahan',
-                'price' => 1350000,
-                'stock' => 0,
-                'sold' => 25,
-                'status' => 'Nonaktif',
-                'img' => asset('image/' . rawurlencode('ulos2.jpg')),
-            ],
-            [
-                'title' => 'Ulos Mangiring Premium',
-                'slug' => 'ulos-mangiring-premium',
-                'category' => 'Penghormatan',
-                'price' => 875000,
-                'stock' => 20,
-                'sold' => 18,
-                'status' => 'Aktif',
-                'img' => asset('image/' . rawurlencode('ulos3.jpg')),
-            ],
-        ];
-        // Filter produk yang sudah ditandai dihapus (demo) dari session
-        // Merge produk custom yang dibuat via form create
-        $custom = session('custom_products', []);
-        if (!empty($custom)) {
-            $products = array_merge($products, array_values($custom));
-        }
-        $deleted = session('deleted_products', []);
-        if (!empty($deleted)) {
-            $products = array_values(array_filter($products, fn($p) => !in_array($p['slug'], $deleted)));
-        }
+        // Ambil produk murni dari DB (tanpa demo/session) dan normalkan URL gambar
+        $products = \App\Models\Product::active()
+            ->get()
+            ->map(function ($p) {
+                $slug = $p->slug ?: strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $p->name)));
+                $imgRaw = $p->image;
+                $img = $imgRaw
+                    ? (str_starts_with($imgRaw, 'http')
+                        ? $imgRaw
+                        : (str_starts_with($imgRaw, '/storage/')
+                            ? $imgRaw
+                            : asset('storage/' . ltrim($imgRaw, '/'))))
+                    : asset('image/' . rawurlencode('ulos1.jpeg'));
+
+                return [
+                    'id' => $p->id,
+                    'title' => $p->name,
+                    'slug' => $slug,
+                    'category' => $p->category, // fungsi
+                    'jenis' => $p->tag,
+                    'price' => (int) $p->price,
+                    'stock' => (int) $p->stock,
+                    'sold' => 0,
+                    'status' => $p->is_active ? 'Aktif' : 'Nonaktif',
+                    'img' => $img,
+                    // Detail untuk preview
+                    'desc' => $p->description,
+                    'material' => $p->material,
+                    'size' => $p->size,
+                    'weight' => $p->weight,
+                    'origin' => $p->origin,
+                ];
+            })
+            ->toArray();
     @endphp
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -290,7 +261,8 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="w-64">Produk</th>
-                        <th>Kategori</th>
+                        <th>Fungsi</th>
+                        <th>Jenis</th>
                         <th>Harga</th>
                         <th>Stok</th>
                         <th>Terjual</th>
@@ -300,17 +272,24 @@
                 </thead>
                 <tbody>
                     @foreach ($products as $p)
-                        <tr>
+                        <tr data-title="{{ $p['title'] }}" data-img="{{ $p['img'] }}"
+                            data-category="{{ $p['category'] }}" data-jenis="{{ $p['jenis'] ?? '' }}"
+                            data-price="{{ $p['price'] }}" data-stock="{{ $p['stock'] }}"
+                            data-description="{{ $p['desc'] ?? '' }}" data-material="{{ $p['material'] ?? '' }}"
+                            data-size="{{ $p['size'] ?? '' }}" data-weight="{{ $p['weight'] ?? '' }}"
+                            data-origin="{{ $p['origin'] ?? '' }}">
                             <td class="flex items-center gap-3 min-w-0">
                                 <div class="w-12 h-12 rounded-md overflow-hidden bg-gray-100 shrink-0">
                                     <img src="{{ $p['img'] }}" alt="{{ $p['title'] }}"
-                                        class="w-full h-full object-cover" />
+                                        class="w-full h-full object-cover"
+                                        onerror="this.src='{{ asset('image/ulos1.jpeg') }}'" />
                                 </div>
                                 <div class="truncate">
                                     <p class="text-sm font-medium truncate">{{ $p['title'] }}</p>
                                 </div>
                             </td>
                             <td><span class="badge badge-cat">{{ $p['category'] }}</span></td>
+                            <td><span class="badge badge-cat">{{ $p['jenis'] ?? '-' }}</span></td>
                             <td class="price-red">{{ format_rp_products($p['price']) }}</td>
                             <td class="{{ $p['stock'] == 0 ? 'text-red-600 font-semibold' : '' }}">{{ $p['stock'] }}
                                 pcs</td>
@@ -324,7 +303,7 @@
                             </td>
                             <td class="text-right">
                                 <div class="flex justify-end items-center gap-3 text-gray-600">
-                                    <button type="button" class="hover:text-gray-900" title="Lihat">
+                                    <button type="button" class="hover:text-gray-900 js-open-preview" title="Lihat">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -345,8 +324,9 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="hover:text-red-600" title="Hapus">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="action-icon"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="1.7">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M6 7h12M9 7V4h6v3m1 0v13H8V7" />
                                             </svg>
@@ -360,6 +340,140 @@
             </table>
         </div>
     </main>
+    <!-- Modal Preview -->
+    <div id="listPreviewModal" class="fixed inset-0 bg-black/40 z-40 hidden">
+        <div class="absolute inset-0 flex items-start justify-center pt-10 px-4">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-3 border-b">
+                    <div>
+                        <h2 class="text-lg font-semibold">Preview Produk</h2>
+                        <p class="text-xs text-gray-500">Tampilan seperti yang dilihat pembeli</p>
+                    </div>
+                    <button type="button" id="listClosePreview" class="p-2 rounded-md hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" class="w-5 h-5 text-gray-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="rounded-xl overflow-hidden bg-gray-100">
+                            <img id="lpImg" src="" alt="Preview Gambar"
+                                class="w-full h-72 object-cover" />
+                        </div>
+                        <span id="lpActive"
+                            class="inline-block mt-3 text-[11px] bg-yellow-100 text-yellow-800 px-3 py-1 rounded-md">Produk
+                            Aktif</span>
+                    </div>
+                    <div>
+                        <span id="lpCatBadge"
+                            class="inline-block text-[11px] bg-gray-200 text-gray-700 px-3 py-1 rounded-md mb-2"></span>
+                        <h3 id="lpTitle" class="text-xl font-semibold"></h3>
+                        <div class="mt-2">
+                            <span id="lpPrice" class="text-2xl text-red-600 font-bold"></span>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Ketersediaan</span>
+                            <span id="lpStock" class="text-green-600"></span>
+                        </div>
+                        <hr class="my-4" />
+                        <div>
+                            <h4 class="font-semibold mb-2">Deskripsi Produk</h4>
+                            <p id="lpDesc" class="text-sm text-gray-700"></p>
+                        </div>
+                        <div class="mt-4 card">
+                            <div class="card-header">Detail Produk</div>
+                            <ul class="space-y-2 text-sm">
+                                <li id="lpMaterialWrap" style="display:none"><strong>Bahan:</strong> <span
+                                        id="lpMaterial"></span></li>
+                                <li id="lpSizeWrap" style="display:none"><strong>Ukuran:</strong> <span
+                                        id="lpSize"></span></li>
+                                <li id="lpWeightWrap" style="display:none"><strong>Berat:</strong> <span
+                                        id="lpWeight"></span></li>
+                                <li id="lpOriginWrap" style="display:none"><strong>Asal Daerah:</strong> <span
+                                        id="lpOrigin"></span></li>
+                                <li id="lpJenisWrap" style="display:none"><strong>Jenis Ulos:</strong> <span
+                                        id="lpJenis"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const modal = document.getElementById('listPreviewModal');
+            const closeBtn = document.getElementById('listClosePreview');
+
+            function rp(n) {
+                try {
+                    n = parseInt(n || 0);
+                } catch (e) {
+                    n = 0;
+                }
+                return 'Rp ' + n.toLocaleString('id-ID');
+            }
+
+            function setText(el, val) {
+                if (el) el.textContent = val || '';
+            }
+
+            function setShow(el, show) {
+                if (!el) return;
+                el.style.display = show ? '' : 'none';
+            }
+            document.querySelectorAll('.js-open-preview').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const row = btn.closest('tr');
+                    if (!row) return;
+                    const title = row.dataset.title;
+                    const img = row.dataset.img;
+                    const cat = row.dataset.category;
+                    const jenis = row.dataset.jenis;
+                    const price = row.dataset.price;
+                    const stock = row.dataset.stock;
+                    const desc = row.dataset.description;
+                    const material = row.dataset.material;
+                    const size = row.dataset.size;
+                    const weight = row.dataset.weight;
+                    const origin = row.dataset.origin;
+
+                    const lpImg = document.getElementById('lpImg');
+                    if (lpImg) {
+                        lpImg.src = img || '';
+                    }
+                    setText(document.getElementById('lpCatBadge'), cat);
+                    setText(document.getElementById('lpTitle'), title);
+                    setText(document.getElementById('lpPrice'), rp(price));
+                    setText(document.getElementById('lpStock'), `Stok tersedia (${stock} pcs)`);
+                    setText(document.getElementById('lpDesc'), desc);
+
+                    setText(document.getElementById('lpMaterial'), material);
+                    setShow(document.getElementById('lpMaterialWrap'), !!material);
+                    setText(document.getElementById('lpSize'), size);
+                    setShow(document.getElementById('lpSizeWrap'), !!size);
+                    setText(document.getElementById('lpWeight'), weight ? `${weight} gram` : '');
+                    setShow(document.getElementById('lpWeightWrap'), !!weight);
+                    setText(document.getElementById('lpOrigin'), origin);
+                    setShow(document.getElementById('lpOriginWrap'), !!origin);
+                    setText(document.getElementById('lpJenis'), jenis);
+                    setShow(document.getElementById('lpJenisWrap'), !!jenis);
+
+                    modal.classList.remove('hidden');
+                });
+            });
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            }
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.add('hidden');
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>

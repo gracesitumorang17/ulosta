@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -105,6 +106,8 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
+            // Generate a unique slug for seeded products to support edit routes
+            $product['slug'] = Str::slug($product['name']) . '-' . Str::random(6);
             Product::create($product);
         }
     }
