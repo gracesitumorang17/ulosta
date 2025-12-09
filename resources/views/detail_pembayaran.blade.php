@@ -82,11 +82,11 @@
                                 </svg>
                                 <span class="text-sm">Wishlist Saya</span>
                             </a>
-                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                            <a href="{{ route('keranjang') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                 </svg>
-                                <span class="text-sm">Pesanan Saya</span>
+                                <span class="text-sm">Keranjang Saya</span>
                             </a>
                             <div class="my-2 border-t border-gray-100"></div>
                             <form action="{{ route('logout') }}" method="POST">
@@ -194,8 +194,57 @@
             >
                 Lanjut Belanja
             </a>
+
+            <button 
+                onclick="showCancelModal()"
+                class="w-full text-center border-2 border-red-600 text-red-600 py-3 rounded-lg hover:bg-red-50 transition font-medium"
+            >
+                Batalkan Pesanan
+            </button>
         </div>
     </main>
+
+    <!-- Cancel Order Modal -->
+    <div id="cancelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+            <!-- Icon -->
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Batalkan Pesanan?</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Apakah Anda yakin ingin membatalkan pesanan ini? <br>
+                <span class="font-semibold">Pesanan #ULS-{{ $order->order_number }}</span>
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button 
+                    onclick="closeCancelModal()"
+                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                >
+                    Tidak
+                </button>
+                <button 
+                    onclick="cancelOrder()"
+                    id="confirmCancelBtn"
+                    class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium flex items-center justify-center"
+                >
+                    <span id="cancelBtnText">Ya, Batalkan</span>
+                    <svg id="cancelSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-neutral-900 text-neutral-300 mt-16">
@@ -281,6 +330,111 @@
                 profileMenu.classList.add('hidden');
             }
         });
+
+        // Cancel Order Modal Functions
+        function showCancelModal() {
+            document.getElementById('cancelModal').classList.remove('hidden');
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCancelModal();
+            }
+        });
+
+        // Cancel Order Function
+        async function cancelOrder() {
+            const confirmBtn = document.getElementById('confirmCancelBtn');
+            const btnText = document.getElementById('cancelBtnText');
+            const spinner = document.getElementById('cancelSpinner');
+
+            // Show loading state
+            confirmBtn.disabled = true;
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/orders/{{ $order->id }}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success toast
+                    showToast('Pesanan berhasil dibatalkan', 'success');
+                    
+                    // Redirect to profile page after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = '{{ route("profil") }}?tab=pesanan';
+                    }, 1500);
+                } else {
+                    // Show error toast
+                    showToast(data.message || 'Gagal membatalkan pesanan', 'error');
+                    
+                    // Reset button state
+                    confirmBtn.disabled = false;
+                    btnText.classList.remove('hidden');
+                    spinner.classList.add('hidden');
+                    
+                    closeCancelModal();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan saat membatalkan pesanan', 'error');
+                
+                // Reset button state
+                confirmBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                
+                closeCancelModal();
+            }
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            // Remove existing toast if any
+            const existingToast = document.getElementById('toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 flex items-center gap-3 transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            
+            toast.innerHTML = `
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${type === 'success' 
+                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
+                    }
+                </svg>
+                <span class="font-medium">${message}</span>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>

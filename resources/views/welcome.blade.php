@@ -123,7 +123,7 @@
                                     @endif
                                     
                                     <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Profil Saya</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Pesanan Saya</a>
+                                    <a href="{{ route('keranjang') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Keranjang Saya</a>
                                     <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Wishlist</a>
                                     <div class="border-t border-gray-100 mt-2 pt-2">
                                         <form action="{{ route('logout') }}" method="POST">

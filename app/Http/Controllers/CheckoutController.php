@@ -124,4 +124,36 @@ class CheckoutController extends Controller
 
         return view('instruksi_pembayaran', compact('order'));
     }
+
+    public function cancelOrder($orderId)
+    {
+        $order = \App\Models\Order::findOrFail($orderId);
+        
+        // Make sure the order belongs to the authenticated user
+        if ($order->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses tidak diizinkan'
+            ], 403);
+        }
+
+        // Check if order can be cancelled (only pending orders)
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak dapat dibatalkan karena sudah diproses'
+            ], 400);
+        }
+
+        // Update order status to cancelled
+        $order->update([
+            'status' => 'cancelled',
+            'payment_status' => 'cancelled'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil dibatalkan'
+        ]);
+    }
 }
