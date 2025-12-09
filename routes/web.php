@@ -66,16 +66,23 @@ Route::get('/produk/{id}', function ($id) {
         $isInWishlist = false;
         $recommendationWishlist = [];
         if (Auth::check()) {
+            // Check by product_id OR product_name for backward compatibility
             $isInWishlist = \App\Models\Wishlist::where('user_id', Auth::id())
-                ->where('product_id', $product->id)
+                ->where(function($query) use ($product) {
+                    $query->where('product_id', $product->id)
+                          ->orWhere('product_name', $product->name);
+                })
                 ->exists();
             
             // Check wishlist status for recommendations
             $wishlistProductIds = \App\Models\Wishlist::where('user_id', Auth::id())
                 ->pluck('product_id')
                 ->toArray();
+            $wishlistProductNames = \App\Models\Wishlist::where('user_id', Auth::id())
+                ->pluck('product_name')
+                ->toArray();
             foreach ($recommendations as $rec) {
-                $recommendationWishlist[$rec->id] = in_array($rec->id, $wishlistProductIds);
+                $recommendationWishlist[$rec->id] = in_array($rec->id, $wishlistProductIds) || in_array($rec->name, $wishlistProductNames);
             }
         }
         
@@ -260,6 +267,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/detail-pembayaran/{orderId}', [CheckoutController::class, 'detailPembayaran'])->name('detail.pembayaran');
     Route::get('/instruksi-pembayaran/{orderId}', [CheckoutController::class, 'instruksiPembayaran'])->name('instruksi.pembayaran');
+    Route::post('/orders/{orderId}/cancel', [CheckoutController::class, 'cancelOrder'])->name('orders.cancel');
 });
 
 // Profile routes (authenticated)

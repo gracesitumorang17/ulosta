@@ -19,6 +19,7 @@ class WishlistController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'product_id' => 'nullable|integer',
             'name' => 'required|string',
             'image' => 'nullable|string',
             'price' => 'required|string',
@@ -26,10 +27,16 @@ class WishlistController extends Controller
             'tag' => 'nullable|string',
         ]);
 
-        // Check if already exists
-        $existing = Wishlist::where('user_id', Auth::id())
-                           ->where('product_name', $data['name'])
-                           ->first();
+        // Check if already exists (prefer product_id if available)
+        $query = Wishlist::where('user_id', Auth::id());
+        
+        if (isset($data['product_id']) && $data['product_id']) {
+            $query->where('product_id', $data['product_id']);
+        } else {
+            $query->where('product_name', $data['name']);
+        }
+        
+        $existing = $query->first();
 
         if ($existing) {
             // Remove from wishlist
@@ -48,6 +55,7 @@ class WishlistController extends Controller
             
             Wishlist::create([
                 'user_id' => Auth::id(),
+                'product_id' => $data['product_id'] ?? null,
                 'product_name' => $data['name'],
                 'product_image' => $data['image'] ?? null,
                 'product_price' => $price,

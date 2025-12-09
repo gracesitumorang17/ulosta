@@ -259,11 +259,11 @@
                                 </svg>
                                 <span class="text-sm">Wishlist Saya</span>
                             </a>
-                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
+                            <a href="{{ route('keranjang') }}" class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                 </svg>
-                                <span class="text-sm">Pesanan Saya</span>
+                                <span class="text-sm">Keranjang Saya</span>
                             </a>
                             <div class="my-2 border-t border-gray-100"></div>
                             <form action="{{ route('logout') }}" method="POST">
@@ -995,6 +995,25 @@
             console.log('🔘 Add to Cart button:', addToCartBtn ? '✅ Found' : '❌ Not found');
             console.log('🔘 Wishlist button:', wishlistBtn ? '✅ Found' : '❌ Not found');
             console.log('🔘 Buy Now button:', buyNowBtn ? '✅ Found' : '❌ Not found');
+            
+            // Initialize wishlist button state based on product data
+            @if(isset($product['is_in_wishlist']) && $product['is_in_wishlist'])
+                // Find the main wishlist button (Simpan button)
+                const wishlistButtons = document.querySelectorAll('[onclick*="toggleWishlist"]');
+                wishlistButtons.forEach(btn => {
+                    if (btn.dataset.productId === "{{ $product['id'] }}") {
+                        const icon = btn.querySelector('svg');
+                        if (icon) {
+                            icon.classList.add('fill-current');
+                        }
+                        btn.classList.remove('text-gray-600');
+                        btn.classList.add('text-red-600');
+                        console.log('❤️ Wishlist button initialized as RED (in wishlist)');
+                    }
+                });
+            @else
+                console.log('🤍 Product not in wishlist');
+            @endif
         });
     </script>
 </body>

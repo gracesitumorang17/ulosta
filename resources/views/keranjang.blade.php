@@ -401,12 +401,43 @@
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         function deleteCartItem(itemId, button) {
-            if (!confirm('Hapus dari keranjang?')) {
-                return;
-            }
+            // Create custom confirmation modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-2xl transform transition-all">
+                    <div class="text-center">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Hapus dari Keranjang?</h3>
+                        <p class="text-sm text-gray-500 mb-6">Produk ini akan dihapus dari keranjang Anda.</p>
+                        <div class="flex gap-3">
+                            <button onclick="this.closest('.fixed').remove()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium">
+                                Batal
+                            </button>
+                            <button onclick="confirmDeleteCart(${itemId}, this)" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function confirmDeleteCart(itemId, button) {
+            const modal = button.closest('.fixed');
+            button.disabled = true;
+            button.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
             const form = document.getElementById('delete-form-' + itemId);
-            if (!form) return;
+            if (!form) {
+                modal.remove();
+                return;
+            }
 
             fetch(form.action, {
                 method: 'DELETE',
@@ -418,6 +449,12 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    // Close modal
+                    modal.remove();
+                    
+                    // Show success message
+                    showToast('Produk dihapus dari keranjang');
+                    
                     // Update badge counters
                     updateCartBadge(data.count);
                     
@@ -438,12 +475,14 @@
                         }
                     }
                 } else {
-                    alert('Gagal menghapus produk');
+                    modal.remove();
+                    showToast('Gagal menghapus produk', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan');
+                modal.remove();
+                showToast('Terjadi kesalahan: ' + error.message, 'error');
             });
         }
 
@@ -452,14 +491,50 @@
             const mobileBadge = document.getElementById('mobile-cart-badge');
             
             if (badge) {
-                badge.textContent = count;
+                badge.textContent = count > 99 ? '99+' : count;
                 badge.style.display = count > 0 ? 'flex' : 'none';
             }
             
             if (mobileBadge) {
-                mobileBadge.textContent = count;
+                mobileBadge.textContent = count > 99 ? '99+' : count;
                 mobileBadge.style.display = count > 0 ? 'flex' : 'none';
             }
+        }
+
+        function showToast(message, type = 'success') {
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                document.body.appendChild(toast);
+            }
+            
+            const bgColor = type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+            const icon = type === 'success' 
+                ? `<svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                    <path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 111.414-1.414L8.414 12.172l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' />
+                   </svg>`
+                : `<svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                    <path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' />
+                   </svg>`;
+            
+            toast.className = 'fixed top-5 right-5 z-50 bg-white border border-gray-200 shadow-xl rounded-lg px-4 py-3 flex items-center gap-3 transform transition-transform';
+            toast.innerHTML = `
+                <div class="w-8 h-8 flex items-center justify-center rounded-full ${bgColor}">
+                    ${icon}
+                </div>
+                <span class="text-sm font-medium text-gray-800">${message}</span>
+            `;
+            
+            toast.classList.remove('hidden');
+            toast.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3000);
         }
 
         // Auto hide alert after 3 seconds
