@@ -17,11 +17,13 @@ class OrderItem extends Model
         'product_image',
         'quantity',
         'price',
+        'subtotal',
         'total',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
         'quantity' => 'integer',
     ];
@@ -61,7 +63,12 @@ class OrderItem extends Model
         parent::boot();
 
         static::saving(function ($orderItem) {
-            $orderItem->total = $orderItem->quantity * $orderItem->price;
+            $calc = $orderItem->quantity * $orderItem->price;
+            // Isi subtotal jika belum dikirim dari controller
+            if (is_null($orderItem->subtotal)) {
+                $orderItem->subtotal = $calc;
+            }
+            $orderItem->total = $calc;
         });
     }
 }
