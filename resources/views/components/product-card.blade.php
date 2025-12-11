@@ -2,8 +2,8 @@
     data-aos="fade-up" data-aos-delay="{{ 40 * ($index + 1) }}">
     <div class="relative">
         <div class="ratio-3-2">
-            <img src="{{ asset('image/' . rawurlencode($p['image'])) }}" alt="{{ $p['name'] }}"
-                class="w-full h-full object-cover" loading="lazy" />
+            <img src="{{ $p['image_url'] ?? ($p['image'] ? asset('storage/' . ltrim($p['image'], '/')) : asset('image/ulos1.jpeg')) }}"
+                alt="{{ $p['name'] }}" class="w-full h-full object-cover" loading="lazy" />
         </div>
 
         <div class="absolute left-3 top-3">
