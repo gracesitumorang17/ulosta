@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Product;
 
@@ -33,54 +34,63 @@ class SellerProductController extends Controller
         // Slug unik per produk
         $slug = Str::slug($data['name']) . '-' . Str::random(6);
 
-        $images = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+        // Wrap creation in a transaction to ensure product is saved first
+        try {
+            DB::transaction(function () use ($request, $data, $slug) {
+                $sellerId = Auth::id();
 
-                // ✅ Simpan di storage/app/public/products/{slug}/{filename}
-                Storage::disk('public')->putFileAs('products/' . $slug, $file, $filename);
+                // 1) Buat produk terlebih dahulu (tanpa gambar utama) agar id & seller_id valid
+                $product = Product::create([
+                    'name' => $data['name'],
+                    'slug' => $slug,
+                    'description' => $data['description'] ?? '',
+                    'price' => (int) round($data['price']),
+                    'original_price' => null,
+                    'tag' => $data['jenis'] ?? ($data['category'] ?? ''),
+                    'category' => $data['category'],
+                    'image' => null, // set later after uploads
+                    'stock' => (int) $data['stock'],
+                    'is_active' => (bool) ($data['status'] ?? true),
+                    'seller_id' => $sellerId,
+                ]);
 
-                // ✅ Simpan hanya path relatif (bukan URL penuh)
-                $images[] = 'products/' . $slug . '/' . $filename;
-            }
+                if (!$product || !$product->id) {
+                    throw new \RuntimeException('Gagal membuat produk: ID tidak terbentuk. Pastikan kolom products sesuai migrasi (slug, category, seller_id).');
+                }
+
+                // 2) Simpan file gambar (jika ada) dan buat entri gallery
+                $savedPaths = [];
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $file) {
+                        $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+                        Storage::disk('public')->putFileAs('products/' . $sellerId . '/' . $slug, $file, $filename);
+                        $rel = 'products/' . $sellerId . '/' . $slug . '/' . $filename;
+                        $savedPaths[] = $rel;
+                    }
+                }
+
+                // 3) Tetapkan gambar utama dan persist ke product_images
+                if (!empty($savedPaths)) {
+                    // set main image to first upload
+                    $product->image = $savedPaths[0];
+                    $product->save();
+                    foreach ($savedPaths as $i => $path) {
+                        \App\Models\ProductImage::create([
+                            'product_id' => $product->id,
+                            'seller_id' => $sellerId,
+                            'path' => $path,
+                            'is_primary' => $i === 0,
+                        ]);
+                    }
+                }
+
+                // Tidak lagi menyimpan ke session custom_products untuk menghindari duplikasi di sisi pembeli
+            });
+        } catch (\Throwable $e) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan produk: ' . $e->getMessage());
         }
 
-        // Simpan ke database
-        $product = Product::create([
-            'name' => $data['name'],
-            'slug' => $slug,
-            'description' => $data['description'] ?? '',
-            'price' => (int) round($data['price']),
-            'original_price' => null,
-            // Simpan jenis ke kolom tag, fungsi ke category
-            'tag' => $data['jenis'] ?? ($data['category'] ?? ''),
-            'category' => $data['category'],
-            'image' => $images[0] ?? null, // Path relatif
-            'stock' => (int) $data['stock'],
-            'is_active' => (bool) ($data['status'] ?? true),
-        ]);
-
-        // Simpan ke session agar langsung muncul di daftar seller
-        $custom = session()->get('custom_products', []);
-        $custom[$slug] = [
-            'title' => $data['name'],
-            'slug' => $slug,
-            'category' => $data['category'],
-            'price' => (int) $data['price'],
-            'stock' => (int) $data['stock'],
-            'sold' => 0,
-            'status' => ($data['status'] ?? true) ? 'Aktif' : 'Nonaktif',
-            // ✅ Tampilkan gambar dengan URL publik (hanya untuk tampilan)
-            'img' => isset($images[0]) ? asset('storage/' . $images[0]) : asset('image/ulos1.jpeg'),
-            'images' => array_map(fn($i) => asset('storage/' . $i), $images),
-            'description' => $data['description'] ?? '',
-            'material' => $data['material'] ?? '',
-            'size' => $data['size'] ?? '',
-            'weight' => $data['weight'] ?? 0,
-            'origin' => $data['origin'] ?? '',
-        ];
-        session()->put('custom_products', $custom);
+        // Session sudah diperbarui di dalam transaksi; blok duplikat ini dihapus untuk menghindari variabel tidak terdefinisi
 
         return redirect()->route('seller.products.edit', $slug)
             ->with('success', 'Produk berhasil disimpan.');
@@ -195,9 +205,17 @@ class SellerProductController extends Controller
                 ->with('error', 'Produk tidak ditemukan. Tidak dapat mengunggah gambar.');
         }
 
+        $sellerId = Auth::id();
         foreach ($request->file('images') as $file) {
             $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
-            Storage::disk('public')->putFileAs('products/' . $slug, $file, $filename);
+            Storage::disk('public')->putFileAs('products/' . $sellerId . '/' . $slug, $file, $filename);
+            $rel = 'products/' . $sellerId . '/' . $slug . '/' . $filename;
+            \App\Models\ProductImage::create([
+                'product_id' => $product->id,
+                'seller_id' => $sellerId,
+                'path' => $rel,
+                'is_primary' => false,
+            ]);
         }
 
         return redirect()->route('seller.products.edit', $slug)
@@ -243,37 +261,31 @@ class SellerProductController extends Controller
         $product->is_active = $request->boolean('status');
 
         // Jika ada file gambar baru, simpan dan jadikan gambar utama
+        $sellerId = Auth::id();
         if ($request->hasFile('images')) {
             $savedPaths = [];
             foreach ($request->file('images') as $file) {
                 $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
-                Storage::disk('public')->putFileAs('products/' . $slug, $file, $filename);
-                $savedPaths[] = 'products/' . $slug . '/' . $filename; // path relatif
+                Storage::disk('public')->putFileAs('products/' . $sellerId . '/' . $slug, $file, $filename);
+                $savedPaths[] = 'products/' . $sellerId . '/' . $slug . '/' . $filename; // path relatif
             }
             if (!empty($savedPaths)) {
                 // Set gambar utama ke file pertama yang diunggah
                 $product->image = $savedPaths[0];
+                // mark primary in gallery; create entries if missing
+                foreach ($savedPaths as $i => $path) {
+                    \App\Models\ProductImage::create([
+                        'product_id' => $product->id,
+                        'seller_id' => $sellerId,
+                        'path' => $path,
+                        'is_primary' => $i === 0,
+                    ]);
+                }
             }
         }
         $product->save();
 
-        // Perbarui session custom agar konsisten jika ada
-        $custom = session()->get('custom_products', []);
-        if (isset($custom[$slug])) {
-            $custom[$slug] = array_merge($custom[$slug], [
-                'title' => $product->name,
-                'category' => $product->category,
-                'price' => (int) $product->price,
-                'stock' => (int) $product->stock,
-                'status' => $product->is_active ? 'Aktif' : 'Nonaktif',
-                'description' => $product->description,
-                'material' => $data['material'] ?? ($custom[$slug]['material'] ?? ''),
-                'size' => $data['size'] ?? ($custom[$slug]['size'] ?? ''),
-                'weight' => $data['weight'] ?? ($custom[$slug]['weight'] ?? 0),
-                'origin' => $data['origin'] ?? ($custom[$slug]['origin'] ?? ''),
-            ]);
-            session()->put('custom_products', $custom);
-        }
+        // Tidak memperbarui session custom_products untuk mencegah duplikasi di sisi pembeli
 
         return redirect()->route('seller.products.edit', $slug)
             ->with('success', 'Perubahan produk berhasil disimpan.');

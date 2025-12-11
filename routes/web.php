@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
@@ -12,9 +14,10 @@ use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\FacebookController;
+use App\Http\Controllers\SellerOrderController;
 
 // Test routes for Facebook
-require __DIR__.'/test-facebook.php';
+require __DIR__ . '/test-facebook.php';
 
 // Root: redirect based on authentication and role
 Route::get('/', function () {
@@ -36,7 +39,9 @@ Route::get('/', function () {
             'id' => $p->id,
             'name' => $p->name,
             'description' => $p->description,
+            // Keep raw image path for storage rendering, but provide url for convenience
             'image' => $p->image,
+            'image_url' => $p->image_url,
             'tag' => $p->tag,
             'category' => $p->category,
             'price' => $p->formatted_price,
@@ -49,7 +54,11 @@ Route::get('/', function () {
 
 // Product detail route (NO AUTHENTICATION REQUIRED - PUBLIC ACCESS)
 Route::get('/produk/{id}', function ($id) {
-    \Log::info('🔵 PRODUCT ROUTE HIT - ID: ' . $id . ' | User: ' . (Auth::check() ? Auth::user()->email : 'GUEST'));
+    Log::info('🔵 PRODUCT ROUTE HIT - ID: ' . $id . ' | User: ' . (Auth::check() ? Auth::user()->email : 'GUEST'));
+
+    // Inisialisasi variabel agar tidak undefined
+    $isInWishlist = false;
+    $recommendationWishlist = [];
 
     try {
         $product = Product::findOrFail($id);
@@ -61,7 +70,7 @@ Route::get('/produk/{id}', function ($id) {
             ->latest()
             ->take(3)
             ->get();
-        
+
         // Convert to array format expected by the view
         $productData = [
             'id' => $product->id,
@@ -69,6 +78,7 @@ Route::get('/produk/{id}', function ($id) {
             'description' => $product->description,
             'price' => $product->formatted_price,
             'image' => $product->image,
+            'image_url' => $product->image_url,
             'tag' => $product->tag,
             'stock' => $product->stock,
             'category' => $product->tag,
@@ -82,14 +92,14 @@ Route::get('/produk/{id}', function ($id) {
             'is_in_wishlist' => $isInWishlist
         ];
 
-        \Log::info('✅ PRODUCT LOADED: ' . $product->name);
+        Log::info('✅ PRODUCT LOADED: ' . $product->name);
         return view('detail-produk', [
-            'product' => $productData, 
+            'product' => $productData,
             'recommendations' => $recommendations,
             'recommendationWishlist' => $recommendationWishlist
         ]);
     } catch (\Exception $e) {
-        \Log::error('❌ PRODUCT ERROR - ID: ' . $id . ' | ' . $e->getMessage());
+        Log::error('❌ PRODUCT ERROR - ID: ' . $id . ' | ' . $e->getMessage());
         return redirect()->route('welcome')->with('error', 'Produk tidak ditemukan');
     }
 })->name('produk.detail');
@@ -110,7 +120,7 @@ Route::post('/masuk', function (Request $request) {
 
     // Check if user exists
     $user = \App\Models\User::where('email', $credentials['email'])->first();
-    
+
     if (!$user) {
         return back()->withErrors([
             'email' => 'Email tidak terdaftar.',
@@ -127,7 +137,7 @@ Route::post('/masuk', function (Request $request) {
     // Login the user
     Auth::login($user);
     $request->session()->regenerate();
-    
+
     $role = Auth::user()->role;
     // Redirect by role
     if ($role === 'admin') {
@@ -263,26 +273,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         $pendingVerifications = \App\Models\User::where('role', 'seller')
             ->where('verification_status', 'pending')
             ->get();
-        
+
         $approvedVerifications = \App\Models\User::where('role', 'seller')
             ->where('verification_status', 'approved')
             ->get();
-        
+
         $rejectedVerifications = \App\Models\User::where('role', 'seller')
             ->where('verification_status', 'rejected')
             ->get();
-            
+
         $totalSellers = \App\Models\User::where('role', 'seller')->count();
-        
+
         $recentVerifications = \App\Models\User::where('role', 'seller')
             ->whereNotNull('verification_status')
             ->orderBy('verification_submitted_at', 'desc')
             ->limit(5)
             ->get();
-        
+
         return view('admin.admindashboard', compact(
-            'pendingVerifications', 
-            'approvedVerifications', 
+            'pendingVerifications',
+            'approvedVerifications',
             'rejectedVerifications',
             'totalSellers',
             'recentVerifications'
@@ -430,7 +440,7 @@ Route::middleware('auth')->group(function () {
 
         // Create storage directory for user
         $userDir = 'seller_verification/' . $user->id;
-        
+
         // Upload files to private storage
         $ktpPath = $request->file('ktp_photo')->store($userDir, 'private');
         $selfiePath = $request->file('selfie_photo')->store($userDir, 'private');
@@ -594,44 +604,44 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     // Verification form page (for new submission or resubmission after rejection)
     Route::get('/seller/verification', function () {
         $user = Auth::user();
-        
+
         // If already verified, redirect to dashboard
         if ($user->verification_status === 'approved') {
             return redirect()->route('seller.dashboard')
                 ->with('info', 'Akun Anda sudah terverifikasi.');
         }
-        
+
         // If pending, redirect to pending page
         if ($user->verification_status === 'pending') {
             return redirect()->route('seller.verification.pending');
         }
-        
+
         // Show verification form (for first-time or rejected users)
         return redirect()->route('seller.onboarding.verify');
     })->name('seller.verification');
-    
+
     // Verification pending page
     Route::get('/seller/verification/pending', function () {
         $user = Auth::user();
-        
+
         // If not submitted verification yet or rejected, redirect to verification form
         if (!$user->verification_status || $user->verification_status === 'rejected') {
             return redirect()->route('seller.verification');
         }
-        
+
         // If already verified, redirect to dashboard
         if ($user->verification_status === 'approved') {
             return redirect()->route('seller.dashboard')
                 ->with('info', 'Akun Anda sudah terverifikasi.');
         }
-        
+
         return view('seller.verification-pending');
     })->name('seller.verification.pending');
-    
+
     // AJAX endpoint for checking verification status
     Route::get('/seller/verification/status', function () {
         $user = Auth::user();
-        
+
         return response()->json([
             'status' => $user->verification_status,
             'submitted_at' => $user->verification_submitted_at ? $user->verification_submitted_at->format('Y-m-d H:i:s') : null,
@@ -651,77 +661,77 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             ->orderByRaw("FIELD(verification_status, 'pending', 'approved', 'rejected')")
             ->orderBy('verification_submitted_at', 'desc')
             ->get();
-        
+
         return view('admin.verification-list', compact('users'));
     })->name('admin.verification.list');
-    
+
     // Admin verification detail
     Route::get('/admin/verification/{user}', function (\App\Models\User $user) {
         if ($user->role !== 'seller') {
             abort(404);
         }
-        
+
         return view('admin.verification-detail', compact('user'));
     })->name('admin.verification.detail');
-    
+
     // Admin approve verification
     Route::post('/admin/verification/{user}/approve', function (\App\Models\User $user) {
         if ($user->role !== 'seller' || $user->verification_status !== 'pending') {
             return redirect()->back()->with('error', 'Verifikasi tidak valid.');
         }
-        
+
         $user->update([
             'verification_status' => 'approved',
             'verification_approved_at' => now(),
             'verification_rejected_at' => null,
             'rejection_reason' => null,
         ]);
-        
+
         // Send approval email
         try {
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SellerApprovedMail($user));
         } catch (\Exception $e) {
             // Log error but don't block the approval
-            \Log::error('Failed to send approval email: ' . $e->getMessage());
+            Log::error('Failed to send approval email: ' . $e->getMessage());
         }
-        
+
         return redirect()->route('admin.verification.list')
             ->with('success', 'Verifikasi seller berhasil disetujui! Email notifikasi telah dikirim.');
     })->name('admin.verification.approve');
-    
+
     // Admin reject verification
     Route::post('/admin/verification/{user}/reject', function (\App\Models\User $user, Request $request) {
         if ($user->role !== 'seller' || $user->verification_status !== 'pending') {
             return redirect()->back()->with('error', 'Verifikasi tidak valid.');
         }
-        
+
         $reason = $request->input('rejection_reason', 'Dokumen tidak memenuhi persyaratan');
-        
+
         $user->update([
             'verification_status' => 'rejected',
             'verification_approved_at' => null,
             'verification_rejected_at' => now(),
             'rejection_reason' => $reason,
         ]);
-        
+
         // Send rejection email
         try {
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SellerRejectedMail($user, $reason));
         } catch (\Exception $e) {
             // Log error but don't block the rejection
-            \Log::error('Failed to send rejection email: ' . $e->getMessage());
+            Log::error('Failed to send rejection email: ' . $e->getMessage());
         }
-        
+
         return redirect()->route('admin.verification.list')
             ->with('success', 'Verifikasi seller ditolak. Email notifikasi telah dikirim.');
     })->name('admin.verification.reject');
-    
+
     // Admin view private documents
     Route::get('/admin/verification/{user}/document/{type}', function (\App\Models\User $user, $type) {
         if ($user->role !== 'seller') {
             abort(404);
         }
-        
+
         $path = null;
         switch ($type) {
             case 'ktp':
@@ -736,11 +746,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             default:
                 abort(404);
         }
-        
+
         if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
-        
+
         return Storage::disk('private')->response($path);
     })->name('admin.verification.document');
 });

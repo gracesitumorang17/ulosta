@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
@@ -14,6 +15,15 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ambil daftar seller untuk assignment seller_id ke produk
+        $sellers = User::where('role', 'seller')->orderBy('id')->get(['id']);
+        $sellerIds = $sellers->pluck('id')->values();
+        $sellerCount = $sellerIds->count();
+
+        if ($sellerCount === 0) {
+            $this->command?->warn('Seeder Product: tidak ada user dengan role seller, produk akan dibuat tanpa seller_id.');
+        }
+
         $products = [
             [
                 'name' => 'Ulos Ragi Hotang',
@@ -105,9 +115,13 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        foreach ($products as $product) {
+        foreach ($products as $index => $product) {
             // Generate a unique slug for seeded products to support edit routes
             $product['slug'] = Str::slug($product['name']) . '-' . Str::random(6);
+            // Tetapkan seller_id jika tersedia (round-robin)
+            if ($sellerCount > 0) {
+                $product['seller_id'] = $sellerIds[$index % $sellerCount];
+            }
             Product::create($product);
         }
     }

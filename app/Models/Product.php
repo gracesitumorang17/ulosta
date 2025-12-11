@@ -13,6 +13,10 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'material',
+        'size',
+        'weight',
+        'origin',
         'price',
         'original_price',
         'tag',
@@ -20,6 +24,7 @@ class Product extends Model
         'image',
         'stock',
         'is_active',
+        'seller_id',
     ];
 
     protected $casts = [
@@ -27,6 +32,16 @@ class Product extends Model
         'original_price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product) {
+            // Saat seller membuat produk via UI, pastikan seller_id terisi otomatis
+            if (empty($product->seller_id) && function_exists('auth') && auth()->check()) {
+                $product->seller_id = auth()->id();
+            }
+        });
+    }
 
     // Relationships
     public function cartItems()
@@ -44,7 +59,30 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
     // Accessors
+    public function getImageUrlAttribute(): string
+    {
+        $img = $this->image;
+        if (!$img) {
+            // Try primary image from gallery
+            $primary = $this->images()->where('is_primary', true)->first();
+            if ($primary && $primary->path) {
+                return asset('storage/' . ltrim($primary->path, '/'));
+            }
+            return asset('image/ulos1.jpeg');
+        }
+        // If already an absolute URL
+        if (is_string($img) && (str_starts_with($img, 'http://') || str_starts_with($img, 'https://'))) {
+            return $img;
+        }
+        // Stored relative path like products/<slug>/<file>
+        return asset('storage/' . ltrim($img, '/'));
+    }
     public function getFormattedPriceAttribute()
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');

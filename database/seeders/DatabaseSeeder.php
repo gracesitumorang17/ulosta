@@ -17,7 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             MultiRoleSeeder::class,
-            ProductSeeder::class,
+            // Nonaktifkan ProductSeeder agar data hanya berasal dari penjual
+            // ProductSeeder::class,
+            ProductSellerSeeder::class,
         ]);
     }
 }

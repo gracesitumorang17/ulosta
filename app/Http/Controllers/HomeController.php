@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 
 class HomeController extends Controller
@@ -14,7 +15,7 @@ class HomeController extends Controller
         if (Auth::check() && (Auth::user()->role ?? '') === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-        
+
         // For buyers and sellers (logged in users) or guests, show appropriate homepage
         // Get cart/wishlist counts for logged in users
         $cartCount = 0;
@@ -66,12 +67,39 @@ class HomeController extends Controller
 
         // Format products for view (from DB)
         $products = $productsData->map(function ($product) {
+            // Tentukan URL gambar yang dapat diakses publik:
+            // 1) Gunakan accessor image_url jika tersedia dan tidak kosong
+            // 2) Jika tidak ada, gunakan Storage::url($product->image) bila pathnya ada
+            // 3) Terakhir, fallback ke placeholder di public/image
+            $imageUrl = null;
+
+            try {
+                $imageUrl = $product->image_url ?: null;
+            } catch (\Throwable $e) {
+                $imageUrl = null;
+            }
+
+            if (!$imageUrl) {
+                if (!empty($product->image)) {
+                    try {
+                        $imageUrl = Storage::url($product->image);
+                    } catch (\Throwable $e) {
+                        $imageUrl = null;
+                    }
+                }
+            }
+
+            if (!$imageUrl) {
+                $imageUrl = asset('image/placeholder.png');
+            }
+
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'tag' => $product->tag,
                 'price' => $product->formatted_price,
                 'image' => $product->image,
+                'image_url' => $imageUrl,
                 'description' => $product->description,
                 'desc' => $product->description,
                 'category' => $product->category ?? '',
@@ -79,24 +107,8 @@ class HomeController extends Controller
             ];
         })->toArray();
 
-        // Append seller custom products stored in session (demo persistence)
-        $custom = session()->get('custom_products', []);
-        foreach ($custom as $slug => $p) {
-            $products[] = [
-                'id' => $p['slug'] ?? $slug,
-                'name' => $p['title'] ?? 'Produk',
-                'tag' => $p['category'] ?? 'Produk',
-                // price already formatted for DB items; format here for custom
-                'price' => number_format((int)($p['price'] ?? 0), 0, ',', '.'),
-                'original_price' => null,
-                'original' => null,
-                'image' => $p['img'] ?? asset('image/ulos1.jpeg'),
-                'description' => $p['description'] ?? '',
-                'desc' => $p['description'] ?? '',
-                'category' => $p['category'] ?? '',
-                'function' => $p['jenis'] ?? '',
-            ];
-        }
+        // Hapus dependensi session custom_products agar tidak terjadi duplikasi.
+        // Pembeli hanya melihat data dari database (products + product_images via accessor image_url).
 
         // Return appropriate view based on authentication status
         if (Auth::check()) {
