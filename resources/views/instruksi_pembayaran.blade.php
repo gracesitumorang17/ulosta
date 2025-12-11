@@ -226,7 +226,8 @@
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             2</div>
                         <p class="text-sm text-gray-700">Pilih menu <span class="font-semibold">Bayar/Beli</span> →
-                            <span class="font-semibold">Virtual Account</span></p>
+                            <span class="font-semibold">Virtual Account</span>
+                        </p>
                     </div>
                     <div class="flex gap-3">
                         <div
@@ -313,6 +314,24 @@
                 <span class="font-semibold">Penting:</span> Pembayaran akan diverifikasi otomatis setelah berhasil.
                 Jika ada kendala, hubungan customer service kami.
             </p>
+        </div>
+
+        <!-- Action Buttons (Original Layout) -->
+        <div class="space-y-3">
+            <a href="{{ route('profil') }}?tab=pesanan&status=pending"
+                class="block w-full text-center bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-medium">
+                Lihat Pesanan Saya
+            </a>
+
+            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener"
+                class="block w-full text-center border border-yellow-600 text-yellow-700 py-3 rounded-lg hover:bg-yellow-50 transition font-medium">
+                Konfirmasi via WhatsApp
+            </a>
+
+            <a href="{{ route('homepage') }}"
+                class="block w-full text-center border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition font-medium">
+                Kembali ke Beranda
+            </a>
         </div>
     </main>
 
@@ -412,7 +431,7 @@
 
         // Toggle profile dropdown
         const lastButton = document.querySelectorAll('header button')[document.querySelectorAll('header button').length -
-        1];
+            1];
         const profileDropdown = document.getElementById('profileDropdown');
 
         lastButton.addEventListener('click', function(e) {
