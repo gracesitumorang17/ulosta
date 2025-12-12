@@ -307,7 +307,7 @@
                 @forelse($items as $item)
                     <div class="bg-white border rounded-xl shadow-sm">
                         <div class="p-4 flex items-start gap-4">
-                            <img src="{{ $item->image ? asset('storage/' . ltrim($item->image, '/')) : asset('image/Background.png') }}"
+                            <img src="{{ \App\Helpers\ImageHelper::getImageUrl($item->image) }}"
                                 alt="{{ $item->product_name }}" class="w-24 h-24 object-cover rounded-md border" />
                             <div class="flex-1">
                                 <div class="flex items-start justify-between">

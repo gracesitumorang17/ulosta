@@ -237,7 +237,7 @@
                             @foreach ($items as $item)
                                 <div class="flex gap-4">
                                     <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                                        <img src="{{ asset('storage/' . ltrim($item->image, '/')) }}"
+                                        <img src="{{ \App\Helpers\ImageHelper::getImageUrl($item->image) }}"
                                             alt="{{ $item->product_name }}" class="w-full h-full object-cover" />
                                     </div>
                                     <div class="flex-1 min-w-0">

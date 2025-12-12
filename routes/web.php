@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Models\Product;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -18,6 +19,52 @@ use App\Http\Controllers\SellerOrderController;
 
 // Test routes for Facebook
 require __DIR__ . '/test-facebook.php';
+
+// Debug route untuk cek cart images
+Route::get('/debug-cart', function () {
+    $items = \App\Models\CartItem::where('user_id', auth()->id())->with('product')->get();
+
+    echo "<h1>Cart Items Debug</h1>";
+
+    foreach ($items as $item) {
+        echo "<hr>";
+        echo "<b>Item ID:</b> {$item->id}<br>";
+        echo "<b>Product ID:</b> {$item->product_id}<br>";
+        echo "<b>Product Name:</b> {$item->product_name}<br>";
+        echo "<b>Image (raw):</b> {$item->image}<br>";
+
+        if ($item->product) {
+            echo "<b>Product Image:</b> {$item->product->image}<br>";
+            echo "<b>Product Image URL:</b> {$item->product->image_url}<br>";
+        }
+
+        // Test paths
+        if ($item->image) {
+            if (strpos($item->image, '/') !== false) {
+                echo "<b>Has slash - will use Storage::url</b><br>";
+                echo "<b>Storage URL:</b> " . Storage::url($item->image) . "<br>";
+            } else {
+                echo "<b>No slash - will use asset('image/')</b><br>";
+                echo "<b>Asset URL:</b> " . asset('image/' . $item->image) . "<br>";
+            }
+        }
+    }
+})->middleware('auth');
+
+// Debug cart controller
+Route::get('/debug-cart-controller', function () {
+    $controller = new \App\Http\Controllers\CartController();
+
+    $items = \App\Models\CartItem::where('user_id', auth()->id())->with('product')->get();
+
+    echo "<h1>Testing CartController Logic</h1>";
+
+    foreach ($items as $item) {
+        echo "<hr>";
+        echo "<b>Item:</b> {$item->product_name}<br>";
+        echo "<b>Has image_url attr?:</b> " . (isset($item->image_url) ? "YES - " . $item->image_url : "NO") . "<br>";
+    }
+})->middleware('auth');
 
 // Root: redirect based on authentication and role
 Route::get('/', function () {
@@ -554,6 +601,15 @@ Route::put('/seller/orders/{id}/status', [SellerOrderController::class, 'updateS
     ->middleware(['auth', 'role:seller'])
     ->name('seller.orders.update-status');
 
+// Buyer Orders
+Route::get('/orders', [OrderController::class, 'index'])
+    ->middleware('auth')
+    ->name('buyer.orders.index');
+
+Route::get('/orders/{order_number}', [OrderController::class, 'show'])
+    ->middleware('auth')
+    ->name('buyer.orders.show');
+
 // Laporan penjualan (seller reports)
 Route::get('/seller/laporan', function () {
     return view('seller.reports.index');
@@ -652,7 +708,7 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     })->name('seller.verification.status');
 });
 
-// Admin Routes for Seller Verification  
+// Admin Routes for Seller Verification
 Route::middleware(['auth', 'role:admin'])->group(function () {
     // Admin verification list
     Route::get('/admin/verification', function () {

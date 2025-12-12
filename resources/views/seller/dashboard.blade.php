@@ -63,12 +63,50 @@
                 return 'Rp ' . number_format($v, 0, ',', '.');
             }
         }
-        $stats = [
-            'total_products' => $totalProducts ?? 24,
-            'total_orders' => $totalOrders ?? 147,
-            'monthly_revenue' => $monthlyRevenue ?? 12250000,
-            'total_revenue' => $totalRevenue ?? 45500000,
+
+        $labelMap = [
+            'pending' => 'Menunggu',
+            'processing' => 'Diproses',
+            'shipped' => 'Dikirim',
+            'delivered' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
         ];
+
+        $sellerId = Auth::id();
+
+        // Total Produk dari database
+        $totalProducts = \App\Models\Product::where('seller_id', $sellerId)->count();
+
+        // Total Pesanan dari database
+        $totalOrdersQuery = \App\Models\Order::where('seller_id', $sellerId)
+            ->orWhere(function ($q) use ($sellerId) {
+                $q->whereHas('orderItems', function ($subq) use ($sellerId) {
+                    $subq->where('seller_id', $sellerId);
+                });
+            })
+            ->orWhere(function ($q) use ($sellerId) {
+                $q->whereHas('orderItems.product', function ($subq) use ($sellerId) {
+                    $subq->where('seller_id', $sellerId);
+                });
+            });
+        $totalOrders = $totalOrdersQuery->count();
+
+        // Pendapatan Bulan Ini
+        $monthlyRevenue = $totalOrdersQuery->clone()
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
+
+        // Total Pendapatan
+        $totalRevenue = $totalOrdersQuery->clone()->sum('total_amount');
+
+        $stats = [
+            'total_products' => $totalProducts,
+            'total_orders' => $totalOrders,
+            'monthly_revenue' => $monthlyRevenue ?? 0,
+            'total_revenue' => $totalRevenue ?? 0,
+        ];
+
         $topProducts = $topProducts ?? [
             [
                 'rank' => 1,
@@ -92,22 +130,55 @@
                 'img' => asset('image/' . rawurlencode('Ulos Sibolang.jpg')),
             ],
         ];
-        $recentOrders = $recentOrders ?? [
-            [
-                'code' => 'ORD-2024-001',
-                'customer' => 'Grace Caldera',
-                'date' => '2025-01-25',
-                'total' => 850000,
-                'status' => 'Diproses',
-            ],
-            [
-                'code' => 'ORD-2024-002',
-                'customer' => 'Daniel S',
-                'date' => '2025-01-28',
-                'total' => 1500000,
-                'status' => 'Selesai',
-            ],
-        ];
+
+        // Ambil pesanan terbaru dari database
+        $recentOrdersFromDb = \App\Models\Order::where('seller_id', $sellerId)
+            ->orWhere(function ($q) use ($sellerId) {
+                $q->whereHas('orderItems', function ($subq) use ($sellerId) {
+                    $subq->where('seller_id', $sellerId);
+                });
+            })
+            ->orWhere(function ($q) use ($sellerId) {
+                $q->whereHas('orderItems.product', function ($subq) use ($sellerId) {
+                    $subq->where('seller_id', $sellerId);
+                });
+            })
+            ->with(['user', 'orderItems'])
+            ->latest()
+            ->take(2)
+            ->get();
+
+        // Format recent orders untuk view
+        $recentOrders = $recentOrdersFromDb->map(function ($order) use ($labelMap) {
+            return [
+                'code' => $order->order_number ?? 'ORD-' . $order->id,
+                'customer' => $order->shipping_first_name ?? $order->user?->name ?? 'Unknown',
+                'date' => $order->created_at?->format('Y-m-d') ?? '-',
+                'total' => $order->total_amount ?? 0,
+                'status' => $labelMap[$order->status] ?? ucfirst($order->status),
+            ];
+        })->toArray();
+
+        // Jika tidak ada pesanan dari DB, gunakan default
+        if (empty($recentOrders)) {
+            $recentOrders = [
+                [
+                    'code' => 'ORD-2024-001',
+                    'customer' => 'Grace Caldera',
+                    'date' => '2025-01-25',
+                    'total' => 850000,
+                    'status' => 'Diproses',
+                ],
+                [
+                    'code' => 'ORD-2024-002',
+                    'customer' => 'Daniel S',
+                    'date' => '2025-01-28',
+                    'total' => 1500000,
+                    'status' => 'Selesai',
+                ],
+            ];
+        }
+
         $user = Auth::user();
     @endphp
 
@@ -413,6 +484,11 @@
                 }
             } catch (_) {}
         });
+
+        // Auto-refresh dashboard setiap 15 detik untuk sinkronisasi pesanan terbaru
+        setInterval(() => {
+            location.reload();
+        }, 15000);
     </script>
 </body>
 
