@@ -300,6 +300,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/detail-pembayaran/{orderId}', [CheckoutController::class, 'detailPembayaran'])->name('detail.pembayaran');
     Route::get('/instruksi-pembayaran/{orderId}', [CheckoutController::class, 'instruksiPembayaran'])->name('instruksi.pembayaran');
+    // Tandai waktu pengajuan bukti pembayaran oleh pembeli sebelum redirect ke WhatsApp
+    Route::post('/orders/{orderId}/payment-proof/submitted', [CheckoutController::class, 'markProofSubmitted'])
+        ->name('orders.payment-proof.submitted');
 });
 
 // Profile routes (authenticated)
