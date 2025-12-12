@@ -316,17 +316,37 @@
             </p>
         </div>
 
-        <!-- Action Buttons (Original Layout) -->
+        <!-- Action Buttons: dinamis nomor WA penjual dan cap waktu submit bukti -->
         <div class="space-y-3">
             <a href="{{ route('profil') }}?tab=pesanan&status=pending"
                 class="block w-full text-center bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-medium">
                 Lihat Pesanan Saya
             </a>
 
-            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener"
+            @php
+                // Ambil nomor WA penjual secara prioritas dari relasi Order->seller
+                $sellerPhone =
+                    optional($order->seller)->phone ??
+                    (optional(optional($order->items->first())->product->seller)->phone ?? null);
+                // Normalisasi ke format WhatsApp (msisdn, intl)
+                $cleanPhone = $sellerPhone ? preg_replace('/\D+/', '', $sellerPhone) : null;
+                if ($cleanPhone && str_starts_with($cleanPhone, '0')) {
+                    $cleanPhone = '62' . substr($cleanPhone, 1);
+                }
+                $waText = urlencode(
+                    'Halo, ini bukti pembayaran untuk order #' .
+                        ($order->order_number ?? $order->id) .
+                        ' sejumlah Rp ' .
+                        number_format($order->total_amount, 0, ',', '.') .
+                        '. Mohon verifikasi.',
+                );
+                $waUrl = $cleanPhone ? 'https://wa.me/' . $cleanPhone . '?text=' . $waText : null;
+            @endphp
+
+            <button id="btn-wa"
                 class="block w-full text-center border border-yellow-600 text-yellow-700 py-3 rounded-lg hover:bg-yellow-50 transition font-medium">
                 Konfirmasi via WhatsApp
-            </a>
+            </button>
 
             <a href="{{ route('homepage') }}"
                 class="block w-full text-center border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition font-medium">
@@ -445,6 +465,30 @@
                 profileDropdown.classList.add('hidden');
             }
         });
+
+        // Konfirmasi via WhatsApp: tandai submit lalu buka WA penjual
+        (function() {
+            const btnWa = document.getElementById('btn-wa');
+            if (!btnWa) return;
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            btnWa.addEventListener('click', async () => {
+                try {
+                    await fetch('{{ route('orders.payment-proof.submitted', $order->id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf
+                        }
+                    });
+                } catch (e) {
+                    /* ignore */ }
+                const url = {!! json_encode($waUrl) !!};
+                if (url) {
+                    window.open(url, '_blank');
+                } else {
+                    alert('Nomor WhatsApp penjual belum tersedia.');
+                }
+            });
+        })();
     </script>
 </body>
 
