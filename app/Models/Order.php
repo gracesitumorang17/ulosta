@@ -29,6 +29,13 @@ class Order extends Model
         'shipped_at',
         'delivered_at',
 
+        // Payment verification metadata
+        'payment_verified_by',
+        'payment_verified_at',
+        'payment_proof_url',
+        'payment_proof_note',
+        'payment_proof_submitted_at',
+
         // Billing Address
         'billing_first_name',
         'billing_last_name',
@@ -62,6 +69,8 @@ class Order extends Model
         'total_amount' => 'decimal:2',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'payment_verified_at' => 'datetime',
+        'payment_proof_submitted_at' => 'datetime',
     ];
 
     // Order statuses
