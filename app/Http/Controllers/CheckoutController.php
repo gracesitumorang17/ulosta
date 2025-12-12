@@ -182,4 +182,16 @@ class CheckoutController extends Controller
 
         return view('instruksi_pembayaran', compact('order'));
     }
+
+    // Tandai waktu pengajuan bukti pembayaran oleh pembeli (sebelum redirect ke WhatsApp)
+    public function markProofSubmitted($orderId)
+    {
+        $order = \App\Models\Order::findOrFail($orderId);
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $order->payment_proof_submitted_at = now();
+        $order->save();
+        return response()->json(['success' => true]);
+    }
 }
