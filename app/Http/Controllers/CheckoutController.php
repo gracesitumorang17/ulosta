@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Notifications\SellerNewOrderNotification;
 
 class CheckoutController extends Controller
 {
@@ -20,8 +23,8 @@ class CheckoutController extends Controller
             return $item->price * $item->quantity;
         });
 
-        // Tetapkan ongkir flat Rp 15.000
-        $shipping = 15000;
+        // Tetapkan ongkir flat Rp 15.000, tapi gratis jika subtotal >= Rp 500.000
+        $shipping = $subtotal >= 500000 ? 0 : 15000;
 
         $total = $subtotal + $shipping;
 
@@ -50,77 +53,99 @@ class CheckoutController extends Controller
             return $item->price * $item->quantity;
         });
 
-        // Tetapkan ongkir flat Rp 15.000
-        $shipping = 15000;
+        // Tetapkan ongkir flat Rp 15.000, tapi gratis jika subtotal >= Rp 500.000
+        $shipping = $subtotal >= 500000 ? 0 : 15000;
 
         $total = $subtotal + $shipping;
 
-        // Tentukan seller untuk pesanan ini tanpa menulis ke tabel cart_items
-        // 1) Coba dari product_id yang ada di keranjang
-        $productIds = $items->pluck('product_id')->filter()->unique();
-        $sellerId = null;
-        if ($productIds->isNotEmpty()) {
-            $sellerId = \App\Models\Product::whereIn('id', $productIds)
-                ->pluck('seller_id')->filter()->unique()->first();
-        }
-        // 2) Jika product_id kosong, fallback berdasarkan nama produk di keranjang
-        if (!$sellerId) {
-            $names = $items->pluck('product_name')->filter()->unique();
-            if ($names->isNotEmpty()) {
-                $sellerId = \App\Models\Product::whereIn('name', $names)
-                    ->pluck('seller_id')->filter()->unique()->first();
+        // Resolve product ids and seller ids for items
+        $resolved = collect();
+        foreach ($items as $item) {
+            $pid = $item->product_id;
+            $product = null;
+            if ($pid) {
+                $product = \App\Models\Product::find($pid);
             }
+            if (!$product && $item->product_name) {
+                $product = \App\Models\Product::where('name', $item->product_name)->first();
+                if ($product) {
+                    $pid = $product->id;
+                }
+            }
+            $resolved->push([ 'cart' => $item, 'product' => $product, 'product_id' => $pid, 'seller_id' => $product?->seller_id ]);
         }
-        // 3) Jika masih null, gagalkan dengan pesan yang jelas dan kembalikan input form
-        if (!$sellerId) {
+
+        // Determine distinct sellers in cart
+        $sellerIds = $resolved->pluck('seller_id')->filter()->unique()->values();
+        if ($sellerIds->count() === 0) {
             return redirect()->route('checkout')
                 ->withInput()
                 ->with('error', 'Tidak dapat memproses pesanan karena penjual untuk produk di keranjang belum terdata.');
         }
 
-        // Generate order number
-        $orderNumber = date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-
-        // Create order (support legacy columns like total_price/order_code)
-        $order = \App\Models\Order::create([
-            'user_id' => Auth::id(),
-            'seller_id' => $sellerId,
-            'order_number' => $orderNumber,
-            'status' => 'pending',
-            'payment_status' => 'pending',
-            'subtotal' => $subtotal,
-            'shipping_cost' => $shipping,
-            'total_amount' => $total,
-            // Legacy column compatibility
-            'total_price' => $total,
-            'shipping_first_name' => $request->nama_lengkap,
-            'shipping_phone' => $request->nomor_telepon,
-            'shipping_address_1' => $request->alamat_lengkap,
-            'shipping_city' => $request->kota,
-            'shipping_postal_code' => $request->kode_pos,
-        ]);
-
-        // Create order items
-        foreach ($items as $item) {
-            // Pastikan product_id terisi untuk OrderItem jika memungkinkan
-            $pid = $item->product_id;
-            if (!$pid && $item->product_name) {
-                $pid = optional(\App\Models\Product::where('name', $item->product_name)->first())->id;
-            }
-            \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $pid,
-                'product_name' => $item->product_name,
-                'product_image' => $item->image,
-                'quantity' => $item->quantity,
-                'price' => $item->price,
-                'subtotal' => $item->price * $item->quantity,
-                'total' => $item->price * $item->quantity,
-            ]);
+        // If more than one seller, reject (marketplace: split-order required)
+        if ($sellerIds->count() > 1) {
+            return redirect()->route('checkout')
+                ->withInput()
+                ->with('error', 'Keranjang berisi produk dari beberapa penjual. Silakan pisahkan per penjual atau hapus beberapa item.');
         }
+
+        $sellerId = $sellerIds->first();
+
+        // All good: create order and items inside transaction
+        $order = null;
+        DB::transaction(function () use ($request, $subtotal, $shipping, $total, $sellerId, $resolved, &$order) {
+            // Generate order number
+            $orderNumber = date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+
+            $order = \App\Models\Order::create([
+                'user_id' => Auth::id(),
+                'seller_id' => $sellerId,
+                'order_number' => $orderNumber,
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'subtotal' => $subtotal,
+                'shipping_cost' => $shipping,
+                'total_amount' => $total,
+                // Legacy column compatibility
+                'total_price' => $total,
+                'shipping_first_name' => $request->nama_lengkap,
+                'shipping_phone' => $request->nomor_telepon,
+                'shipping_address_1' => $request->alamat_lengkap,
+                'shipping_city' => $request->kota,
+                'shipping_postal_code' => $request->kode_pos,
+            ]);
+
+            foreach ($resolved as $row) {
+                $item = $row['cart'];
+                $pid = $row['product_id'];
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $pid,
+                    'product_name' => $item->product_name,
+                    'product_image' => $item->image,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'subtotal' => $item->price * $item->quantity,
+                    'total' => $item->price * $item->quantity,
+                ]);
+            }
+        });
 
         // Clear cart
         CartItem::where('user_id', Auth::id())->delete();
+
+        // Notify seller if available
+        if ($sellerId) {
+            $seller = User::find($sellerId);
+            if ($seller) {
+                try {
+                    $seller->notify(new SellerNewOrderNotification($order));
+                } catch (\Throwable $e) {
+                    // ignore notification failures to not block checkout
+                }
+            }
+        }
 
         // Redirect to detail pembayaran
         return redirect()->route('detail.pembayaran', ['orderId' => $order->id]);
@@ -130,8 +155,12 @@ class CheckoutController extends Controller
     {
         $order = \App\Models\Order::with(['items'])->findOrFail($orderId);
 
-        // Make sure the order belongs to the authenticated user
-        if ($order->user_id !== Auth::id()) {
+        // Allow access to buyer, the seller of the order, or an admin
+        $me = Auth::user();
+        $isBuyer = $order->user_id === $me->id;
+        $isSeller = isset($order->seller_id) && $order->seller_id === $me->id;
+        $isAdmin = ($me->role ?? '') === 'admin';
+        if (!($isBuyer || $isSeller || $isAdmin)) {
             abort(403, 'Unauthorized access');
         }
 
@@ -142,8 +171,12 @@ class CheckoutController extends Controller
     {
         $order = \App\Models\Order::with(['items'])->findOrFail($orderId);
 
-        // Make sure the order belongs to the authenticated user
-        if ($order->user_id !== Auth::id()) {
+        // Allow access to buyer, the seller of the order, or an admin
+        $me = Auth::user();
+        $isBuyer = $order->user_id === $me->id;
+        $isSeller = isset($order->seller_id) && $order->seller_id === $me->id;
+        $isAdmin = ($me->role ?? '') === 'admin';
+        if (!($isBuyer || $isSeller || $isAdmin)) {
             abort(403, 'Unauthorized access');
         }
 

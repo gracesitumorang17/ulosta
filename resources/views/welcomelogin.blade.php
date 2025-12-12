@@ -812,7 +812,7 @@
                                     <div class="mt-auto grid grid-cols-2 gap-3">
                                         <button data-product-id="{{ $p['id'] }}"
                                             data-name="{{ $p['name'] }}" data-price="{{ $p['price'] }}"
-                                            data-tag="{{ $p['tag'] }}" data-image="{{ $p['image_url'] }}"
+                                            data-tag="{{ $p['tag'] }}" data-image="{{ $p['image'] }}"
                                             class="btn-add-to-cart inline-flex items-center justify-center gap-2 px-4 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-shadow shadow-sm text-sm font-medium h-11">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"

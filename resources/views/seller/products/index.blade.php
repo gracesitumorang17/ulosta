@@ -150,7 +150,7 @@
             }
         }
         // Ambil produk murni dari DB (tanpa demo/session) dan normalkan URL gambar
-        $products = \App\Models\Product::active()
+        $products = \App\Models\Product::where('seller_id', Auth::id())
             ->get()
             ->map(function ($p) {
                 $slug = $p->slug ?: strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $p->name)));
@@ -244,14 +244,26 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button"
-                    class="inline-flex items-center gap-1 text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M5 9h14M9 14h6M11 19h2" />
-                    </svg>
-                    Status: Semua
-                </button>
+                <div class="relative">
+                    <button type="button" id="statusFilterBtn"
+                        class="inline-flex items-center gap-1 text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                        aria-haspopup="true" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M5 9h14M9 14h6M11 19h2" />
+                        </svg>
+                        <span id="statusFilterLabel">Status: Semua</span>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="statusFilterDropdown" class="hidden absolute top-full right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                        <ul class="py-1">
+                            <li><button type="button" class="status-filter-option w-full text-left px-4 py-2 hover:bg-gray-100 text-xs font-medium" data-status="Semua">Semua</button></li>
+                            <li><button type="button" class="status-filter-option w-full text-left px-4 py-2 hover:bg-gray-100 text-xs font-medium" data-status="Aktif">Aktif</button></li>
+                            <li><button type="button" class="status-filter-option w-full text-left px-4 py-2 hover:bg-gray-100 text-xs font-medium" data-status="Nonaktif">Nonaktif</button></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -277,7 +289,7 @@
                             data-price="{{ $p['price'] }}" data-stock="{{ $p['stock'] }}"
                             data-description="{{ $p['desc'] ?? '' }}" data-material="{{ $p['material'] ?? '' }}"
                             data-size="{{ $p['size'] ?? '' }}" data-weight="{{ $p['weight'] ?? '' }}"
-                            data-origin="{{ $p['origin'] ?? '' }}">
+                            data-origin="{{ $p['origin'] ?? '' }}" data-status="{{ $p['status'] }}">
                             <td class="flex items-center gap-3 min-w-0">
                                 <div class="w-12 h-12 rounded-md overflow-hidden bg-gray-100 shrink-0">
                                     <img src="{{ $p['img'] }}" alt="{{ $p['title'] }}"
@@ -472,6 +484,47 @@
                     if (e.target === modal) modal.classList.add('hidden');
                 });
             }
+
+            // Status Filter
+            const statusFilterBtn = document.getElementById('statusFilterBtn');
+            const statusFilterDropdown = document.getElementById('statusFilterDropdown');
+            const statusFilterLabel = document.getElementById('statusFilterLabel');
+            const statusFilterOptions = document.querySelectorAll('.status-filter-option');
+
+            if (statusFilterBtn) {
+                statusFilterBtn.addEventListener('click', () => {
+                    statusFilterDropdown.classList.toggle('hidden');
+                    statusFilterBtn.setAttribute('aria-expanded', !statusFilterDropdown.classList.contains('hidden'));
+                });
+            }
+
+            statusFilterOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const selectedStatus = option.dataset.status;
+                    statusFilterLabel.textContent = `Status: ${selectedStatus}`;
+                    statusFilterDropdown.classList.add('hidden');
+                    statusFilterBtn.setAttribute('aria-expanded', 'false');
+
+                    // Filter rows
+                    const rows = document.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const rowStatus = row.dataset.status;
+                        if (selectedStatus === 'Semua' || rowStatus === selectedStatus) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#statusFilterBtn') && !e.target.closest('#statusFilterDropdown')) {
+                    statusFilterDropdown.classList.add('hidden');
+                    statusFilterBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
         })();
     </script>
 </body>

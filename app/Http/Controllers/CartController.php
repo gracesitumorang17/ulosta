@@ -5,12 +5,38 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
     public function index()
     {
-        $items = CartItem::where('user_id', Auth::id())->get();
+        $items = CartItem::where('user_id', Auth::id())->with('product')->get();
+
+        // Tambahkan image_url ke setiap item menggunakan setAttribute
+        foreach ($items as $item) {
+            $imageUrl = asset('image/Background.png');
+
+            // Prioritas 1: Gunakan product->image_url jika ada relasi product
+            if ($item->product && !empty($item->product->image)) {
+                $imageUrl = $item->product->image_url;
+            }
+            // Prioritas 2: Gunakan raw cart item image jika ada
+            elseif (!empty($item->image)) {
+                // Check if it's a storage path (contains /) atau just filename
+                if (strpos($item->image, '/') !== false) {
+                    // Storage path like "products/20/..."
+                    $imageUrl = Storage::url($item->image);
+                } else {
+                    // Simple filename like "Ulos Sadum.jpeg"
+                    $imageUrl = asset('image/' . $item->image);
+                }
+            }
+
+            // Tambahkan sebagai attribute
+            $item->setAttribute('image_url', $imageUrl);
+        }
+
         $subtotal = $items->sum(fn($i) => $i->price * $i->quantity);
         $shipping = $items->isNotEmpty() ? 25000 : 0;
         $total = $subtotal + $shipping;
