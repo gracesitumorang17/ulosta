@@ -601,6 +601,10 @@ Route::put('/seller/orders/{id}/status', [SellerOrderController::class, 'updateS
     ->middleware(['auth', 'role:seller'])
     ->name('seller.orders.update-status');
 
+// Verifikasi pembayaran manual oleh penjual
+Route::put('/seller/orders/{id}/verify-payment', [SellerOrderController::class, 'verifyPayment'])
+    ->middleware(['auth', 'role:seller'])
+    ->name('seller.orders.verify-payment');
 // Buyer Orders
 Route::get('/orders', [OrderController::class, 'index'])
     ->middleware('auth')
