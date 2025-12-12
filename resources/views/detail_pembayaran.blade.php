@@ -179,12 +179,17 @@
                 @foreach ($order->items as $item)
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            @if ($item->product_image)
-                                <img src="{{ asset('storage/' . ltrim($item->product_image, '/')) }}"
+                            @php
+                                $imageUrl = null;
+                                if ($item->product_image) {
+                                    $imageUrl = \App\Helpers\ImageHelper::getImageUrl($item->product_image);
+                                } elseif ($item->product && $item->product->image) {
+                                    $imageUrl = \App\Helpers\ImageHelper::getImageUrl($item->product->image);
+                                }
+                            @endphp
+                            @if ($imageUrl)
+                                <img src="{{ $imageUrl }}"
                                     alt="{{ $item->product_name }}" class="w-full h-full object-cover" />
-                            @elseif($item->product && $item->product->image)
-                                <img src="{{ asset('storage/' . ltrim($item->product->image, '/')) }}"
-                                    alt="{{ $item->product->name }}" class="w-full h-full object-cover" />
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"

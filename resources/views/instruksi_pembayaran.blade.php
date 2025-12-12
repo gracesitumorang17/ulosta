@@ -263,8 +263,11 @@
                 @foreach ($order->items as $item)
                     <div class="flex gap-4">
                         <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            @if ($item->product_image)
-                                <img src="{{ asset('storage/' . ltrim($item->product_image, '/')) }}"
+                            @php
+                                $imageUrl = \App\Helpers\ImageHelper::getImageUrl($item->product_image ?? ($item->product?->image ?? null));
+                            @endphp
+                            @if ($imageUrl)
+                                <img src="{{ $imageUrl }}"
                                     alt="{{ $item->product_name }}" class="w-full h-full object-cover" />
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400">

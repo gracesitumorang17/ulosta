@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Wishlist</title>
+</head>
+<body>
+    <h1>Wishlist Debug</h1>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Loaded');
+
+            const deleteModal = document.getElementById('deleteModal');
+            console.log('deleteModal:', deleteModal);
+
+            const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+            console.log('deleteConfirmBtn:', deleteConfirmBtn);
+
+            const deleteCancelBtn = document.getElementById('deleteCancelBtn');
+            console.log('deleteCancelBtn:', deleteCancelBtn);
+
+            if (deleteConfirmBtn) {
+                console.log('Adding event listener to deleteConfirmBtn');
+                deleteConfirmBtn.addEventListener('click', () => {
+                    console.log('deleteConfirmBtn clicked');
+                });
+            }
+        });
+    </script>
+
+    <div id="deleteModal" style="display:none;">
+        <button id="deleteConfirmBtn">Confirm</button>
+        <button id="deleteCancelBtn">Cancel</button>
+    </div>
+
+    <p>Check browser console for debug messages</p>
+</body>
+</html>

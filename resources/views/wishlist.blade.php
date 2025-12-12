@@ -141,11 +141,11 @@
             <div id="mobile-search" class="md:hidden pb-3">
                 <form action="{{ route('homepage') }}" method="GET">
                     <div class="relative">
-                        <input 
-                            name="q" 
-                            type="search" 
-                            placeholder="Cari ulos..." 
-                            class="w-full border border-gray-200 rounded-full py-2.5 px-4 pr-10 shadow-sm focus:outline-none" 
+                        <input
+                            name="q"
+                            type="search"
+                            placeholder="Cari ulos..."
+                            class="w-full border border-gray-200 rounded-full py-2.5 px-4 pr-10 shadow-sm focus:outline-none"
                         />
                     </div>
                 </form>
@@ -202,7 +202,7 @@
                 Wishlist Saya
             </h1>
             <p class="text-gray-600 mt-2">{{ $wishlistCount }} produk di wishlist</p>
-            
+
             <div class="mt-4">
                 <a href="{{ route('homepage') }}" class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,10 +219,10 @@
             <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group" data-wishlist-id="{{ $item->id }}">
                 <div class="relative">
                     <div class="aspect-[4/3] relative">
-                        <img src="{{ asset('image/' . $item->product_image) }}" alt="{{ $item->product_name }}" class="absolute inset-0 w-full h-full object-cover" />
+                        <img src="{{ \App\Helpers\ImageHelper::getImageUrl($item->product_image) }}" alt="{{ $item->product_name }}" class="absolute inset-0 w-full h-full object-cover" />
                     </div>
 
-                    <button 
+                    <button
                         onclick="removeFromWishlist({{ $item->id }})"
                         class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition"
                         title="Hapus dari wishlist"
@@ -241,7 +241,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <button 
+                        <button
                             onclick="addToCart('{{ $item->product_name }}', '{{ $item->formatted_price }}', '', '{{ $item->product_image }}')"
                             class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition text-sm font-medium"
                         >
@@ -252,7 +252,7 @@
                             </svg>
                             Keranjang
                         </button>
-                        <button 
+                        <button
                             onclick="removeFromWishlist({{ $item->id }})"
                             class="border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition text-sm font-medium"
                         >
@@ -281,43 +281,133 @@
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         function removeFromWishlist(id) {
-            if (!confirm('Hapus dari wishlist?')) {
+            // Tampilkan modal confirmation
+            showDeleteModal(id);
+        }
+
+        // Inisialisasi delete modal saat DOM ready
+        let deleteModal, deleteConfirmBtn, deleteCancelBtn;
+        let pendingDeleteId = null;
+
+        function initDeleteModal() {
+            deleteModal = document.getElementById('deleteModal');
+            deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+            deleteCancelBtn = document.getElementById('deleteCancelBtn');
+
+            if (!deleteModal || !deleteConfirmBtn || !deleteCancelBtn) {
+                console.error('Modal elements not found');
                 return;
             }
 
-            fetch(`/wishlist/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json'
+            deleteConfirmBtn.addEventListener('click', handleDeleteConfirm);
+            deleteCancelBtn.addEventListener('click', closeDeleteModal);
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) {
+                    closeDeleteModal();
                 }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Update badge counter
+            });
+        }
+
+        function showDeleteModal(id) {
+            pendingDeleteId = id;
+            if (deleteModal) {
+                deleteModal.classList.remove('hidden');
+                deleteModal.style.display = 'flex';
+            }
+        }
+
+        function closeDeleteModal() {
+            if (deleteModal) {
+                deleteModal.classList.add('hidden');
+                deleteModal.style.display = 'none';
+            }
+            pendingDeleteId = null;
+        }
+
+        // Update wishlist badge (local copy to ensure function exists on this page)
+        function updateWishlistBadge(count) {
+            const badge = document.getElementById('wishlist-badge');
+            const mobileBadge = document.getElementById('mobile-wishlist-badge');
+
+            if (count > 0) {
+                const displayCount = count > 99 ? '99+' : count;
+
+                if (badge) {
+                    badge.textContent = displayCount;
+                    badge.classList.remove('hidden');
+                }
+
+                if (mobileBadge) {
+                    mobileBadge.textContent = displayCount;
+                    mobileBadge.classList.remove('hidden');
+                }
+            } else {
+                if (badge) badge.classList.add('hidden');
+                if (mobileBadge) mobileBadge.classList.add('hidden');
+            }
+        }
+
+        async function handleDeleteConfirm() {
+            if (!pendingDeleteId) return;
+
+            try {
+                const res = await fetch(`/wishlist/${pendingDeleteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                // Try to parse JSON safely
+                let data = null;
+                try { data = await res.json(); } catch(e) { /* ignore */ }
+
+                if (!res.ok) {
+                    const msg = data && data.message ? data.message : 'Gagal menghapus produk';
+                    alert(msg);
+                    closeDeleteModal();
+                    return;
+                }
+
+                if (data && data.success) {
                     updateWishlistBadge(data.count);
-                    
-                    const item = document.querySelector(`[data-wishlist-id="${id}"]`);
+
+                    const item = document.querySelector(`[data-wishlist-id="${pendingDeleteId}"]`);
                     if (item) {
                         item.style.transition = 'opacity 0.3s';
                         item.style.opacity = '0';
                         setTimeout(() => {
                             item.remove();
-                            
                             if (data.count === 0) {
-                                window.location.reload();
+                                // replace grid with empty state without full reload
+                                const main = document.querySelector('main');
+                                if (main) window.location.reload();
                             }
                         }, 300);
                     }
+
+                    showToast(data.message || 'Produk dihapus dari wishlist');
+                    closeDeleteModal();
                 } else {
-                    alert('Gagal menghapus produk');
+                    const msg = data && data.message ? data.message : 'Gagal menghapus produk';
+                    alert(msg);
+                    closeDeleteModal();
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            } catch (err) {
+                console.error('Error:', err);
                 alert('Terjadi kesalahan');
-            });
+                closeDeleteModal();
+            }
+        }
+
+        // Initialize modal ketika DOM selesai load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDeleteModal);
+        } else {
+            // DOM sudah loaded
+            initDeleteModal();
         }
 
         function addToCart(name, price, tag, image) {
@@ -360,10 +450,10 @@
                 `;
                 document.body.appendChild(toast);
             }
-            
+
             toast.querySelector('#toast-text').textContent = message;
             toast.classList.remove('hidden');
-            
+
             setTimeout(() => {
                 toast.classList.add('hidden');
             }, 3000);
@@ -396,5 +486,35 @@
             });
         })();
     </script>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50" style="display: none; align-items: center; justify-content: center;">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm mx-4 transform transition-all">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Hapus dari Wishlist</h3>
+                <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <p class="text-gray-600">Apakah Anda yakin ingin menghapus produk ini dari wishlist?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex gap-3 p-6 border-t bg-gray-50 rounded-b-lg">
+                <button id="deleteCancelBtn" class="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition">
+                    Batal
+                </button>
+                <button id="deleteConfirmBtn" class="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-medium transition">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
