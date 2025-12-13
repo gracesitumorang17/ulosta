@@ -502,12 +502,14 @@ Route::middleware('auth')->group(function () {
         // Update user with verification data from onboarding + session
         $user->update([
             'ktp_number' => $data['ktp_number'],
-            'phone_number' => $user->phone ?? '', // Use existing phone if available
+            // Simpan ke kolom 'phone' yang ada di tabel users
+            'phone' => $user->phone ?? '',
             'store_name' => $store['name'] ?? ($user->name . ' Store'),
             'store_address' => $store['address'] ?? '',
             'bank_name' => $store['bank_name'] ?? '',
-            'bank_account_number' => $store['account_number'] ?? '',
-            'bank_account_name' => $store['account_name'] ?? '',
+            // Gunakan key yang benar dari sesi onboarding bank: 'bank_account' dan 'bank_holder'
+            'bank_account_number' => $store['bank_account'] ?? '',
+            'bank_account_name' => $store['bank_holder'] ?? '',
             'ktp_photo_path' => $ktpPath,
             'selfie_with_ktp_path' => $selfiePath,
             'store_photo_path' => $storePath,
@@ -525,12 +527,12 @@ Route::middleware('auth')->group(function () {
 // Dashboard penjual
 Route::get('/seller/dashboard', function () {
     return view('seller.dashboard');
-})->middleware(['auth', 'role:seller'])->name('seller.dashboard');
+})->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.dashboard');
 
 // Halaman daftar produk penjual
 Route::get('/seller/products', function () {
     return view('seller.products.index');
-})->middleware(['auth', 'role:seller'])->name('seller.products.index');
+})->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.index');
 
 // Halaman tambah produk (form kosong mirip edit)
 Route::get('/seller/products/create', function () {
@@ -550,7 +552,7 @@ Route::get('/seller/products/create', function () {
     $slugValue = null; // belum ada slug sampai disimpan
     $uploaded = [];
     return view('seller.products.create', compact('product', 'slugValue', 'uploaded'));
-})->middleware(['auth', 'role:seller'])->name('seller.products.create');
+})->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.create');
 
 // Simpan produk baru -> gunakan Controller (persist DB + storage publik)
 Route::post('/seller/products', [\App\Http\Controllers\SellerProductController::class, 'store'])
@@ -558,15 +560,15 @@ Route::post('/seller/products', [\App\Http\Controllers\SellerProductController::
 
 // Halaman edit produk -> gunakan Controller agar konsisten DB + storage
 Route::get('/seller/products/{slug}/edit', [\App\Http\Controllers\SellerProductController::class, 'edit'])
-    ->middleware(['auth', 'role:seller'])->name('seller.products.edit');
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.edit');
 
 // Update produk (persist ke DB)
 Route::put('/seller/products/{slug}', [\App\Http\Controllers\SellerProductController::class, 'update'])
-    ->middleware(['auth', 'role:seller'])->name('seller.products.update');
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.update');
 
 // Upload gambar produk (multiple) -> gunakan Controller
 Route::post('/seller/products/{slug}/images', [\App\Http\Controllers\SellerProductController::class, 'uploadImages'])
-    ->middleware(['auth', 'role:seller'])->name('seller.products.images.upload');
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.images.upload');
 
 // Hapus produk (persist ke DB + hapus gambar di storage)
 Route::delete('/seller/products/{slug}', function ($slug) {
@@ -587,26 +589,26 @@ Route::delete('/seller/products/{slug}', function ($slug) {
     }
 
     return redirect()->route('seller.products.index')->with('error', 'Produk tidak ditemukan, tidak ada yang dihapus.');
-})->middleware(['auth', 'role:seller'])->name('seller.products.destroy');
+})->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.products.destroy');
 
 // Daftar pesanan (gunakan controller agar membaca dari DB)
 Route::get('/seller/orders', [SellerOrderController::class, 'index'])
-    ->middleware(['auth', 'role:seller'])
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])
     ->name('seller.orders.index');
 
 // Detail pesanan penjual
 Route::get('/seller/orders/{id}', [SellerOrderController::class, 'show'])
-    ->middleware(['auth', 'role:seller'])
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])
     ->name('seller.orders.show');
 
 // Ubah status pesanan (Menunggu/Diproses/Dikirim/Selesai/Dibatalkan)
 Route::put('/seller/orders/{id}/status', [SellerOrderController::class, 'updateStatus'])
-    ->middleware(['auth', 'role:seller'])
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])
     ->name('seller.orders.update-status');
 
 // Verifikasi pembayaran manual oleh penjual
 Route::put('/seller/orders/{id}/verify-payment', [SellerOrderController::class, 'verifyPayment'])
-    ->middleware(['auth', 'role:seller'])
+    ->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])
     ->name('seller.orders.verify-payment');
 // Buyer Orders
 Route::get('/orders', [OrderController::class, 'index'])
@@ -620,10 +622,10 @@ Route::get('/orders/{order_number}', [OrderController::class, 'show'])
 // Laporan penjualan (seller reports)
 Route::get('/seller/laporan', function () {
     return view('seller.reports.index');
-})->middleware(['auth', 'role:seller'])->name('seller.reports.index');
+})->middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->name('seller.reports.index');
 
 // Pengaturan toko (seller settings)
-Route::middleware(['auth', 'role:seller'])->group(function () {
+Route::middleware(['auth', 'role:seller', \App\Http\Middleware\EnsureSellerVerified::class])->group(function () {
     Route::get('/seller/settings', function () {
         $defaults = [
             'name' => Auth::user()->name ? (Auth::user()->name . ' Store') : 'Nama Toko',
