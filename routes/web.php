@@ -648,7 +648,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/verification', function () {
         $users = \App\Models\User::where('role', 'seller')
             ->whereNotNull('verification_status')
-            ->orderByRaw("FIELD(verification_status, 'pending', 'approved', 'rejected')")
+            ->orderByRaw("CASE 
+                WHEN verification_status = 'pending' THEN 1 
+                WHEN verification_status = 'approved' THEN 2 
+                WHEN verification_status = 'rejected' THEN 3 
+                ELSE 4 
+            END")
             ->orderBy('verification_submitted_at', 'desc')
             ->get();
         

@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('price'); // store in smallest currency unit if needed
             $table->unsignedBigInteger('original_price')->nullable();
             $table->timestamps();
-            $table->unique(['user_id','product_name']);
+            $table->unique(['user_id','product_id']); // Fixed: unique by product_id, not product_name
         });
     }
 
