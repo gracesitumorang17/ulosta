@@ -170,30 +170,48 @@
 
         <!-- Payment Method Section -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            @php
+                // Ambil snapshot pembayaran dari order jika tersedia, fallback ke seller
+                $payBank = $order->payment_bank_name ?? optional($order->seller)->bank_name;
+                $payNumber = $order->payment_bank_account_number ?? optional($order->seller)->bank_account_number;
+                $payName = $order->payment_bank_account_name ?? optional($order->seller)->bank_account_name;
+            @endphp
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold">Mandiri Virtual Account</h3>
+                <h3 class="text-lg font-semibold">Transfer Manual ke Rekening Penjual</h3>
                 <span class="text-sm text-blue-600 font-medium">Menunggu pembayaran</span>
             </div>
 
-            <!-- Virtual Account Number -->
-            <div class="mb-4">
-                <label class="block text-sm text-gray-600 mb-2">Nomor Virtual Account</label>
-                <div class="flex items-center gap-2">
-                    <input type="text" value="8851 2345 6789 0123" readonly
-                        class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-lg font-semibold" />
-                    <button onclick="copyToClipboard('8851 2345 6789 0123')"
-                        class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition" title="Salin">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </button>
+            <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm text-gray-600 mb-2">Bank</label>
+                    <input type="text" value="{{ $payBank ?? '-' }}" readonly
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg" />
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Nomor Virtual Account ini sudah termasuk kode unik</p>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-2">Nomor Rekening</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" value="{{ $payNumber ?? '-' }}" readonly
+                            class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono" />
+                        @if ($payNumber)
+                            <button onclick="copyToClipboard('{{ $payNumber }}')"
+                                class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                title="Salin">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm text-gray-600 mb-2">Nama Pemilik Rekening</label>
+                    <input type="text" value="{{ $payName ?? '-' }}" readonly
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg" />
+                </div>
             </div>
 
-            <!-- Total Payment -->
             <div class="mb-6">
                 <label class="block text-sm text-gray-600 mb-2">Jumlah transfer</label>
                 <div class="flex items-center gap-2">
@@ -210,7 +228,6 @@
                 </div>
             </div>
 
-            <!-- Payment Instructions -->
             <div class="border-t pt-4">
                 <h4 class="font-semibold mb-3">Cara Pembayaran:</h4>
                 <div class="space-y-3">
@@ -218,29 +235,29 @@
                         <div
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             1</div>
-                        <p class="text-sm text-gray-700">Buka aplikasi Livin' by Mandiri atau kunjung ATM Mandiri
-                            terdekat</p>
+                        <p class="text-sm text-gray-700">Buka aplikasi mobile banking atau kunjungi ATM sesuai bank
+                            Anda</p>
                     </div>
                     <div class="flex gap-3">
                         <div
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             2</div>
-                        <p class="text-sm text-gray-700">Pilih menu <span class="font-semibold">Bayar/Beli</span> →
-                            <span class="font-semibold">Virtual Account</span>
-                        </p>
+                        <p class="text-sm text-gray-700">Pilih menu <span class="font-semibold">Transfer</span> ke
+                            rekening</p>
                     </div>
                     <div class="flex gap-3">
                         <div
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             3</div>
-                        <p class="text-sm text-gray-700">Masukkan nomor Virtual Account: <span
-                                class="font-semibold font-mono">8851 2345 6789 0123</span></p>
+                        <p class="text-sm text-gray-700">Masukkan nomor rekening penjual: <span
+                                class="font-semibold font-mono">{{ $payNumber ?? '-' }}</span> dan nama pemilik: <span
+                                class="font-semibold">{{ $payName ?? '-' }}</span></p>
                     </div>
                     <div class="flex gap-3">
                         <div
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             4</div>
-                        <p class="text-sm text-gray-700">Konfirmasi pembayaran sebesar <span
+                        <p class="text-sm text-gray-700">Konfirmasi nominal <span
                                 class="font-semibold text-red-600">Rp
                                 {{ number_format($order->total_amount, 0, ',', '.') }}</span></p>
                     </div>
@@ -248,7 +265,7 @@
                         <div
                             class="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                             5</div>
-                        <p class="text-sm text-gray-700">Simpan bukti pembayaran untuk konfirmasi</p>
+                        <p class="text-sm text-gray-700">Simpan bukti transfer untuk konfirmasi ke penjual</p>
                     </div>
                 </div>
             </div>
@@ -264,11 +281,13 @@
                     <div class="flex gap-4">
                         <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             @php
-                                $imageUrl = \App\Helpers\ImageHelper::getImageUrl($item->product_image ?? ($item->product?->image ?? null));
+                                $imageUrl = \App\Helpers\ImageHelper::getImageUrl(
+                                    $item->product_image ?? ($item->product?->image ?? null),
+                                );
                             @endphp
                             @if ($imageUrl)
-                                <img src="{{ $imageUrl }}"
-                                    alt="{{ $item->product_name }}" class="w-full h-full object-cover" />
+                                <img src="{{ $imageUrl }}" alt="{{ $item->product_name }}"
+                                    class="w-full h-full object-cover" />
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
@@ -483,7 +502,8 @@
                         }
                     });
                 } catch (e) {
-                    /* ignore */ }
+                    /* ignore */
+                }
                 const url = {!! json_encode($waUrl) !!};
                 if (url) {
                     window.open(url, '_blank');
