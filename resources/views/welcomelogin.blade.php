@@ -315,7 +315,7 @@
                                         </svg>
                                         <span class="text-sm font-medium">Profil Saya</span>
                                     </a>
-                                    <a href="#"
+                                    <a href="{{ route('keranjang') }}"
                                         class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -323,7 +323,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                         </svg>
-                                        <span class="text-sm font-medium">Pesanan Saya</span>
+                                        <span class="text-sm font-medium">Keranjang</span>
                                     </a>
                                     <a href="{{ route('wishlist.index') }}"
                                         class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
@@ -341,7 +341,9 @@
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                             stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19" />
+                                                d="M3 10h18M4.5 10V8l2-2h11l2 2v2" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 21V10h14v11" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6" />
                                         </svg>
                                         <span class="text-sm font-medium">Dashboard Toko</span>
                                     </a>
@@ -367,7 +369,7 @@
                                         </svg>
                                         <span class="text-sm font-medium">Wishlist Saya</span>
                                     </a>
-                                    <a href="#"
+                                    <a href="{{ route('keranjang') }}"
                                         class="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 transition">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -375,7 +377,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 6.8a1 1 0 00.9 1.2H19m-7 4a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
                                         </svg>
-                                        <span class="text-sm font-medium">Pesanan Saya</span>
+                                        <span class="text-sm font-medium">Keranjang</span>
                                     </a>
                                 @endif
 

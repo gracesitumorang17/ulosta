@@ -107,7 +107,8 @@
         @endphp
 
         <div class="mb-6">
-            <a href="{{ route('seller.dashboard') ?? url('/seller') }}" class="text-sm text-gray-500 hover:underline">&larr; Kembali ke Dashboard</a>
+            <a href="{{ route('seller.dashboard') ?? url('/seller') }}"
+                class="text-sm text-gray-500 hover:underline">&larr; Kembali ke Dashboard</a>
             <h1 class="text-2xl font-bold mt-3">Kelola Pesanan</h1>
             <p class="text-sm text-gray-500 mt-1">{{ count($list) }} pesanan ditemukan</p>
         </div>
@@ -140,7 +141,9 @@
                             class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all {{ $active ? $tabColorMap[$s] . ' ' . $tabTextColorMap[$s] : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
                             data-tab="{{ $s }}">
                             <span>{{ $s }}</span>
-                            <span class="inline-flex items-center justify-center min-w-6 px-2 py-0.5 text-xs font-bold rounded-full {{ $active ? 'bg-white' : 'bg-gray-200' }} js-tab-count" data-status="{{ $s }}">{{ $counts[$s] ?? 0 }}</span>
+                            <span
+                                class="inline-flex items-center justify-center min-w-6 px-2 py-0.5 text-xs font-bold rounded-full {{ $active ? 'bg-white' : 'bg-gray-200' }} js-tab-count"
+                                data-status="{{ $s }}">{{ $counts[$s] ?? 0 }}</span>
                         </a>
                     @endforeach
                 </div>
@@ -192,29 +195,36 @@
                 <tbody class="divide-y divide-gray-200">
                     @forelse ($list as $o)
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-900">{{ $o->order_number ?? 'ORD-' . $o->id }}</td>
+                            <td class="px-6 py-4 font-medium text-gray-900">{{ $o->order_number ?? 'ORD-' . $o->id }}
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900">
-                                    {{ $o->shipping_first_name ? $o->shipping_first_name : (optional($o->user)->name ?? '—') }}
+                                    {{ $o->shipping_first_name ? $o->shipping_first_name : optional($o->user)->name ?? '—' }}
                                 </div>
-                                <div class="text-xs text-gray-500">{{ $o->shipping_phone ? $o->shipping_phone : (optional($o->user)->phone ?? '—') }}</div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $o->shipping_phone ? $o->shipping_phone : optional($o->user)->phone ?? '—' }}
+                                </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-700">{{ $o->orderItems ? $o->orderItems->count() : 0 }} item</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $o->orderItems ? $o->orderItems->count() : 0 }} item
+                            </td>
                             <td class="px-6 py-4 text-red-600 font-bold">
                                 {{ format_rp((int) ($o->total_amount ?? ($o->subtotal ?? 0))) }}</td>
-                            <td class="px-6 py-4 text-gray-700">{{ $o->created_at ? $o->created_at->format('Y-m-d H:i') : '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">
+                                {{ $o->created_at ? $o->created_at->format('Y-m-d H:i') : '—' }}</td>
                             <td class="px-6 py-4">
                                 @php
                                     $statusKey = $o->status;
                                     $badgeClass = $classMap[$statusKey] ?? 'bg-gray-100 text-gray-700';
                                 @endphp
-                                <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold {{ $badgeClass }} js-status-badge"
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold {{ $badgeClass }} js-status-badge"
                                     data-order-id="{{ $o->id }}">{{ $labelMap[$statusKey] ?? ucfirst($statusKey) }}</span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3 text-gray-600">
                                     <!-- Tombol Detail -->
-                                    <a href="{{ route('seller.orders.show', $o->id) }}" class="hover:text-gray-900 transition-colors" title="Lihat Detail">
+                                    <a href="{{ route('seller.orders.show', $o->id) }}"
+                                        class="hover:text-gray-900 transition-colors" title="Lihat Detail">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -227,8 +237,10 @@
                                     <!-- Dropdown Aksi -->
                                     <div class="action-trigger" aria-expanded="false" title="Aksi">
                                         <button type="button" class="p-1 hover:bg-gray-100 rounded transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                             </svg>
                                         </button>
 
@@ -236,28 +248,32 @@
                                             <ul class="py-1">
                                                 <!-- Terima Pesanan -->
                                                 @if ($o->status === 'pending')
-                                                    <li data-action="set-status" data-status="processing" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
+                                                    <li data-action="set-status" data-status="processing"
+                                                        class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
                                                         <span>✓</span> <span>Terima Pesanan</span>
                                                     </li>
                                                 @endif
 
                                                 <!-- Tandai Dikirim -->
                                                 @if ($o->status === 'processing')
-                                                    <li data-action="set-status" data-status="shipped" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
+                                                    <li data-action="set-status" data-status="shipped"
+                                                        class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
                                                         <span>📦</span> <span>Tandai Dikirim</span>
                                                     </li>
                                                 @endif
 
                                                 <!-- Pesanan Selesai -->
                                                 @if ($o->status === 'shipped')
-                                                    <li data-action="set-status" data-status="delivered" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
+                                                    <li data-action="set-status" data-status="delivered"
+                                                        class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-2 transition-colors">
                                                         <span>✓</span> <span>Selesaikan Pesanan</span>
                                                     </li>
                                                 @endif
 
                                                 <!-- Batalkan Pesanan -->
                                                 @if (!in_array($o->status, ['delivered', 'cancelled']))
-                                                    <li data-action="set-status" data-status="cancelled" class="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm text-red-600 flex items-center gap-2 transition-colors border-t border-gray-100">
+                                                    <li data-action="set-status" data-status="cancelled"
+                                                        class="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm text-red-600 flex items-center gap-2 transition-colors border-t border-gray-100">
                                                         <span>✕</span> <span>Batalkan Pesanan</span>
                                                     </li>
                                                 @endif
@@ -280,8 +296,10 @@
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 text-gray-300"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 Belum ada pesanan.
                             </td>
@@ -399,12 +417,24 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ status: newStatus })
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
                 });
-
-                const data = await response.json();
+                // Safely parse JSON only when content-type is JSON
+                let data;
+                const ct = response.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error('Unexpected non-JSON response: ' + text.slice(0, 120));
+                }
                 console.log('🔵 Status Update Response:', {
                     status: response.status,
                     ok: response.ok,
@@ -422,7 +452,8 @@
                     // Update badge langsung dengan status baru
                     if (badge) {
                         badge.textContent = newStatusLabel;
-                        badge.className = `inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold js-status-badge ${CLASSES[status] || 'bg-gray-100 text-gray-700'}`;
+                        badge.className =
+                            `inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold js-status-badge ${CLASSES[status] || 'bg-gray-100 text-gray-700'}`;
                         badge.style.opacity = '1';
                     }
 
