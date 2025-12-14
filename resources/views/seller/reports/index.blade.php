@@ -86,80 +86,28 @@
         header .relative [x-show] {
             display: none !important;
         }
+
+        /* Sembunyikan seluruh konten laporan bila diperlukan */
+        .hide-report-page {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body class="min-h-screen bg-gray-50 text-gray-800">
     @include('seller.partials.navbar')
     @php
-        $transactions = [
-            [
-                'id' => 'TRX001234',
-                'date' => '1 Des 2024',
-                'customer' => 'Budi Santoso',
-                'total' => 3750000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001235',
-                'date' => '1 Des 2024',
-                'customer' => 'Siti Nurhaliza',
-                'total' => 1900000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001236',
-                'date' => '30 Nov 2024',
-                'customer' => 'Ahmad Dhani',
-                'total' => 1250000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001237',
-                'date' => '30 Nov 2024',
-                'customer' => 'Rina Wijaya',
-                'total' => 4200000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001238',
-                'date' => '29 Nov 2024',
-                'customer' => 'Joko Widodo',
-                'total' => 2100000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001239',
-                'date' => '29 Nov 2024',
-                'customer' => 'Mega Sari',
-                'total' => 950000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001240',
-                'date' => '28 Nov 2024',
-                'customer' => 'Bambang Susilo',
-                'total' => 3300000,
-                'status' => 'Selesai',
-            ],
-            [
-                'id' => 'TRX001241',
-                'date' => '28 Nov 2024',
-                'customer' => 'Dewi Lestari',
-                'total' => 2400000,
-                'status' => 'Pending',
-            ],
-        ];
-        $totalRevenue = array_sum(array_map(fn($t) => $t['total'], $transactions));
-        $orderCount = count($transactions);
-        $avgOrder = $orderCount ? floor($totalRevenue / $orderCount) : 0;
-        $soldProducts = 312; // dummy
+        // Nilai awal placeholder sebelum data API dimuat
+        $totalRevenue = 0;
+        $orderCount = 0;
+        $avgOrder = 0;
+        $soldProducts = 0;
         function format_rp_rep($v)
         {
             return 'Rp ' . number_format($v, 0, ',', '.');
         }
     @endphp
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main id="report-main" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="mb-8">
             <h1 class="text-2xl font-bold mb-1">Laporan Penjualan</h1>
             <p class="text-sm text-gray-500">Ringkasan performa toko dan transaksi terbaru</p>
@@ -179,7 +127,8 @@
                 </div>
                 <div class="mt-4">
                     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Total Pendapatan</div>
-                    <div class="text-xl font-bold text-red-600">{{ format_rp_rep($totalRevenue) }}</div>
+                    <div id="stat-totalRevenue" class="text-xl font-bold text-red-600">
+                        {{ format_rp_rep($totalRevenue) }}</div>
                 </div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
@@ -196,7 +145,7 @@
                 </div>
                 <div class="mt-4">
                     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Total Pesanan</div>
-                    <div class="text-xl font-bold">{{ $orderCount }}</div>
+                    <div id="stat-totalOrders" class="text-xl font-bold">{{ $orderCount }}</div>
                 </div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
@@ -211,7 +160,7 @@
                 </div>
                 <div class="mt-4">
                     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Rata-rata Order</div>
-                    <div class="text-xl font-bold">{{ format_rp_rep($avgOrder) }}</div>
+                    <div id="stat-avgOrder" class="text-xl font-bold">{{ format_rp_rep($avgOrder) }}</div>
                 </div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
@@ -227,7 +176,7 @@
                 </div>
                 <div class="mt-4">
                     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Produk Terjual</div>
-                    <div class="text-xl font-bold">{{ $soldProducts }}</div>
+                    <div id="stat-productsSold" class="text-xl font-bold">{{ $soldProducts }}</div>
                 </div>
             </div>
         </div>
@@ -251,31 +200,20 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach ($transactions as $t)
-                            <tr class="hover:bg-gray-50">
-                                <td class="font-medium">{{ $t['id'] }}</td>
-                                <td>{{ $t['date'] }}</td>
-                                <td>{{ $t['customer'] }}</td>
-                                <td class="text-red-600 font-semibold">{{ format_rp_rep($t['total']) }}</td>
-                                <td>
-                                    @if ($t['status'] === 'Pending')
-                                        <span class="badge-status badge-status-pending">Pending</span>
-                                    @else
-                                        <span class="badge-status">Selesai</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
+                    <tbody id="recent-body">
+                        <tr>
+                            <td colspan="5" class="text-center text-sm text-gray-500 py-4">Memuat data...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
             <div
                 class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between text-xs">
-                <div>Total {{ $orderCount }} transaksi ditampilkan</div>
+                <div>Total <span id="order-count">{{ $orderCount }}</span> transaksi ditampilkan</div>
                 <div class="flex items-center gap-4">
                     <span class="font-medium">Total Nilai</span>
-                    <span class="text-red-600 font-semibold">{{ format_rp_rep($totalRevenue) }}</span>
+                    <span class="text-red-600 font-semibold"><span
+                            id="total-revenue">{{ format_rp_rep($totalRevenue) }}</span></span>
                 </div>
             </div>
         </div>
@@ -286,26 +224,27 @@
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
     <script>
-        // Ensure navbar Laporan points here and shows active state without editing partial
+        // Sembunyikan menu "Laporan" di navbar tanpa mengubah partial umum
         (function() {
             try {
-                const laporanHref = @json(route('seller.reports.index'));
                 const header = document.querySelector('header');
                 if (!header) return;
                 header.querySelectorAll('nav a').forEach(a => {
                     const label = a.querySelector('span');
                     if (label && label.textContent.trim() === 'Laporan') {
-                        a.setAttribute('href', laporanHref);
-                        const path = new URL(laporanHref, window.location.origin).pathname;
-                        if (window.location.pathname === path) {
-                            a.classList.remove('text-gray-700');
-                            a.classList.add('text-red-600');
-                        }
+                        a.style.display = 'none';
                     }
                 });
+                // Sembunyikan konten halaman laporan sepenuhnya
+                const main = document.getElementById('report-main');
+                if (main) main.classList.add('hide-report-page');
+                // Opsional: arahkan balik ke halaman pesanan agar alur pengguna tetap lancar
+                const backTo = @json(route('seller.orders.index'));
+                if (backTo) window.location.replace(backTo);
             } catch (e) {}
         })();
     </script>
+    <!-- Dinonaktifkan: pengambilan data laporan untuk sementara waktu -->
 </body>
 
 </html>
